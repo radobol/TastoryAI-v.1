@@ -1,0 +1,563 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		BEB6BB392E313B440030CBAB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BEB6BB232E313B410030CBAB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BEB6BB2A2E313B410030CBAB;
+			remoteInfo = "TastoryAI v.1";
+		};
+		BEB6BB432E313B440030CBAB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BEB6BB232E313B410030CBAB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BEB6BB2A2E313B410030CBAB;
+			remoteInfo = "TastoryAI v.1";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		BEB6BB2B2E313B410030CBAB /* TastoryAI v.1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TastoryAI v.1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEB6BB382E313B440030CBAB /* TastoryAI v.1Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TastoryAI v.1Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEB6BB422E313B440030CBAB /* TastoryAI v.1UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TastoryAI v.1UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		BEB6BB2D2E313B410030CBAB /* TastoryAI v.1 */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "TastoryAI v.1";
+			sourceTree = "<group>";
+		};
+		BEB6BB3B2E313B440030CBAB /* TastoryAI v.1Tests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "TastoryAI v.1Tests";
+			sourceTree = "<group>";
+		};
+		BEB6BB452E313B440030CBAB /* TastoryAI v.1UITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "TastoryAI v.1UITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BEB6BB282E313B410030CBAB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEB6BB352E313B440030CBAB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEB6BB3F2E313B440030CBAB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BEB6BB222E313B410030CBAB = {
+			isa = PBXGroup;
+			children = (
+				BEB6BB2D2E313B410030CBAB /* TastoryAI v.1 */,
+				BEB6BB3B2E313B440030CBAB /* TastoryAI v.1Tests */,
+				BEB6BB452E313B440030CBAB /* TastoryAI v.1UITests */,
+				BEB6BB2C2E313B410030CBAB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BEB6BB2C2E313B410030CBAB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BEB6BB2B2E313B410030CBAB /* TastoryAI v.1.app */,
+				BEB6BB382E313B440030CBAB /* TastoryAI v.1Tests.xctest */,
+				BEB6BB422E313B440030CBAB /* TastoryAI v.1UITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BEB6BB2A2E313B410030CBAB /* TastoryAI v.1 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEB6BB4C2E313B440030CBAB /* Build configuration list for PBXNativeTarget "TastoryAI v.1" */;
+			buildPhases = (
+				BEB6BB272E313B410030CBAB /* Sources */,
+				BEB6BB282E313B410030CBAB /* Frameworks */,
+				BEB6BB292E313B410030CBAB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				BEB6BB2D2E313B410030CBAB /* TastoryAI v.1 */,
+			);
+			name = "TastoryAI v.1";
+			packageProductDependencies = (
+			);
+			productName = "TastoryAI v.1";
+			productReference = BEB6BB2B2E313B410030CBAB /* TastoryAI v.1.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BEB6BB372E313B440030CBAB /* TastoryAI v.1Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEB6BB4F2E313B440030CBAB /* Build configuration list for PBXNativeTarget "TastoryAI v.1Tests" */;
+			buildPhases = (
+				BEB6BB342E313B440030CBAB /* Sources */,
+				BEB6BB352E313B440030CBAB /* Frameworks */,
+				BEB6BB362E313B440030CBAB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BEB6BB3A2E313B440030CBAB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BEB6BB3B2E313B440030CBAB /* TastoryAI v.1Tests */,
+			);
+			name = "TastoryAI v.1Tests";
+			packageProductDependencies = (
+			);
+			productName = "TastoryAI v.1Tests";
+			productReference = BEB6BB382E313B440030CBAB /* TastoryAI v.1Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BEB6BB412E313B440030CBAB /* TastoryAI v.1UITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEB6BB522E313B440030CBAB /* Build configuration list for PBXNativeTarget "TastoryAI v.1UITests" */;
+			buildPhases = (
+				BEB6BB3E2E313B440030CBAB /* Sources */,
+				BEB6BB3F2E313B440030CBAB /* Frameworks */,
+				BEB6BB402E313B440030CBAB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BEB6BB442E313B440030CBAB /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BEB6BB452E313B440030CBAB /* TastoryAI v.1UITests */,
+			);
+			name = "TastoryAI v.1UITests";
+			packageProductDependencies = (
+			);
+			productName = "TastoryAI v.1UITests";
+			productReference = BEB6BB422E313B440030CBAB /* TastoryAI v.1UITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BEB6BB232E313B410030CBAB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					BEB6BB2A2E313B410030CBAB = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					BEB6BB372E313B440030CBAB = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = BEB6BB2A2E313B410030CBAB;
+					};
+					BEB6BB412E313B440030CBAB = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = BEB6BB2A2E313B410030CBAB;
+					};
+				};
+			};
+			buildConfigurationList = BEB6BB262E313B410030CBAB /* Build configuration list for PBXProject "TastoryAI v.1" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BEB6BB222E313B410030CBAB;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = BEB6BB2C2E313B410030CBAB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BEB6BB2A2E313B410030CBAB /* TastoryAI v.1 */,
+				BEB6BB372E313B440030CBAB /* TastoryAI v.1Tests */,
+				BEB6BB412E313B440030CBAB /* TastoryAI v.1UITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BEB6BB292E313B410030CBAB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEB6BB362E313B440030CBAB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEB6BB402E313B440030CBAB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BEB6BB272E313B410030CBAB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEB6BB342E313B440030CBAB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BEB6BB3E2E313B440030CBAB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BEB6BB3A2E313B440030CBAB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BEB6BB2A2E313B410030CBAB /* TastoryAI v.1 */;
+			targetProxy = BEB6BB392E313B440030CBAB /* PBXContainerItemProxy */;
+		};
+		BEB6BB442E313B440030CBAB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BEB6BB2A2E313B410030CBAB /* TastoryAI v.1 */;
+			targetProxy = BEB6BB432E313B440030CBAB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BEB6BB4A2E313B440030CBAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BEB6BB4B2E313B440030CBAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		BEB6BB4D2E313B440030CBAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mansory.TastoryAI-v-1";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		BEB6BB4E2E313B440030CBAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mansory.TastoryAI-v-1";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BEB6BB502E313B440030CBAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mansory.TastoryAI-v-1Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TastoryAI v.1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TastoryAI v.1";
+			};
+			name = Debug;
+		};
+		BEB6BB512E313B440030CBAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mansory.TastoryAI-v-1Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TastoryAI v.1.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TastoryAI v.1";
+			};
+			name = Release;
+		};
+		BEB6BB532E313B440030CBAB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mansory.TastoryAI-v-1UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "TastoryAI v.1";
+			};
+			name = Debug;
+		};
+		BEB6BB542E313B440030CBAB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NFS6M4BR2B;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "mansory.TastoryAI-v-1UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "TastoryAI v.1";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BEB6BB262E313B410030CBAB /* Build configuration list for PBXProject "TastoryAI v.1" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEB6BB4A2E313B440030CBAB /* Debug */,
+				BEB6BB4B2E313B440030CBAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BEB6BB4C2E313B440030CBAB /* Build configuration list for PBXNativeTarget "TastoryAI v.1" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEB6BB4D2E313B440030CBAB /* Debug */,
+				BEB6BB4E2E313B440030CBAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BEB6BB4F2E313B440030CBAB /* Build configuration list for PBXNativeTarget "TastoryAI v.1Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEB6BB502E313B440030CBAB /* Debug */,
+				BEB6BB512E313B440030CBAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BEB6BB522E313B440030CBAB /* Build configuration list for PBXNativeTarget "TastoryAI v.1UITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEB6BB532E313B440030CBAB /* Debug */,
+				BEB6BB542E313B440030CBAB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BEB6BB232E313B410030CBAB /* Project object */;
+}

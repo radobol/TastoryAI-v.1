@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var recipes: [Recipe] = Recipe.sampleRecipes
+    @StateObject private var storageManager = RecipeStorageManager.shared
     @State private var showingAddRecipe = false
     
     var body: some View {
@@ -17,10 +17,10 @@ struct HomeView: View {
                 Theme.Colors.background
                     .ignoresSafeArea()
                 
-                if recipes.isEmpty {
+                if storageManager.recipes.isEmpty {
                     EmptyStateView()
                 } else {
-                    RecipeGridView(recipes: recipes)
+                    RecipeGridView(recipes: storageManager.recipes)
                 }
                 
                 VStack {

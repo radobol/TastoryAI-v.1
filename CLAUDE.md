@@ -47,9 +47,17 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 ## Technical Guidelines
 
 ### Architecture
+
+#### Current Implementation (Phase 1)
 - **Platform**: Native SwiftUI for iOS/iPadOS
+- **Storage**: Local JSON via RecipeStorageManager (temporary, before Supabase migration)
+- **Input Processing**: Vision framework for OCR, Share Extension for external content
+- **Recipe Processing**: IngredientParser utility with sophisticated scaling and unit recognition
+- **UI Framework**: MVVM pattern with Theme.swift and Typography.swift design system
+
+#### Planned Architecture (Phase 2+)
 - **Backend**: Supabase (Postgres, Auth, Storage, Edge Functions)
-- **AI Service**: OpenAI GPT-4o 
+- **AI Service**: OpenAI GPT-4o for multi-modal recipe extraction
 - **Auth**: Sign in with Apple or Google (optional) sign-in 
 
 
@@ -61,28 +69,30 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 - ShadCN-style components: neutral tones, soft shadows, rounded corners
 - Fully responsive between iPhone and iPad (portrait/landscape)
 
-### Features to Implement
-1. **Recipe Capture**
-   - Share Sheet integration (Instagram, TikTok, URLs)
-   - Photo/Camera import with OCR
-   - Manual entry with smart paste detection
+### Features Implementation Status
 
-2. **AI Processing**
-   - Structured recipe extraction (title, ingredients, steps, tips)
-   - Auto-categorization and tagging
-   - Rate limiting (10 req/min/user)
+1. **Recipe Capture** ✅ **COMPLETED**
+   - ✅ Share Sheet integration (Instagram, TikTok, URLs) - Full extension with content extraction
+   - ✅ Photo/Camera import with OCR - Vision framework with error handling
+   - ✅ Manual entry with validation - Complete form with dynamic ingredients/steps
+   - ✅ URL input handling - Validation and placeholder processing ready for AI
 
-3. **Recipe Management**
-   - CRUD operations with editable fields
-   - US/Metric unit toggle
-   - Dynamic serving size scaling
-   - Custom categories and tags
-   - Share recipe via system sheet (Mail, SMS, WhatsApp, Messenger, etc.).
+2. **AI Processing** 🔄 **IN PROGRESS - Phase 2A Priority**
+   - [ ] Structured recipe extraction (title, ingredients, steps, tips) - OpenAI GPT-4o integration pending
+   - [ ] Auto-categorization and tagging - Planned for Phase 2B
+   - [ ] Rate limiting (10 req/min/user) - Queue system design ready
 
-4. **Search & Organization**
-   - Full-text search
-   - Filter by category/tag
-   - Grid view with category chips
+3. **Recipe Management** ✅ **COMPLETED**
+   - ✅ CRUD operations with editable fields - Full RecipeStorageManager with JSON persistence
+   - [ ] US/Metric unit toggle - Planned for Phase 2B with IngredientParser extension
+   - ✅ Dynamic serving size scaling - Advanced IngredientParser with unit recognition
+   - [ ] Custom categories and tags - Planned for Phase 2C
+   - ✅ Share recipe via system sheet - Built-in iOS share integration
+
+4. **Search & Organization** 📋 **PLANNED - Phase 2B**
+   - [ ] Full-text search - RecipeSearchManager design ready
+   - [ ] Filter by category/tag - Interactive chips system planned
+   - [ ] Grid view with category chips - Extension of existing RecipeGridView
 
 
 ### Performance Requirements

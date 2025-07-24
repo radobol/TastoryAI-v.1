@@ -1,300 +1,145 @@
-# Tastory AI - Initial Project Setup Plan
+# Tastory AI - Development Roadmap
 
-## Overview
-This plan outlines the initial setup for Tastory AI, a native iOS cookbook app that captures recipes from any source and uses AI to extract clean ingredients and directions. The focus is on creating a minimal, clean foundation that we can build upon incrementally.
+## 📊 Current State (For Future Sessions)
 
-## Todo Items
+### ✅ COMPLETED: Foundation & Recipe Management System
+- **Complete MVVM architecture** with local JSON storage via RecipeStorageManager
+- **All input methods implemented**: Manual entry, URL input with validation, Photo/OCR with Vision framework, Share Extension for Instagram/TikTok
+- **Advanced recipe features**: Serving size scaling with sophisticated IngredientParser, full CRUD operations, editing, sharing
+- **Responsive UI**: iPhone/iPad layouts with Theme.swift and Typography.swift design system
+- **Share Extension**: Configured to accept URLs, images, videos, text with programmatic UI
 
-### 1. Project Configuration
-- [x] Rename Xcode project from "TastoryAI v.1" to "TastoryAI"
-- [ ] Update bundle identifier to com.tastoryai.app
-- [ ] Set minimum iOS deployment target to iOS 17.0
-- [ ] Configure project for iPhone and iPad support
-- [ ] Enable SwiftUI previews for all device sizes
+### 🔄 CURRENT STATUS: Ready for AI Processing Integration
+All input mechanisms capture content successfully. Next phase focuses on AI-powered recipe extraction.
 
-### 2. Core Folder Structure
-- [x] Create Groups folder structure in Xcode:
-  - [x] `App` - App entry point and configuration
-  - [x] `Views` - All SwiftUI views
-  - [x] `Models` - Data models
-  - [x] `ViewModels` - View models for MVVM
-  - [x] `Services` - Business logic and API services
-  - [x] `Utilities` - Helper functions and extensions
-  - [x] `Resources` - Assets, colors, fonts
+---
 
-### 3. Design System Setup
-- [x] Create `Theme.swift` with color definitions:
-  - [x] Primary colors (neutral tones)
-  - [x] Background colors
-  - [x] Text colors with proper contrast
-  - [x] Accent color for CTAs
-- [x] Create `Typography.swift` with font styles:
-  - [x] Title styles
-  - [x] Body text styles
-  - [x] Caption styles
-- [x] Configure Assets.xcassets with color sets
+## 🎯 Phase 2: AI Integration & Advanced Features
 
-### 4. App Entry Point
-- [x] Update `TastoryAIApp.swift` with proper naming
-- [x] Create `MainTabView.swift` with tab navigation:
-  - [x] Home tab (Recipes grid)
-  - [x] Search tab (placeholder)
-  - [x] Profile tab (placeholder)
-- [x] Add SF Symbol icons for tabs
-- [x] Set up proper navigation structure
+### HIGH PRIORITY (Phase 2A - Next Sprint)
 
-### 5. Recipe Model
-- [x] Create `Recipe.swift` model with basic properties:
-  - [x] id (UUID)
-  - [x] title (String)
-  - [x] ingredients ([String])
-  - [x] steps ([String])
-  - [x] imageURL (String?)
-  - [x] category (String?)
-  - [x] tags ([String])
-  - [x] servings (Int)
-  - [x] createdAt (Date)
-- [x] Add Codable conformance for future API integration
-
-### 6. Home Screen
-- [x] Create `HomeView.swift` with:
-  - [x] Navigation title "My Recipes"
-  - [x] Empty state with friendly message
-  - [x] Floating "+" button for adding recipes
-- [x] Create `RecipeGridView.swift` for displaying recipes:
-  - [x] 2-column grid on iPhone
-  - [x] 3-4 column grid on iPad
-  - [x] Recipe cards with image, title, and category
-- [x] Add sample data for preview testing
-
-### 7. Add Recipe Flow
-- [x] Create `AddRecipeView.swift` as a sheet:
-  - [x] Navigation bar with Cancel/Save buttons
-  - [x] Input options placeholder (URL, Photo, Manual)
-  - [x] Clean, minimal design
-- [x] Wire up sheet presentation from Home view
-- [x] Add basic dismiss functionality
-
-### 8. Recipe Card Component
-- [x] Create `RecipeCardView.swift`:
-  - [x] Rounded corners with soft shadow
-  - [x] Placeholder image area
-  - [x] Recipe title
-  - [x] Category chip
-  - [x] Tap gesture for future navigation
-
-### 9. App Icon & Launch Screen
-- [x] Create placeholder app icon:
-  - [ ] Simple cookbook or recipe-related design
-  - [ ] Follow Apple's icon guidelines
-- [ ] Configure launch screen:
-  - [ ] App logo centered
-  - [ ] Brand color background
-  - [ ] Smooth transition to app
-
-### 10. Project Cleanup
-- [x] Remove default "Hello, world!" content
-- [x] Update file headers with proper copyright
-- [x] Organize files into correct group folders
-- [ ] Test on iPhone and iPad simulators
-- [ ] Ensure all SwiftUI previews work correctly
-
-## Success Criteria
-- Clean, organized project structure following MVVM
-- Minimal but functional UI with proper navigation
-- Responsive layout for iPhone and iPad
-- Consistent design system in place
-- All components use SwiftUI best practices
-- Project builds without warnings
-- Smooth navigation and interactions
-
-## Next Steps (Future)
-- Supabase integration
-- AI recipe extraction service
-- Share Sheet extension
-- Search functionality
-- User authentication
-- Data persistence
-
-## Notes
-- Keep everything minimal - we'll add complexity incrementally
-- Focus on clean code and proper architecture from the start
-- Ensure every component is reusable and testable
-- Follow Apple's Human Interface Guidelines throughout
-
-## Implementation Review
-
-### Completed Tasks
-1. **Project Structure**: Created a clean MVVM folder structure with separate directories for App, Views, Models, ViewModels, Services, Utilities, and Resources
-2. **Design System**: Implemented comprehensive Theme.swift and Typography.swift files with:
-   - Neutral color palette with proper contrast
-   - Complete typography scale following iOS standards
-   - Spacing, corner radius, and shadow definitions
-3. **Navigation**: Set up MainTabView with three tabs (Recipes, Search, Profile) using SF Symbols
-4. **Recipe Model**: Created a robust Recipe model with all required properties and Codable conformance
-5. **Home Screen**: Built HomeView with:
-   - Empty state for new users
-   - Floating add button with proper styling
-   - RecipeGridView that adapts between iPhone (2 columns) and iPad (4 columns)
-6. **Add Recipe Flow**: Created AddRecipeView with three input options (URL, Photo, Manual) in a clean sheet presentation
-7. **Recipe Cards**: Designed RecipeCardView with placeholder images, category chips, and serving/ingredient counts
-
-### Key Decisions Made
-- Used SwiftUI's built-in navigation and state management
-- Implemented a clean, minimal design with soft shadows and rounded corners
-- Added sample recipe data for testing
-- Made the grid layout responsive using horizontalSizeClass
-- Used system colors and fonts for consistency with iOS
-
-## Recipe Details & Local Storage Implementation - COMPLETED ✅
-
-### Additional Features Implemented
-8. **Local Storage Manager**: Created `RecipeStorageManager.swift` with JSON-based persistence
-   - CRUD operations (Create, Read, Update, Delete)
-   - Automatic sample data migration on first launch
-   - Error handling and data validation
-
-9. **Recipe Detail View**: Built comprehensive `RecipeDetailView.swift` with:
-   - Hero image placeholder
-   - Title and category display
-   - Interactive serving size adjustment with live scaling
-   - Checkable ingredients list with quantity scaling
-   - Step-by-step instructions with numbered circles
-   - Edit, share, duplicate, and delete actions
-
-10. **Edit Recipe Functionality**: Created `EditRecipeView.swift` with:
-    - Inline editing of all recipe fields
-    - Dynamic ingredient and step management
-    - Tag editor with add/remove functionality
-    - Form validation and save functionality
-
-11. **Manual Recipe Entry**: Extended `AddRecipeView.swift` with:
-    - Full manual entry form (`ManualRecipeEntryView`)
-    - Dynamic ingredient and step addition
-    - Real-time form validation
-    - Integration with storage manager
-
-12. **Navigation Integration**: Updated navigation flow:
-    - Recipe cards now link to detail views
-    - Home view uses storage manager
-    - Proper SwiftUI navigation structure
-
-### Key Technical Achievements
-- **Offline-first design**: All data stored locally in JSON format
-- **Real-time quantity scaling**: Ingredients automatically adjust based on serving size
-- **Comprehensive CRUD operations**: Full create, read, update, delete functionality
-- **Share functionality**: Built-in iOS share sheet integration
-- **Data persistence**: Automatic saving and loading of recipes
-- **Form validation**: Proper input validation and error handling
-
-## Phase 2: Core CLAUDE.md Features Implementation
-
-### 1. Recipe Capture System (High Priority)
-Currently the "From URL" and "From Photo" buttons in AddRecipeView are placeholder buttons with empty actions.
-
-#### Share Sheet Integration
-- [ ] Implement Share Sheet extension for receiving content from Instagram/TikTok/other apps
-- [x] Add URL input handling and validation
-- [ ] Create web scraping service for common recipe websites
-- [ ] Extract recipe data from various web formats (JSON-LD, Microdata, etc.)
-- [x] Connect "From URL" button to actual URL processing functionality
-
-#### Photo/Camera Import with OCR
-- [x] Add camera and photo library access permissions (via Xcode project settings)
-- [x] Implement OCR using Vision framework for text extraction from images
-- [x] Create PhotoRecipeEntryView with camera/photo picker functionality
-- [x] Handle OCR parsing errors gracefully with proper user feedback
-- [x] Connect "From Photo" button to camera/photo library selection
-- [x] Fix Info.plist build conflicts and verify successful build
-
-#### Smart Manual Entry Enhancement
-- [ ] Add smart paste detection to identify recipe content in clipboard
-- [ ] Auto-format pasted recipe text into structured ingredients/steps
-- [ ] Enhance existing ManualRecipeEntryView with paste intelligence
-
-### 1b. Share Sheet Extension (High Priority) - COMPLETED ✅
-Enable sharing FROM Instagram/TikTok TO our app.
-
-#### Share Sheet Extension Setup
-- [x] Create iOS Share Extension target in Xcode
-- [x] Configure extension to accept URLs, images, videos, text  
-- [x] Create Share Extension UI for processing status (programmatic layout)
-- [x] Handle content extraction from shared items
-- [x] Add placeholder processing for mixed content
-- [ ] Test sharing from Instagram/TikTok/Safari
-
-### 2. AI Processing System (High Priority)
-Transform captured content (URLs, photos, manual) into clean recipe data.
-
-#### OpenAI GPT-4o Integration
-- [ ] Set up OpenAI API client service
-- [ ] Create structured prompts for recipe extraction
-- [ ] Implement recipe parsing from unstructured text/web content
+#### 1. AI Processing Pipeline
+- [ ] Set up OpenAI GPT-4o API client service  
+- [ ] Create structured prompts for recipe extraction from text/HTML/OCR content
+- [ ] Implement multi-modal processing (text + images + audio)
 - [ ] Add error handling for API failures and rate limits
 - [ ] Process extracted content into Recipe model format
 
-#### Auto-categorization and Tagging
+#### 2. Web Content Processing  
+- [ ] Create web scraping service for common recipe websites
+- [ ] Extract recipe data from various web formats (JSON-LD, Microdata, etc.)
+- [ ] Connect existing URL input to AI processing pipeline
+- [ ] Handle different website structures and formats
+
+#### 3. Complete Share Extension Integration
+- [ ] Test sharing from Instagram/TikTok/Safari thoroughly
+- [ ] Implement data passing between Share Extension and main app
+- [ ] Connect Share Extension content to AI processing
+
+#### 4. Rate Limiting System
+- [ ] Implement 10 requests/minute/user rate limiting
+- [ ] Add queue system for processing requests  
+- [ ] Create user feedback for rate limit status
+- [ ] Handle rate limit exceeded gracefully
+
+### MEDIUM PRIORITY (Phase 2B)
+
+#### 5. AI-Powered Features
 - [ ] Implement AI-powered category detection
 - [ ] Generate relevant tags based on ingredients and cooking methods
 - [ ] Create category suggestion system
 - [ ] Add confidence scoring for AI-generated metadata
 
-#### Rate Limiting System
-- [ ] Implement 10 requests/minute/user rate limiting
-- [ ] Add queue system for processing requests
-- [ ] Create user feedback for rate limit status
-- [ ] Handle rate limit exceeded gracefully
-
-### 3. Enhanced Recipe Management (Medium Priority)
-Extend existing recipe functionality with CLAUDE.md requirements.
-
-#### US/Metric Unit Toggle System
+#### 6. Unit Conversion System
 - [ ] Create unit conversion service for ingredients
-- [ ] Add toggle switch in RecipeDetailView for unit switching
+- [ ] Add US/Metric toggle switch in RecipeDetailView  
 - [ ] Extend IngredientParser to handle unit conversions
 - [ ] Support common conversions (cups↔ml, oz↔g, fahrenheit↔celsius)
 - [ ] Persist user's preferred unit system
 
-#### Custom Categories and Tags Management
-- [ ] Create CategoryManager service for custom category CRUD
-- [ ] Add category creation/editing UI
-- [ ] Implement tag management system with autocomplete
-- [ ] Create category and tag selection interfaces
-- [ ] Add category/tag deletion with recipe reassignment
-
-#### Enhanced System Sharing
-- [ ] Extend existing share functionality for Mail, SMS, WhatsApp, Messenger
-- [ ] Add recipe formatting for different share targets
-- [ ] Include recipe images in shared content
-- [ ] Create share templates for different platforms
-
-### 4. Search & Organization (Medium Priority)
-Add comprehensive search and filtering capabilities.
-
-#### Full-text Search Implementation
+#### 7. Search & Organization
 - [ ] Create RecipeSearchManager with full-text search capabilities
 - [ ] Add search bar to HomeView with real-time results
 - [ ] Search through titles, ingredients, categories, tags, and steps
 - [ ] Implement search result highlighting
 - [ ] Add search history and suggestions
 
-#### Category/Tag Filtering System
+#### 8. Category/Tag Filtering System  
 - [ ] Create filter UI in HomeView with category/tag chips
 - [ ] Implement tap-to-filter functionality
 - [ ] Add multi-filter support (AND/OR logic)
 - [ ] Create filter state management
 - [ ] Add "Clear all filters" functionality
 
-#### Enhanced Grid View with Category Chips
-- [ ] Add category chips display to existing RecipeGridView
-- [ ] Make category chips interactive (tap to filter)
-- [ ] Show active filters in grid view
-- [ ] Add filter summary display
+### LOW PRIORITY (Phase 2C)
 
-### Ready for Next Steps
-After Phase 2 completion, the app will have:
-- Complete recipe capture from any source (URLs, photos, manual)
-- AI-powered recipe extraction and categorization  
-- Advanced search and filtering capabilities
-- Professional unit conversion system
-- Enhanced sharing across all major platforms
+#### 9. Enhanced Recipe Management
+- [ ] Create CategoryManager service for custom category CRUD
+- [ ] Add category creation/editing UI
+- [ ] Implement tag management system with autocomplete
+- [ ] Create category and tag selection interfaces
+- [ ] Add category/tag deletion with recipe reassignment
+
+#### 10. Advanced Features
+- [ ] Enhanced Grid View with interactive category chips
+- [ ] Show active filters in grid view  
+- [ ] Add filter summary display
+- [ ] Smart Manual Entry with paste detection for recipe content
+- [ ] Auto-format pasted recipe text into structured ingredients/steps
+
+#### 11. Enhanced System Sharing
+- [ ] Extend existing share functionality for Mail, SMS, WhatsApp, Messenger
+- [ ] Add recipe formatting for different share targets
+- [ ] Include recipe images in shared content
+- [ ] Create share templates for different platforms
+
+#### 12. Project Finalization
+- [ ] Update bundle identifier to com.tastoryai.app
+- [ ] Set minimum iOS deployment target to iOS 17.0
+- [ ] Create final app icon following Apple guidelines
+- [ ] Configure launch screen with app logo and brand colors
+- [ ] Test on iPhone and iPad simulators thoroughly
+- [ ] Ensure all SwiftUI previews work correctly
+
+---
+
+## 🎯 Success Criteria for Phase 2
+
+### Phase 2A (AI Integration)
+- Users can share content from any app and get structured recipes
+- URL processing extracts clean recipe data from websites
+- AI processing handles text, images, and mixed content reliably
+- Rate limiting prevents API abuse while maintaining good UX
+
+### Phase 2B (Enhanced Features)  
+- Unit conversion works seamlessly with ingredient scaling
+- Search finds recipes across all content (title, ingredients, steps, tags)
+- Filtering by categories/tags provides quick recipe discovery
+
+### Phase 2C (Polish & Advanced)
+- Custom categories and tags system for personalization
+- Professional sharing capabilities across platforms
+- Complete recipe management ecosystem ready for production
+
+---
+
+## 📝 Technical Notes
+
+### Current Architecture
+- **Storage**: Local JSON via RecipeStorageManager (will migrate to Supabase later)
+- **Parsing**: IngredientParser utility with unit recognition and quantity scaling
+- **UI Framework**: SwiftUI with MVVM pattern, Theme-based design system
+- **Input Processing**: Vision framework for OCR, Share Extension for external content
+- **Permissions**: Camera/Photo library configured via Xcode project settings
+
+### Key Design Decisions  
+- Local-first approach for Phase 1 (offline functionality)
+- Ingredient scaling with sophisticated parsing (handles fractions, ranges, units)
+- Share Extension uses programmatic UI (no storyboard) for better control
+- OpenAI GPT-4o chosen for multi-modal recipe extraction capabilities
+
+### Development Principles (from CLAUDE.md)
+- Keep UI clean and simple - single input, clear output
+- Ensure mobile responsiveness for creators on-the-go  
+- Prioritize simplicity in every code change and design decision
+- Follow Apple UI best practices and iOS design guidelines

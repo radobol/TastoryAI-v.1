@@ -52,8 +52,11 @@ extension Recipe {
                 "400g spaghetti",
                 "200g guanciale or pancetta",
                 "4 large eggs",
-                "100g Pecorino Romano cheese",
-                "Black pepper"
+                "100g Pecorino Romano cheese, grated",
+                "2 cloves garlic",
+                "1/2 cup white wine",
+                "Black pepper to taste",
+                "Salt as needed"
             ],
             steps: [
                 "Cook spaghetti in salted water until al dente",
@@ -69,11 +72,16 @@ extension Recipe {
         Recipe(
             title: "Chicken Stir Fry",
             ingredients: [
-                "500g chicken breast",
+                "500g chicken breast, cubed",
                 "2 cups mixed vegetables",
-                "3 cloves garlic",
+                "3 cloves garlic, minced",
+                "1 medium onion, sliced",
                 "2 tbsp soy sauce",
-                "1 tbsp sesame oil"
+                "1 tbsp sesame oil",
+                "1 tsp cornstarch",
+                "1/4 cup chicken broth",
+                "Salt to taste",
+                "2 green onions, chopped"
             ],
             steps: [
                 "Cut chicken into bite-sized pieces",

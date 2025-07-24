@@ -57,48 +57,7 @@ class RecipeViewModel: ObservableObject {
     
     var scaledIngredients: [String] {
         return recipe.ingredients.map { ingredient in
-            scaleIngredientQuantity(ingredient)
-        }
-    }
-    
-    private func scaleIngredientQuantity(_ ingredient: String) -> String {
-        guard servingMultiplier != 1.0 else { return ingredient }
-        
-        // Simple quantity scaling - could be enhanced with more sophisticated parsing
-        let words = ingredient.components(separatedBy: " ")
-        var scaledWords = words
-        
-        // Look for numbers in the first few words
-        for (index, word) in words.prefix(3).enumerated() {
-            if let quantity = extractQuantity(from: word) {
-                let scaledQuantity = quantity * servingMultiplier
-                scaledWords[index] = formatQuantity(scaledQuantity)
-                break
-            }
-        }
-        
-        return scaledWords.joined(separator: " ")
-    }
-    
-    private func extractQuantity(from text: String) -> Double? {
-        // Handle fractions and decimals
-        if text.contains("/") {
-            let parts = text.components(separatedBy: "/")
-            if parts.count == 2,
-               let numerator = Double(parts[0]),
-               let denominator = Double(parts[1]) {
-                return numerator / denominator
-            }
-        }
-        
-        return Double(text)
-    }
-    
-    private func formatQuantity(_ quantity: Double) -> String {
-        if quantity == floor(quantity) {
-            return String(Int(quantity))
-        } else {
-            return String(format: "%.1f", quantity)
+            IngredientParser.scaleIngredient(ingredient, by: servingMultiplier)
         }
     }
     

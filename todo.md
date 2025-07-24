@@ -187,10 +187,103 @@ This plan outlines the initial setup for Tastory AI, a native iOS cookbook app t
 - **Data persistence**: Automatic saving and loading of recipes
 - **Form validation**: Proper input validation and error handling
 
+## Phase 2: Core CLAUDE.md Features Implementation
+
+### 1. Recipe Capture System (High Priority)
+Currently the "From URL" and "From Photo" buttons in AddRecipeView are placeholder buttons with empty actions.
+
+#### Share Sheet Integration
+- [ ] Implement Share Sheet extension for receiving content from Instagram/TikTok/other apps
+- [x] Add URL input handling and validation
+- [ ] Create web scraping service for common recipe websites
+- [ ] Extract recipe data from various web formats (JSON-LD, Microdata, etc.)
+- [x] Connect "From URL" button to actual URL processing functionality
+
+#### Photo/Camera Import with OCR
+- [x] Add camera and photo library access permissions
+- [x] Implement OCR using Vision framework for text extraction from images
+- [ ] Create PhotoRecipeParser for converting OCR text to recipe format
+- [ ] Add image preprocessing for better OCR accuracy
+- [x] Connect "From Photo" button to camera/photo library selection
+- [x] Handle OCR parsing errors gracefully
+
+#### Smart Manual Entry Enhancement
+- [ ] Add smart paste detection to identify recipe content in clipboard
+- [ ] Auto-format pasted recipe text into structured ingredients/steps
+- [ ] Enhance existing ManualRecipeEntryView with paste intelligence
+
+### 2. AI Processing System (High Priority)
+Transform captured content (URLs, photos, manual) into clean recipe data.
+
+#### OpenAI GPT-4o Integration
+- [ ] Set up OpenAI API client service
+- [ ] Create structured prompts for recipe extraction
+- [ ] Implement recipe parsing from unstructured text/web content
+- [ ] Add error handling for API failures and rate limits
+- [ ] Process extracted content into Recipe model format
+
+#### Auto-categorization and Tagging
+- [ ] Implement AI-powered category detection
+- [ ] Generate relevant tags based on ingredients and cooking methods
+- [ ] Create category suggestion system
+- [ ] Add confidence scoring for AI-generated metadata
+
+#### Rate Limiting System
+- [ ] Implement 10 requests/minute/user rate limiting
+- [ ] Add queue system for processing requests
+- [ ] Create user feedback for rate limit status
+- [ ] Handle rate limit exceeded gracefully
+
+### 3. Enhanced Recipe Management (Medium Priority)
+Extend existing recipe functionality with CLAUDE.md requirements.
+
+#### US/Metric Unit Toggle System
+- [ ] Create unit conversion service for ingredients
+- [ ] Add toggle switch in RecipeDetailView for unit switching
+- [ ] Extend IngredientParser to handle unit conversions
+- [ ] Support common conversions (cups↔ml, oz↔g, fahrenheit↔celsius)
+- [ ] Persist user's preferred unit system
+
+#### Custom Categories and Tags Management
+- [ ] Create CategoryManager service for custom category CRUD
+- [ ] Add category creation/editing UI
+- [ ] Implement tag management system with autocomplete
+- [ ] Create category and tag selection interfaces
+- [ ] Add category/tag deletion with recipe reassignment
+
+#### Enhanced System Sharing
+- [ ] Extend existing share functionality for Mail, SMS, WhatsApp, Messenger
+- [ ] Add recipe formatting for different share targets
+- [ ] Include recipe images in shared content
+- [ ] Create share templates for different platforms
+
+### 4. Search & Organization (Medium Priority)
+Add comprehensive search and filtering capabilities.
+
+#### Full-text Search Implementation
+- [ ] Create RecipeSearchManager with full-text search capabilities
+- [ ] Add search bar to HomeView with real-time results
+- [ ] Search through titles, ingredients, categories, tags, and steps
+- [ ] Implement search result highlighting
+- [ ] Add search history and suggestions
+
+#### Category/Tag Filtering System
+- [ ] Create filter UI in HomeView with category/tag chips
+- [ ] Implement tap-to-filter functionality
+- [ ] Add multi-filter support (AND/OR logic)
+- [ ] Create filter state management
+- [ ] Add "Clear all filters" functionality
+
+#### Enhanced Grid View with Category Chips
+- [ ] Add category chips display to existing RecipeGridView
+- [ ] Make category chips interactive (tap to filter)
+- [ ] Show active filters in grid view
+- [ ] Add filter summary display
+
 ### Ready for Next Steps
-The app now has a complete recipe management system. Next priorities:
-- AI recipe extraction from URLs and photos
-- Enhanced search and filtering
-- Image storage and management
-- Supabase backend integration (when ready)
-- Category management system
+After Phase 2 completion, the app will have:
+- Complete recipe capture from any source (URLs, photos, manual)
+- AI-powered recipe extraction and categorization  
+- Advanced search and filtering capabilities
+- Professional unit conversion system
+- Enhanced sharing across all major platforms

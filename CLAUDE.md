@@ -48,12 +48,14 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 
 ### Architecture
 
-#### Current Implementation (Phase 1)
+#### Current Implementation (Phase 2A Complete)
 - **Platform**: Native SwiftUI for iOS/iPadOS
-- **Storage**: Local JSON via RecipeStorageManager (temporary, before Supabase migration)
-- **Input Processing**: Vision framework for OCR, Share Extension for external content
+- **Storage**: Local JSON via RecipeStorageManager with App Groups for Share Extension sync
+- **AI Processing**: OpenAI GPT-4o with secure xcconfig API key management and rate limiting
+- **Input Processing**: Vision framework for OCR, Share Extension with full recipe editing UI
 - **Recipe Processing**: IngredientParser utility with sophisticated scaling and unit recognition
 - **UI Framework**: MVVM pattern with Theme.swift and Typography.swift design system
+- **Web Scraping**: Platform-specific content extraction for Instagram, TikTok, recipe websites
 
 #### Planned Architecture (Phase 2+)
 - **Backend**: Supabase (Postgres, Auth, Storage, Edge Functions)
@@ -72,15 +74,18 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 ### Features Implementation Status
 
 1. **Recipe Capture** ✅ **COMPLETED**
-   - ✅ Share Sheet integration (Instagram, TikTok, URLs) - Full extension with content extraction
+   - ✅ Share Sheet integration (Instagram, TikTok, URLs) - Full extension with content extraction and recipe editing UI
    - ✅ Photo/Camera import with OCR - Vision framework with error handling
    - ✅ Manual entry with validation - Complete form with dynamic ingredients/steps
-   - ✅ URL input handling - Validation and placeholder processing ready for AI
+   - ✅ URL input handling - Complete AI processing pipeline integrated
 
-2. **AI Processing** 🔄 **IN PROGRESS - Phase 2A Priority**
-   - [ ] Structured recipe extraction (title, ingredients, steps, tips) - OpenAI GPT-4o integration pending
+2. **AI Processing** ✅ **COMPLETED - Phase 2A**
+   - ✅ Structured recipe extraction (title, ingredients, steps, tips) - OpenAI GPT-4o integration with secure xcconfig API key management
+   - ✅ Multi-modal processing pipeline - Text, URL, OCR, and Share Extension content processing
+   - ✅ Rate limiting (10 req/min/user) - Implemented with queue system and user feedback
+   - ✅ Web scraping service - Platform-specific extraction for Instagram, TikTok, recipe sites
+   - ✅ Share Extension recipe editing - Full UI with editable fields matching ReciMe design
    - [ ] Auto-categorization and tagging - Planned for Phase 2B
-   - [ ] Rate limiting (10 req/min/user) - Queue system design ready
 
 3. **Recipe Management** ✅ **COMPLETED**
    - ✅ CRUD operations with editable fields - Full RecipeStorageManager with JSON persistence
@@ -102,9 +107,12 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 - 99.9% API uptime
 
 ### Security & Privacy
+- **API Key Security**: OpenAI API key stored in secure xcconfig file (excluded from git)
+- **Build-time Injection**: API keys injected at build time via $(OPENAI_API_KEY) variable reference
+- **Git Security**: .gitignore configured to prevent sensitive data commits
 - TLS encryption in transit
 - AES-256 encryption at rest
-- Row-level security in Supabase
+- Row-level security in Supabase (planned)
 - GDPR compliance
 - App Store privacy requirements
 
@@ -161,3 +169,44 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 - Always consider the mobile cooking experience
 - Test your changes in real cooking scenarios
 - Keep the interface clean and focused on the recipe content
+
+## Share Extension Processing Flow
+
+### Instagram/TikTok Posts
+
+When users share from Instagram/TikTok, the Share Extension extracts:
+- URLs (post links)
+- Text (captions/descriptions)
+- Images (post photos)
+- Videos (for future audio extraction)
+
+### Complete User Experience Flow
+
+1. **Content Extraction** - ShareViewController extracts shared content (URLs, text, images)
+2. **AI Processing** - "Importing..." progress screen while OpenAI processes content
+3. **Recipe Editing UI** - Full editing interface appears with:
+   - Recipe image placeholder (top left)
+   - Editable recipe title field
+   - Editable ingredients list with bullet points
+   - Editable instructions with numbered steps
+   - Save/Cancel buttons
+4. **User Interaction** - User can modify AI-extracted content as needed
+5. **Save to App Groups** - Recipe saved to shared container for main app access
+6. **Success Feedback** - "Recipe Saved!" alert with completion
+
+### Technical Implementation
+
+ShareViewController → RecipeExtractionService.processSharedContent()
+                  ↓
+If URLs available → WebScrapingService.extractContent()
+                  ↓
+All content combined → OpenAIService.generateRecipeFromText()
+                  ↓
+Recipe editing UI → User edits → Save to App Groups → Success alert
+
+### ReciMe-Style UI Features
+
+- **Scrollable Content**: Full recipe editing in compact Share Extension format
+- **Editable Fields**: All text fields and text views allow user modifications
+- **Professional Design**: Clean layout with orange accent colors and proper spacing
+- **Save/Cancel Flow**: Clear user actions with success feedback

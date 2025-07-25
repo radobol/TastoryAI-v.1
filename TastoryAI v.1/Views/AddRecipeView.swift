@@ -249,9 +249,12 @@ struct AddOptionButton: View {
 
 struct URLRecipeEntryView: View {
     @Environment(\.dismiss) var dismiss
+    @StateObject private var extractionService = RecipeExtractionService.shared
     @State private var urlText = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var showingSuccessAlert = false
+    @State private var extractedRecipe: Recipe?
     
     var body: some View {
         NavigationView {
@@ -289,7 +292,7 @@ struct URLRecipeEntryView: View {
                 
                 Button(action: processURL) {
                     HStack {
-                        if isLoading {
+                        if extractionService.isProcessing {
                             ProgressView()
                                 .scaleEffect(0.8)
                                 .foregroundColor(.white)
@@ -298,7 +301,7 @@ struct URLRecipeEntryView: View {
                                 .font(.system(size: 16))
                         }
                         
-                        Text(isLoading ? "Processing..." : "Import Recipe")
+                        Text(extractionService.isProcessing ? extractionService.processingStatus : "Import Recipe")
                             .font(Typography.Subheadline.semibold)
                     }
                     .foregroundColor(.white)
@@ -306,11 +309,24 @@ struct URLRecipeEntryView: View {
                     .padding(Theme.Spacing.medium)
                     .background(
                         RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                            .fill(isValidURL && !isLoading ? Theme.Colors.accent : Theme.Colors.tertiaryText)
+                            .fill(isValidURL && !extractionService.isProcessing ? Theme.Colors.accent : Theme.Colors.tertiaryText)
                     )
                 }
-                .disabled(!isValidURL || isLoading)
+                .disabled(!isValidURL || extractionService.isProcessing)
                 .padding(.horizontal, Theme.Spacing.large)
+                
+                // Progress indicator
+                if extractionService.isProcessing {
+                    VStack(spacing: Theme.Spacing.small) {
+                        ProgressView(value: extractionService.processingProgress)
+                            .progressViewStyle(LinearProgressViewStyle())
+                            .padding(.horizontal, Theme.Spacing.large)
+                        
+                        Text(extractionService.processingStatus)
+                            .font(Typography.Caption1.regular)
+                            .foregroundColor(Theme.Colors.secondaryText)
+                    }
+                }
                 
                 Spacer()
             }
@@ -331,6 +347,20 @@ struct URLRecipeEntryView: View {
                     urlText = clipboardText
                 }
             }
+            .alert("Recipe Imported Successfully!", isPresented: $showingSuccessAlert) {
+                Button("View Recipe") {
+                    dismiss()
+                }
+                Button("Import Another", role: .cancel) {
+                    urlText = ""
+                    errorMessage = nil
+                    extractedRecipe = nil
+                }
+            } message: {
+                if let recipe = extractedRecipe {
+                    Text("'\(recipe.title)' has been added to your cookbook.")
+                }
+            }
         }
     }
     
@@ -349,27 +379,38 @@ struct URLRecipeEntryView: View {
     private func processURL() {
         guard isValidURL else { return }
         
-        isLoading = true
         errorMessage = nil
         
-        // TODO: Implement actual web scraping here
-        // For now, show a placeholder message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            isLoading = false
-            errorMessage = "Web scraping not yet implemented. Coming soon!"
+        Task {
+            do {
+                let recipe = try await extractionService.extractAndSaveRecipe(from: urlText.trimmingCharacters(in: .whitespacesAndNewlines))
+                
+                await MainActor.run {
+                    extractedRecipe = recipe
+                    showingSuccessAlert = true
+                }
+                
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
         }
     }
 }
 
 struct PhotoRecipeEntryView: View {
     @Environment(\.dismiss) var dismiss
+    @StateObject private var extractionService = RecipeExtractionService.shared
     @State private var selectedImage: UIImage?
     @State private var isShowingImagePicker = false
     @State private var isShowingActionSheet = false
     @State private var imageSourceType: UIImagePickerController.SourceType = .photoLibrary
-    @State private var isProcessing = false
+    @State private var isProcessingOCR = false
     @State private var extractedText = ""
     @State private var errorMessage: String?
+    @State private var showingSuccessAlert = false
+    @State private var extractedRecipe: Recipe?
     
     var body: some View {
         NavigationView {
@@ -437,30 +478,45 @@ struct PhotoRecipeEntryView: View {
                 
                 // Process Button
                 if selectedImage != nil {
-                    Button(action: processImage) {
-                        HStack {
-                            if isProcessing {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                    .foregroundColor(.white)
-                            } else {
-                                Image(systemName: "text.viewfinder")
-                                    .font(.system(size: 16))
+                    VStack(spacing: Theme.Spacing.medium) {
+                        Button(action: processImage) {
+                            HStack {
+                                if isProcessingOCR || extractionService.isProcessing {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                        .foregroundColor(.white)
+                                } else {
+                                    Image(systemName: "text.viewfinder")
+                                        .font(.system(size: 16))
+                                }
+                                
+                                Text(getProcessingText())
+                                    .font(Typography.Subheadline.semibold)
                             }
-                            
-                            Text(isProcessing ? "Processing..." : "Extract Recipe")
-                                .font(Typography.Subheadline.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(Theme.Spacing.medium)
+                            .background(
+                                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                                    .fill((isProcessingOCR || extractionService.isProcessing) ? Theme.Colors.tertiaryText : Theme.Colors.accent)
+                            )
                         }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(Theme.Spacing.medium)
-                        .background(
-                            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                                .fill(isProcessing ? Theme.Colors.tertiaryText : Theme.Colors.accent)
-                        )
+                        .disabled(isProcessingOCR || extractionService.isProcessing)
+                        .padding(.horizontal, Theme.Spacing.large)
+                        
+                        // AI Processing Progress
+                        if extractionService.isProcessing {
+                            VStack(spacing: Theme.Spacing.small) {
+                                ProgressView(value: extractionService.processingProgress)
+                                    .progressViewStyle(LinearProgressViewStyle())
+                                    .padding(.horizontal, Theme.Spacing.large)
+                                
+                                Text(extractionService.processingStatus)
+                                    .font(Typography.Caption1.regular)
+                                    .foregroundColor(Theme.Colors.secondaryText)
+                            }
+                        }
                     }
-                    .disabled(isProcessing)
-                    .padding(.horizontal, Theme.Spacing.large)
                 }
                 
                 // Extracted Text Display
@@ -517,20 +573,57 @@ struct PhotoRecipeEntryView: View {
             .sheet(isPresented: $isShowingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: imageSourceType)
             }
+            .alert("Recipe Imported Successfully!", isPresented: $showingSuccessAlert) {
+                Button("View Recipe") {
+                    dismiss()
+                }
+                Button("Import Another", role: .cancel) {
+                    selectedImage = nil
+                    extractedText = ""
+                    errorMessage = nil
+                    extractedRecipe = nil
+                }
+            } message: {
+                if let recipe = extractedRecipe {
+                    Text("'\(recipe.title)' has been added to your cookbook.")
+                }
+            }
+        }
+    }
+    
+    private func getProcessingText() -> String {
+        if isProcessingOCR {
+            return "Extracting text..."
+        } else if extractionService.isProcessing {
+            return extractionService.processingStatus
+        } else if !extractedText.isEmpty {
+            return "Generate Recipe"
+        } else {
+            return "Extract Recipe"
         }
     }
     
     private func processImage() {
         guard let selectedImage = selectedImage else { return }
         
-        isProcessing = true
+        if extractedText.isEmpty {
+            // First extract text using OCR
+            performOCR(on: selectedImage)
+        } else {
+            // Text already extracted, process with AI
+            processWithAI()
+        }
+    }
+    
+    private func performOCR(on image: UIImage) {
+        isProcessingOCR = true
         errorMessage = nil
         extractedText = ""
         
         // Convert UIImage to CGImage
-        guard let cgImage = selectedImage.cgImage else {
+        guard let cgImage = image.cgImage else {
             DispatchQueue.main.async {
-                self.isProcessing = false
+                self.isProcessingOCR = false
                 self.errorMessage = "Failed to process image. Please try a different image."
             }
             return
@@ -539,7 +632,7 @@ struct PhotoRecipeEntryView: View {
         // Create Vision text recognition request
         let request = VNRecognizeTextRequest { request, error in
             DispatchQueue.main.async {
-                self.isProcessing = false
+                self.isProcessingOCR = false
                 
                 if let error = error {
                     self.errorMessage = "OCR failed: \(error.localizedDescription)"
@@ -560,6 +653,8 @@ struct PhotoRecipeEntryView: View {
                     self.errorMessage = "No readable text found in the image."
                 } else {
                     self.extractedText = recognizedText
+                    // Automatically proceed to AI processing
+                    self.processWithAI()
                 }
             }
         }
@@ -576,8 +671,30 @@ struct PhotoRecipeEntryView: View {
                 try handler.perform([request])
             } catch {
                 DispatchQueue.main.async {
-                    self.isProcessing = false
+                    self.isProcessingOCR = false
                     self.errorMessage = "OCR processing failed: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    private func processWithAI() {
+        guard let image = selectedImage, !extractedText.isEmpty else { return }
+        
+        errorMessage = nil
+        
+        Task {
+            do {
+                let recipe = try await extractionService.extractAndSaveRecipe(fromImage: image, withText: extractedText)
+                
+                await MainActor.run {
+                    extractedRecipe = recipe
+                    showingSuccessAlert = true
+                }
+                
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
                 }
             }
         }

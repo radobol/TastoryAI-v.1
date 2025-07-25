@@ -1,0 +1,39 @@
+# Xcode
+*.xcuserstate
+*.xcuserdatad/
+DerivedData/
+build/
+
+# API Keys and Sensitive Configuration
+Config.xcconfig
+
+# iOS
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# SwiftPM
+.swiftpm/
+
+# CocoaPods
+Pods/
+*.xcworkspace
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.temp
+*~

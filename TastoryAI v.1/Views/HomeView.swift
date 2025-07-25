@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var storageManager = RecipeStorageManager.shared
     @State private var showingAddRecipe = false
+    @State private var showingAPITest = false
+    @State private var apiTestResult = ""
     
     var body: some View {
         NavigationView {
@@ -26,6 +28,15 @@ struct HomeView: View {
                 VStack {
                     Spacer()
                     HStack {
+                        // Add API Test Button
+                        Button("🧪 Test API") {
+                            testAPI()
+                        }
+                        .padding()
+                        .background(Theme.Colors.secondaryBackground)
+                        .cornerRadius(8)
+                        .padding(.leading, Theme.Spacing.medium)
+                        
                         Spacer()
                         AddRecipeButton(showingAddRecipe: $showingAddRecipe)
                             .padding(.trailing, Theme.Spacing.medium)
@@ -37,8 +48,51 @@ struct HomeView: View {
             .sheet(isPresented: $showingAddRecipe) {
                 AddRecipeView()
             }
+            .alert("API Test Result", isPresented: $showingAPITest) {
+                Button("OK") {}
+            } message: {
+                Text(apiTestResult)
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            // Refresh recipes when app becomes active (to show Share Extension additions)
+            storageManager.loadRecipes()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            // Refresh when app comes back from background (after Share Extension)
+            storageManager.loadRecipes()
+        }
+    }
+    
+    private func testAPI() {
+        Task {
+            do {
+                print("🧪 Testing OpenAI API...")
+                let openAIService = OpenAIService.shared
+                
+                let testPrompt = """
+                Extract recipe information from this text and return it in JSON format:
+                
+                "Chocolate Chip Cookies
+                Ingredients: 2 cups flour, 1 cup sugar, 1/2 cup butter, 2 eggs, 1 cup chocolate chips
+                Instructions: Mix dry ingredients. Add wet ingredients. Fold in chocolate chips. Bake at 350°F for 12 minutes."
+                """
+                
+                let result = try await openAIService.generateRecipeFromText(testPrompt)
+                
+                await MainActor.run {
+                    apiTestResult = "✅ API Test Successful!\n\nResponse:\n\(String(result.prefix(200)))..."
+                    showingAPITest = true
+                }
+                
+            } catch {
+                await MainActor.run {
+                    apiTestResult = "❌ API Test Failed:\n\n\(error.localizedDescription)"
+                    showingAPITest = true
+                }
+            }
+        }
     }
 }
 

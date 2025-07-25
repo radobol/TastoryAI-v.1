@@ -1,9 +1,1 @@
-//
-//  Config.xcconfig
-//  TastoryAI v.1
-//
-//  Created by Denis Radabolski on 7/25/25.
-//
-
-// Configuration settings file format documentation can be found at:
-// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+OPENAI_API_KEY = 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

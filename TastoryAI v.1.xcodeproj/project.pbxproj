@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BE7EBE332E329C5700CBBF7C /* TastoryShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BE7EBE292E329C5700CBBF7C /* TastoryShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BE7EBE462E32F04500CBBF7C /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,19 +51,13 @@
 
 /* Begin PBXFileReference section */
 		BE7EBE292E329C5700CBBF7C /* TastoryShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TastoryShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE7EBE452E32F04500CBBF7C /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		BEB6BB2B2E313B410030CBAB /* TastoryAI v.1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TastoryAI v.1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEB6BB382E313B440030CBAB /* TastoryAI v.1Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TastoryAI v.1Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEB6BB422E313B440030CBAB /* TastoryAI v.1UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TastoryAI v.1UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		BE7EBE242E329B3800CBBF7C /* Exceptions for "TastoryAI v.1" folder in "TastoryAI v.1" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"TastoryAI-v-1-Info.plist",
-			);
-			target = BEB6BB2A2E313B410030CBAB /* TastoryAI v.1 */;
-		};
 		BE7EBE372E329C5700CBBF7C /* Exceptions for "TastoryShare" folder in "TastoryShare" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -83,9 +78,6 @@
 		};
 		BEB6BB2D2E313B410030CBAB /* TastoryAI v.1 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				BE7EBE242E329B3800CBBF7C /* Exceptions for "TastoryAI v.1" folder in "TastoryAI v.1" target */,
-			);
 			path = "TastoryAI v.1";
 			sourceTree = "<group>";
 		};
@@ -136,6 +128,7 @@
 		BEB6BB222E313B410030CBAB = {
 			isa = PBXGroup;
 			children = (
+				BE7EBE452E32F04500CBBF7C /* Config.xcconfig */,
 				BEB6BB2D2E313B410030CBAB /* TastoryAI v.1 */,
 				BEB6BB3B2E313B440030CBAB /* TastoryAI v.1Tests */,
 				BEB6BB452E313B440030CBAB /* TastoryAI v.1UITests */,
@@ -310,6 +303,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE7EBE462E32F04500CBBF7C /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -381,7 +375,9 @@
 /* Begin XCBuildConfiguration section */
 		BE7EBE352E329C5700CBBF7C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TastoryShare/TastoryShare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NFS6M4BR2B;
@@ -406,7 +402,9 @@
 		};
 		BE7EBE362E329C5700CBBF7C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TastoryShare/TastoryShare.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NFS6M4BR2B;
@@ -431,6 +429,7 @@
 		};
 		BEB6BB4A2E313B440030CBAB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -495,6 +494,7 @@
 		};
 		BEB6BB4B2E313B440030CBAB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -552,9 +552,11 @@
 		};
 		BEB6BB4D2E313B440030CBAB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "TastoryAI v.1/TastoryAI v.1.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NFS6M4BR2B;
@@ -583,9 +585,11 @@
 		};
 		BEB6BB4E2E313B440030CBAB /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE7EBE452E32F04500CBBF7C /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "TastoryAI v.1/TastoryAI v.1.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NFS6M4BR2B;

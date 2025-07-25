@@ -16,15 +16,27 @@ class RecipeStorageManager: ObservableObject {
     private let recipesFileURL: URL
     
     private init() {
-        documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        // Use App Group container if available, fallback to documents directory
+        if let groupContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.tastoryai.app") {
+            documentsDirectory = groupContainer
+            print("✅ Main app using App Groups container: \(groupContainer.path)")
+        } else {
+            documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            print("⚠️ Main app falling back to documents directory")
+        }
+        
         recipesFileURL = documentsDirectory.appendingPathComponent("recipes.json")
+        print("📁 Main app recipes file: \(recipesFileURL.path)")
         
         loadRecipes()
         
         // If no recipes exist, initialize with sample data
         if recipes.isEmpty {
+            print("📖 No recipes found in main app, loading sample data")
             recipes = Recipe.sampleRecipes
             saveRecipes()
+        } else {
+            print("📖 Main app loaded \(recipes.count) existing recipes")
         }
     }
     
@@ -32,10 +44,14 @@ class RecipeStorageManager: ObservableObject {
     
     func loadRecipes() {
         do {
+            print("📖 Main app attempting to load recipes from: \(recipesFileURL.path)")
             let data = try Data(contentsOf: recipesFileURL)
-            recipes = try JSONDecoder().decode([Recipe].self, from: data)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            recipes = try decoder.decode([Recipe].self, from: data)
+            print("📖 Main app successfully loaded \(recipes.count) recipes")
         } catch {
-            print("Failed to load recipes: \(error)")
+            print("📖 Main app failed to load recipes: \(error)")
             recipes = []
         }
     }
@@ -46,13 +62,15 @@ class RecipeStorageManager: ObservableObject {
             encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(recipes)
             try data.write(to: recipesFileURL)
+            print("💾 Main app successfully saved \(recipes.count) recipes to: \(recipesFileURL.path)")
         } catch {
-            print("Failed to save recipes: \(error)")
+            print("💾 Main app failed to save recipes: \(error)")
         }
     }
     
     func addRecipe(_ recipe: Recipe) {
         recipes.append(recipe)
+        print("➕ Main app adding recipe: \(recipe.title)")
         saveRecipes()
     }
     

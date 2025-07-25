@@ -86,116 +86,22 @@ struct ManualRecipeEntryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var storageManager = RecipeStorageManager.shared
     
-    @State private var title = ""
-    @State private var category = ""
-    @State private var servings = 4
-    @State private var ingredients: [String] = [""]
-    @State private var steps: [String] = [""]
-    @State private var tags: [String] = []
-    
     var body: some View {
-        NavigationView {
-            Form {
-                Section("Basic Information") {
-                    TextField("Recipe Title", text: $title)
-                        .font(Typography.Body.regular)
-                    
-                    TextField("Category (optional)", text: $category)
-                        .font(Typography.Body.regular)
-                    
-                    Stepper("Servings: \(servings)", value: $servings, in: 1...20)
-                        .font(Typography.Body.regular)
-                }
-                
-                Section("Ingredients") {
-                    ForEach(Array(ingredients.enumerated()), id: \.offset) { index, ingredient in
-                        TextField("Ingredient \(index + 1)", text: Binding(
-                            get: { ingredients[index] },
-                            set: { ingredients[index] = $0 }
-                        ))
-                        .font(Typography.Body.regular)
-                    }
-                    .onDelete(perform: deleteIngredient)
-                    
-                    Button("Add Ingredient") {
-                        ingredients.append("")
-                    }
-                    .foregroundColor(Theme.Colors.accent)
-                }
-                
-                Section("Instructions") {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                        VStack(alignment: .leading) {
-                            Text("Step \(index + 1)")
-                                .font(Typography.Subheadline.semibold)
-                                .foregroundColor(Theme.Colors.accent)
-                            
-                            TextField("Instruction", text: Binding(
-                                get: { steps[index] },
-                                set: { steps[index] = $0 }
-                            ), axis: .vertical)
-                            .font(Typography.Body.regular)
-                            .lineLimit(3, reservesSpace: true)
-                        }
-                    }
-                    .onDelete(perform: deleteStep)
-                    
-                    Button("Add Step") {
-                        steps.append("")
-                    }
-                    .foregroundColor(Theme.Colors.accent)
-                }
+        RecipeEditingView(
+            recipe: Recipe(
+                title: "",
+                ingredients: [""],
+                steps: [""],
+                servings: 4
+            ),
+            onSave: { recipe in
+                storageManager.addRecipe(recipe)
+                dismiss()
+            },
+            onCancel: {
+                dismiss()
             }
-            .navigationTitle("New Recipe")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .foregroundColor(Theme.Colors.accent)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveRecipe()
-                    }
-                    .foregroundColor(Theme.Colors.accent)
-                    .disabled(title.isEmpty || ingredients.allSatisfy { $0.isEmpty } || steps.allSatisfy { $0.isEmpty })
-                }
-            }
-        }
-    }
-    
-    private func deleteIngredient(at offsets: IndexSet) {
-        ingredients.remove(atOffsets: offsets)
-        if ingredients.isEmpty {
-            ingredients.append("")
-        }
-    }
-    
-    private func deleteStep(at offsets: IndexSet) {
-        steps.remove(atOffsets: offsets)
-        if steps.isEmpty {
-            steps.append("")
-        }
-    }
-    
-    private func saveRecipe() {
-        let filteredIngredients = ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        let filteredSteps = steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        
-        let newRecipe = Recipe(
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-            ingredients: filteredIngredients,
-            steps: filteredSteps,
-            category: category.isEmpty ? nil : category.trimmingCharacters(in: .whitespacesAndNewlines),
-            tags: tags,
-            servings: servings
         )
-        
-        storageManager.addRecipe(newRecipe)
-        dismiss()
     }
 }
 
@@ -250,10 +156,11 @@ struct AddOptionButton: View {
 struct URLRecipeEntryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var extractionService = RecipeExtractionService.shared
+    @StateObject private var storageManager = RecipeStorageManager.shared
     @State private var urlText = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var showingSuccessAlert = false
+    @State private var showingRecipeEditor = false
     @State private var extractedRecipe: Recipe?
     
     var body: some View {
@@ -347,18 +254,22 @@ struct URLRecipeEntryView: View {
                     urlText = clipboardText
                 }
             }
-            .alert("Recipe Imported Successfully!", isPresented: $showingSuccessAlert) {
-                Button("View Recipe") {
-                    dismiss()
-                }
-                Button("Import Another", role: .cancel) {
-                    urlText = ""
-                    errorMessage = nil
-                    extractedRecipe = nil
-                }
-            } message: {
+            .sheet(isPresented: $showingRecipeEditor) {
                 if let recipe = extractedRecipe {
-                    Text("'\(recipe.title)' has been added to your cookbook.")
+                    RecipeEditingView(
+                        recipe: recipe,
+                        onSave: { updatedRecipe in
+                            storageManager.addRecipe(updatedRecipe)
+                            showingRecipeEditor = false
+                            dismiss()
+                        },
+                        onCancel: {
+                            showingRecipeEditor = false
+                            urlText = ""
+                            errorMessage = nil
+                            extractedRecipe = nil
+                        }
+                    )
                 }
             }
         }
@@ -383,11 +294,11 @@ struct URLRecipeEntryView: View {
         
         Task {
             do {
-                let recipe = try await extractionService.extractAndSaveRecipe(from: urlText.trimmingCharacters(in: .whitespacesAndNewlines))
+                let recipe = try await extractionService.processURL(urlText.trimmingCharacters(in: .whitespacesAndNewlines))
                 
                 await MainActor.run {
                     extractedRecipe = recipe
-                    showingSuccessAlert = true
+                    showingRecipeEditor = true
                 }
                 
             } catch {
@@ -402,6 +313,7 @@ struct URLRecipeEntryView: View {
 struct PhotoRecipeEntryView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var extractionService = RecipeExtractionService.shared
+    @StateObject private var storageManager = RecipeStorageManager.shared
     @State private var selectedImage: UIImage?
     @State private var isShowingImagePicker = false
     @State private var isShowingActionSheet = false
@@ -409,7 +321,7 @@ struct PhotoRecipeEntryView: View {
     @State private var isProcessingOCR = false
     @State private var extractedText = ""
     @State private var errorMessage: String?
-    @State private var showingSuccessAlert = false
+    @State private var showingRecipeEditor = false
     @State private var extractedRecipe: Recipe?
     
     var body: some View {
@@ -573,19 +485,23 @@ struct PhotoRecipeEntryView: View {
             .sheet(isPresented: $isShowingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: imageSourceType)
             }
-            .alert("Recipe Imported Successfully!", isPresented: $showingSuccessAlert) {
-                Button("View Recipe") {
-                    dismiss()
-                }
-                Button("Import Another", role: .cancel) {
-                    selectedImage = nil
-                    extractedText = ""
-                    errorMessage = nil
-                    extractedRecipe = nil
-                }
-            } message: {
+            .sheet(isPresented: $showingRecipeEditor) {
                 if let recipe = extractedRecipe {
-                    Text("'\(recipe.title)' has been added to your cookbook.")
+                    RecipeEditingView(
+                        recipe: recipe,
+                        onSave: { updatedRecipe in
+                            storageManager.addRecipe(updatedRecipe)
+                            showingRecipeEditor = false
+                            dismiss()
+                        },
+                        onCancel: {
+                            showingRecipeEditor = false
+                            selectedImage = nil
+                            extractedText = ""
+                            errorMessage = nil
+                            extractedRecipe = nil
+                        }
+                    )
                 }
             }
         }
@@ -685,11 +601,11 @@ struct PhotoRecipeEntryView: View {
         
         Task {
             do {
-                let recipe = try await extractionService.extractAndSaveRecipe(fromImage: image, withText: extractedText)
+                let recipe = try await extractionService.processImage(image, withExtractedText: extractedText)
                 
                 await MainActor.run {
                     extractedRecipe = recipe
-                    showingSuccessAlert = true
+                    showingRecipeEditor = true
                 }
                 
             } catch {

@@ -11,9 +11,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Follow Apple UI best practices** and iOS design guidelines
 - **Use modern SwiftUI** patterns and components
 
-## Standard Development Workflow
-
-
 ## Project Overview
 Tastory AI is a native iOS cookbook app that captures recipes from any source (TikTok, Instagram, photos, web links) and uses AI to extract clean ingredients and step-by-step directions. The app focuses on simplicity, mobile responsiveness, and a clean UI design.
 ### 1. Problem Analysis & Planning
@@ -44,9 +41,7 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 - Include any relevant information for future development
 - Note any potential improvements or considerations
 
-## Technical Guidelines
 
-### Architecture
 
 #### Current Implementation (Phase 2A Complete)
 - **Platform**: Native SwiftUI for iOS/iPadOS

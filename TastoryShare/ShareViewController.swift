@@ -79,11 +79,13 @@ class RecipeStorageManager {
     private func loadRecipes() -> [Recipe] {
         do {
             let data = try Data(contentsOf: recipesFileURL)
-            let recipes = try JSONDecoder().decode([Recipe].self, from: data)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let recipes = try decoder.decode([Recipe].self, from: data)
             print("📖 Loaded \(recipes.count) existing recipes from App Groups")
             return recipes
         } catch {
-            print("📖 No existing recipes found (this is normal for first run)")
+            print("📖 No existing recipes found (this is normal for first run): \(error)")
             return []
         }
     }

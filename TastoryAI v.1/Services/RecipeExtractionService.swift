@@ -203,8 +203,15 @@ class RecipeExtractionService: ObservableObject {
             processingStatus = "Processing content with AI..."
             processingProgress = 0.6
             
-            // Process with AI
-            let aiResponse = try await openAIService.generateRecipeFromText(combinedContent)
+            // Process with AI - use URL-specific method if URLs are present
+            let aiResponse: String
+            if !urls.isEmpty, let firstURL = urls.first {
+                // Use URL-specific processing for better structured data extraction
+                aiResponse = try await openAIService.generateRecipeFromURL(firstURL.absoluteString, content: combinedContent)
+            } else {
+                // Use general text processing for non-URL content
+                aiResponse = try await openAIService.generateRecipeFromText(combinedContent)
+            }
             processingProgress = 0.8
             processingStatus = "Parsing recipe data..."
             

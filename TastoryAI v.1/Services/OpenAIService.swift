@@ -183,7 +183,7 @@ class OpenAIService: ObservableObject {
         Rules:
         - Look for structured data (JSON-LD, microdata) first
         - Ingredients MUST include quantities and units in standardized format
-        -If there is no list of ingredients with their volumes, try to find mentions of these ingredients in the recipe description and extract the volumes from the description.
+        - If there is no list of ingredients with their volumes, try to find mentions of these ingredients in the recipe description and extract the volumes from the description.
         - Use standard units: cups, tablespoons (tbsp), teaspoons (tsp), ounces (oz), pounds (lbs), grams (g)
         - Format ingredients as: "2 cups flour" NOT "flour (2 cups)" or "flour - 2 cups"
         - Use consistent quantity formats: "1/2 cup", "1.5 cups", "2 cups" (no ranges like "1-2 cups")

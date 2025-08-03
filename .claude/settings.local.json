@@ -3,7 +3,9 @@
     "allow": [
       "Bash(mkdir:*)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:fdc.nal.usda.gov)"
+      "WebFetch(domain:fdc.nal.usda.gov)",
+      "WebFetch(domain:www.loveandlemons.com)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

@@ -8,103 +8,14 @@
 import UIKit
 import MobileCoreServices
 import UniformTypeIdentifiers
+import Foundation
 
-// Import Recipe model and services from main app target
-// Note: These would need to be shared between targets in the Xcode project
-struct Recipe: Identifiable, Codable {
-    let id: UUID
-    var title: String
-    var ingredients: [String]
-    var steps: [String]
-    var imageURL: String?
-    var category: String?
-    var tags: [String]
-    var servings: Int
-    let createdAt: Date
-    var updatedAt: Date
-    
-    init(
-        id: UUID = UUID(),
-        title: String,
-        ingredients: [String] = [],
-        steps: [String] = [],
-        imageURL: String? = nil,
-        category: String? = nil,
-        tags: [String] = [],
-        servings: Int = 4,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date()
-    ) {
-        self.id = id
-        self.title = title
-        self.ingredients = ingredients
-        self.steps = steps
-        self.imageURL = imageURL
-        self.category = category
-        self.tags = tags
-        self.servings = servings
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-    }
-}
-
-// Shared storage manager for the extension (using same App Groups file system as main app)
-class RecipeStorageManager {
-    static let shared = RecipeStorageManager()
-    
-    private let documentsDirectory: URL
-    private let recipesFileURL: URL
-    
-    private init() {
-        // Use App Group container if available, fallback to documents directory
-        if let groupContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.tastoryai.app") {
-            documentsDirectory = groupContainer
-            print("✅ Share Extension using App Groups container: \(groupContainer.path)")
-        } else {
-            documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            print("⚠️ Share Extension falling back to documents directory")
-        }
-        
-        recipesFileURL = documentsDirectory.appendingPathComponent("recipes.json")
-        print("📁 Share Extension recipes file: \(recipesFileURL.path)")
-    }
-    
-    func addRecipe(_ recipe: Recipe) {
-        var recipes = loadRecipes()
-        recipes.append(recipe)
-        saveRecipes(recipes)
-        print("💾 Saved recipe to App Groups: \(recipe.title)")
-    }
-    
-    private func loadRecipes() -> [Recipe] {
-        do {
-            let data = try Data(contentsOf: recipesFileURL)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let recipes = try decoder.decode([Recipe].self, from: data)
-            print("📖 Loaded \(recipes.count) existing recipes from App Groups")
-            return recipes
-        } catch {
-            print("📖 No existing recipes found (this is normal for first run): \(error)")
-            return []
-        }
-    }
-    
-    private func saveRecipes(_ recipes: [Recipe]) {
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            let data = try encoder.encode(recipes)
-            try data.write(to: recipesFileURL)
-            print("💾 Successfully saved \(recipes.count) recipes to App Groups")
-        } catch {
-            print("❌ Failed to save recipes: \(error.localizedDescription)")
-        }
-    }
-}
-
-// Note: Complex AI processing removed from Share Extension to prevent crashes
-// Share Extension now creates placeholder recipes that get processed in the main app
+// Note: These files must be added to the TastoryShare target in Xcode:
+// - Recipe.swift
+// - RecipeStorageManager.swift
+// - WebScrapingService.swift
+// - OpenAIService.swift
+// - RecipeExtractionService.swift
 
 class ShareViewController: UIViewController {
     
@@ -124,15 +35,13 @@ class ShareViewController: UIViewController {
     private var stepsStackView: UIStackView!
     private var saveButton: UIButton!
     
-    private var extractedContent: ExtractedContent?
+    private var extractedURLs: [URL] = []
+    private var extractedImages: [UIImage] = []
+    private var extractedText: String = ""
     private var processedRecipe: Recipe?
     
-    struct ExtractedContent {
-        var urls: [URL] = []
-        var images: [UIImage] = []
-        var text: String = ""
-        var videos: [URL] = []
-    }
+    // Services
+    private let recipeExtractionService = RecipeExtractionService.shared
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -234,7 +143,9 @@ class ShareViewController: UIViewController {
         
         print("🔍 Starting Share Extension content extraction...")
         
-        var content = ExtractedContent()
+        var urls: [URL] = []
+        var images: [UIImage] = []
+        var collectedText = ""
         let group = DispatchGroup()
         
         for item in extensionContext.inputItems {
@@ -269,7 +180,7 @@ class ShareViewController: UIViewController {
                         
                         if let url = data as? URL {
                             print("✅ Extracted URL: \(url.absoluteString)")
-                            content.urls.append(url)
+                            urls.append(url)
                         } else {
                             print("❌ URL data is not URL type: \(String(describing: data))")
                         }
@@ -290,7 +201,7 @@ class ShareViewController: UIViewController {
                         
                         if let text = data as? String {
                             print("✅ Extracted text: \(String(text.prefix(100)))...")
-                            content.text += text + "\n"
+                            collectedText += text + "\n"
                         } else {
                             print("❌ Text data is not String type: \(String(describing: data))")
                         }
@@ -311,10 +222,10 @@ class ShareViewController: UIViewController {
                         
                         if let imageData = data as? Data, let image = UIImage(data: imageData) {
                             print("✅ Extracted image from Data")
-                            content.images.append(image)
+                            images.append(image)
                         } else if let image = data as? UIImage {
                             print("✅ Extracted UIImage directly")
-                            content.images.append(image)
+                            images.append(image)
                         } else {
                             print("❌ Image data is not valid: \(String(describing: data))")
                         }
@@ -335,7 +246,7 @@ class ShareViewController: UIViewController {
                         
                         if let text = data as? String {
                             print("✅ Extracted HTML: \(String(text.prefix(100)))...")
-                            content.text += text + "\n"
+                            collectedText += text + "\n"
                         }
                     }
                 }
@@ -344,270 +255,75 @@ class ShareViewController: UIViewController {
         
         group.notify(queue: .main) {
             print("🎯 Content extraction complete:")
-            print("   URLs: \(content.urls.count)")
-            print("   Images: \(content.images.count)")
-            print("   Text length: \(content.text.count)")
-            print("   Videos: \(content.videos.count)")
+            print("   URLs: \(urls.count)")
+            print("   Images: \(images.count)")
+            print("   Text length: \(collectedText.count)")
             
-            self.extractedContent = content
+            self.extractedURLs = urls
+            self.extractedImages = images
+            self.extractedText = collectedText
             self.processExtractedContent()
         }
     }
     
     private func processExtractedContent() {
-        guard let content = extractedContent else {
+        if extractedURLs.isEmpty && extractedImages.isEmpty && extractedText.isEmpty {
             showError("No content found to process")
             return
         }
         
         // Update UI to show what we found
         var statusText = "Found: "
-        if !content.urls.isEmpty {
-            statusText += "\(content.urls.count) URL(s) "
+        if !extractedURLs.isEmpty {
+            statusText += "\(extractedURLs.count) URL(s) "
         }
-        if !content.images.isEmpty {
-            statusText += "\(content.images.count) image(s) "
+        if !extractedImages.isEmpty {
+            statusText += "\(extractedImages.count) image(s) "
         }
-        if !content.videos.isEmpty {
-            statusText += "\(content.videos.count) video(s) "
-        }
-        if !content.text.isEmpty {
+        if !extractedText.isEmpty {
             statusText += "text content "
         }
         
         statusLabel?.text = statusText
         
-        // Process content with AI
-        processWithRecipeExtraction(content: content)
+        // Process content with RecipeExtractionService
+        processWithRecipeExtraction()
     }
     
-    private func processWithRecipeExtraction(content: ExtractedContent) {
+    private func processWithRecipeExtraction() {
         statusLabel?.text = "Importing..."
         progressView?.progress = 0.1
         
-        print("🔄 Starting AI processing...")
+        print("🔄 Starting recipe extraction...")
         
         Task {
             do {
-                await MainActor.run {
-                    self.progressView?.progress = 0.3
-                    self.statusLabel?.text = "Fetching content..."
-                }
+                // RecipeExtractionService doesn't have onProgressUpdate
+                // We'll just show a simple progress indicator
                 
-                var combinedContent = ""
+                // Process using RecipeExtractionService
+                let recipe = try await recipeExtractionService.processSharedContent(
+                    urls: extractedURLs,
+                    images: [], // Images handled separately for now
+                    text: extractedText,
+                    videos: [] // Videos not supported yet
+                )
                 
-                // If we have URLs, try to scrape content
-                if !content.urls.isEmpty {
-                    print("🌐 Processing URLs...")
-                    for url in content.urls {
-                        print("🔗 Processing URL: \(url.absoluteString)")
-                        combinedContent += "URL: \(url.absoluteString)\n"
-                        
-                        // Simple URL content extraction (avoid complex web scraping in extension)
-                        if let htmlContent = try? await fetchBasicContent(from: url) {
-                            combinedContent += htmlContent + "\n"
-                        }
-                    }
-                }
-                
-                // Add any extracted text
-                if !content.text.isEmpty {
-                    combinedContent += "Text Content:\n\(content.text)\n"
-                }
+                print("✅ Recipe processed: \(recipe.title)")
                 
                 await MainActor.run {
-                    self.progressView?.progress = 0.6
-                    self.statusLabel?.text = "Processing with AI..."
-                }
-                
-                // Process with OpenAI (simplified for extension)
-                let recipe = try await processWithSimpleAI(content: combinedContent)
-                
-                await MainActor.run {
-                    self.progressView?.progress = 0.9
-                    self.statusLabel?.text = "Saving recipe..."
-                }
-                
-                // Save the recipe
-                RecipeStorageManager.shared.addRecipe(recipe)
-                print("✅ Recipe saved: \(recipe.title)")
-                
-                await MainActor.run {
-                    self.showSuccess(with: recipe)
+                    self.processedRecipe = recipe
+                    self.showRecipeEditingUI()
                 }
                 
             } catch {
-                print("❌ AI processing failed: \(error.localizedDescription)")
+                print("❌ Recipe extraction failed: \(error.localizedDescription)")
                 
                 await MainActor.run {
                     self.showError("Failed to process recipe: \(error.localizedDescription)")
                 }
             }
         }
-    }
-    
-    private func fetchBasicContent(from url: URL) async throws -> String {
-        print("📥 Fetching content from: \(url.absoluteString)")
-        
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let html = String(data: data, encoding: .utf8) ?? ""
-        
-        // Extract basic text content (remove HTML tags)
-        let cleanedText = html.replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        return String(cleanedText.prefix(2000)) // Limit to prevent huge content
-    }
-    
-    private func processWithSimpleAI(content: String) async throws -> Recipe {
-        print("🤖 Processing with OpenAI...")
-        
-        let prompt = """
-        Extract recipe information from this content and return ONLY a JSON object in this exact format:
-        
-        {
-          "title": "Recipe Name",
-          "ingredients": ["ingredient 1", "ingredient 2"],
-          "steps": ["step 1", "step 2"],
-          "category": "category name or null",
-          "tags": ["tag1", "tag2"],
-          "servings": 4
-        }
-        
-        Content to process:
-        \(content)
-        """
-        
-        // Use a simplified OpenAI request for the extension
-        guard let apiKey = getAPIKey() else {
-            throw NSError(domain: "OpenAI", code: 1, userInfo: [NSLocalizedDescriptionKey: "API key not found"])
-        }
-        
-        let request = createOpenAIRequest(prompt: prompt, apiKey: apiKey)
-        let response = try await performSimpleOpenAIRequest(request)
-        
-        return try parseRecipeResponse(response)
-    }
-    
-    private func getAPIKey() -> String? {
-        // Try to get API key from main app bundle (shared xcconfig)
-        if let key = Bundle.main.object(forInfoDictionaryKey: "OPENAI_API_KEY") as? String {
-            print("✅ Found API key in Share Extension: \(String(key.prefix(10)))...")
-            return key
-        }
-        
-        print("❌ No API key found in Share Extension bundle")
-        return nil
-    }
-    
-    private func createOpenAIRequest(prompt: String, apiKey: String) -> URLRequest {
-        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        
-        let requestBody = [
-            "model": "gpt-4o",
-            "messages": [
-                ["role": "user", "content": prompt]
-            ],
-            "temperature": 0.1,
-            "max_tokens": 1500
-        ] as [String: Any]
-        
-        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody)
-        return request
-    }
-    
-    private func performSimpleOpenAIRequest(_ request: URLRequest) async throws -> String {
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse,
-              200...299 ~= httpResponse.statusCode else {
-            throw NSError(domain: "OpenAI", code: 2, userInfo: [NSLocalizedDescriptionKey: "API request failed"])
-        }
-        
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        let choices = json?["choices"] as? [[String: Any]]
-        let message = choices?.first?["message"] as? [String: Any]
-        let content = message?["content"] as? String
-        
-        return content ?? ""
-    }
-    
-    private func parseRecipeResponse(_ response: String) throws -> Recipe {
-        let cleanedResponse = response
-            .replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        guard let data = cleanedResponse.data(using: .utf8),
-              let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw NSError(domain: "Parse", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON response"])
-        }
-        
-        let title = json["title"] as? String ?? "Shared Recipe"
-        let ingredients = json["ingredients"] as? [String] ?? ["Ingredients will be processed"]
-        let steps = json["steps"] as? [String] ?? ["Steps will be processed"]
-        let category = json["category"] as? String
-        let tags = json["tags"] as? [String] ?? ["shared"]
-        let servings = json["servings"] as? Int ?? 4
-        
-        return Recipe(
-            title: title,
-            ingredients: ingredients.filter { !$0.isEmpty },
-            steps: steps.filter { !$0.isEmpty },
-            category: category?.isEmpty == true ? nil : category,
-            tags: tags,
-            servings: servings
-        )
-    }
-    
-    private func createPlaceholderRecipe(from content: ExtractedContent) -> Recipe {
-        var title = "Shared Recipe"
-        var ingredients: [String] = []
-        var steps: [String] = []
-        
-        // Extract title from text content
-        if !content.text.isEmpty {
-            let lines = content.text.components(separatedBy: .newlines)
-            if let firstLine = lines.first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
-                let trimmed = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
-                if trimmed.count < 100 {
-                    title = trimmed
-                }
-            }
-        }
-        
-        // Add content info
-        if !content.urls.isEmpty {
-            steps.append("Original source: \(content.urls.first?.absoluteString ?? "")")
-        }
-        
-        if !content.text.isEmpty {
-            steps.append("Shared content: \(content.text)")
-        }
-        
-        if content.images.count > 0 {
-            steps.append("Contains \(content.images.count) image(s)")
-        }
-        
-        // Add processing note
-        ingredients.append("⚠️ This recipe needs processing")
-        ingredients.append("Open the main app to extract ingredients with AI")
-        
-        steps.append("⚠️ Recipe steps will be extracted when you open the main app")
-        
-        return Recipe(
-            title: title,
-            ingredients: ingredients,
-            steps: steps,
-            category: "Shared Content",
-            tags: ["shared", "needs-processing"],
-            servings: 1
-        )
     }
     
     private func showSuccess() {

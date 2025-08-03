@@ -31,26 +31,12 @@ class WebScrapingService: ObservableObject {
             throw WebScrapingError.invalidURL
         }
         
-        // Check if it's a supported platform
-        let platform = detectPlatform(from: url)
-        
         do {
             // Fetch the HTML content
             let htmlContent = try await fetchHTML(from: url)
             
-            // Extract content based on platform
-            switch platform {
-            case .instagram:
-                return try extractInstagramContent(from: htmlContent, url: url)
-            case .tiktok:
-                return try extractTikTokContent(from: htmlContent, url: url)
-            case .youtube:
-                return try extractYouTubeContent(from: htmlContent, url: url)
-            case .recipeWebsite:
-                return try extractRecipeWebsiteContent(from: htmlContent, url: url)
-            case .general:
-                return try extractGeneralContent(from: htmlContent, url: url)
-            }
+            // Use unified extraction approach for all websites
+            return try extractUnifiedContent(from: htmlContent, url: url)
             
         } catch {
             throw WebScrapingError.contentExtractionFailed(error.localizedDescription)
@@ -87,32 +73,6 @@ class WebScrapingService: ObservableObject {
         }
     }
     
-    private func detectPlatform(from url: URL) -> Platform {
-        let host = url.host?.lowercased() ?? ""
-        
-        if host.contains("instagram.com") {
-            return .instagram
-        } else if host.contains("tiktok.com") {
-            return .tiktok
-        } else if host.contains("youtube.com") || host.contains("youtu.be") {
-            return .youtube
-        } else if isRecipeWebsite(host: host) {
-            return .recipeWebsite
-        } else {
-            return .general
-        }
-    }
-    
-    private func isRecipeWebsite(host: String) -> Bool {
-        let recipeHosts = [
-            "allrecipes.com", "foodnetwork.com", "epicurious.com",
-            "bonappetit.com", "seriouseats.com", "food.com",
-            "delish.com", "tasty.co", "buzzfeed.com",
-            "marthastewart.com", "cookinglight.com", "eatingwell.com"
-        ]
-        
-        return recipeHosts.contains { host.contains($0) }
-    }
     
     private func detectEncoding(from response: HTTPURLResponse, data: Data) -> String.Encoding {
         // Check Content-Type header
@@ -132,110 +92,62 @@ class WebScrapingService: ObservableObject {
         return .utf8 // Default fallback
     }
     
-    // MARK: - Platform-Specific Extraction
+    // MARK: - Unified Content Extraction
     
-    private func extractInstagramContent(from html: String, url: URL) throws -> String {
-        var content = "Instagram Post: \(url.absoluteString)\n\n"
+    private func extractUnifiedContent(from html: String, url: URL) throws -> String {
+        var content = "Web Content: \(url.absoluteString)\n\n"
+        var hasStructuredData = false
         
-        // Try to extract JSON-LD data first
-        if let jsonLD = extractJSONLD(from: html) {
-            content += "Structured Data:\n\(jsonLD)\n\n"
-        }
-        
-        // Extract meta description (often contains post caption)
-        if let description = extractMetaContent(from: html, property: "description") {
-            content += "Description: \(description)\n\n"
-        }
-        
-        // Extract Open Graph description
-        if let ogDescription = extractMetaContent(from: html, property: "og:description") {
-            content += "Caption: \(ogDescription)\n\n"
-        }
-        
-        // Try to extract post text from script tags
-        if let scriptContent = extractInstagramScriptData(from: html) {
-            content += "Post Content:\n\(scriptContent)\n\n"
-        }
-        
-        return content.isEmpty ? "No content extracted from Instagram post" : content
-    }
-    
-    private func extractTikTokContent(from html: String, url: URL) throws -> String {
-        var content = "TikTok Video: \(url.absoluteString)\n\n"
-        
-        // Extract meta description
-        if let description = extractMetaContent(from: html, property: "description") {
-            content += "Description: \(description)\n\n"
-        }
-        
-        // Extract video title/caption
-        if let title = extractMetaContent(from: html, property: "og:title") {
-            content += "Title: \(title)\n\n"
-        }
-        
-        // Try to extract from script tags
-        if let scriptContent = extractTikTokScriptData(from: html) {
-            content += "Video Content:\n\(scriptContent)\n\n"
-        }
-        
-        return content.isEmpty ? "No content extracted from TikTok video" : content
-    }
-    
-    private func extractYouTubeContent(from html: String, url: URL) throws -> String {
-        var content = "YouTube Video: \(url.absoluteString)\n\n"
-        
-        // Extract video title
-        if let title = extractMetaContent(from: html, property: "og:title") {
-            content += "Title: \(title)\n\n"
-        }
-        
-        // Extract video description
-        if let description = extractMetaContent(from: html, property: "og:description") {
-            content += "Description: \(description)\n\n"
-        }
-        
-        return content.isEmpty ? "No content extracted from YouTube video" : content
-    }
-    
-    private func extractRecipeWebsiteContent(from html: String, url: URL) throws -> String {
-        var content = "Recipe Website: \(url.absoluteString)\n\n"
-        
-        // Try JSON-LD first (most reliable for recipes)
+        // 1. Try JSON-LD first (most reliable for structured data including recipes)
         if let jsonLD = extractRecipeJSONLD(from: html) {
             content += "Recipe Data (JSON-LD):\n\(jsonLD)\n\n"
-            return content
+            hasStructuredData = true
+        } else if let jsonLD = extractJSONLD(from: html) {
+            // 2. Try general JSON-LD for any structured data
+            content += "Structured Data (JSON-LD):\n\(jsonLD)\n\n"
+            hasStructuredData = true
         }
         
-        // Try microdata
+        // 3. Try microdata as fallback for recipes
         if let microdata = extractRecipeMicrodata(from: html) {
             content += "Recipe Data (Microdata):\n\(microdata)\n\n"
-            return content
+            hasStructuredData = true
         }
         
-        // Fallback to general extraction
-        return try extractGeneralContent(from: html, url: url)
-    }
-    
-    private func extractGeneralContent(from html: String, url: URL) throws -> String {
-        var content = "Web Page: \(url.absoluteString)\n\n"
-        
-        // Extract title
+        // 4. Extract standard meta content
         if let title = extractTitle(from: html) {
             content += "Title: \(title)\n\n"
         }
         
-        // Extract meta description
         if let description = extractMetaContent(from: html, property: "description") {
             content += "Description: \(description)\n\n"
         }
         
-        // Extract main content (remove scripts, styles, nav, etc.)
-        let cleanContent = cleanHTML(html)
-        if !cleanContent.isEmpty {
-            content += "Content:\n\(cleanContent)\n"
+        if let ogTitle = extractMetaContent(from: html, property: "og:title") {
+            content += "OG Title: \(ogTitle)\n\n"
         }
         
-        return content
+        if let ogDescription = extractMetaContent(from: html, property: "og:description") {
+            content += "OG Description: \(ogDescription)\n\n"
+        }
+        
+        // 5. Try to extract social media script data
+        if let scriptContent = extractInstagramScriptData(from: html) {
+            content += "Instagram Data:\n\(scriptContent)\n\n"
+        }
+        
+        if let scriptContent = extractTikTokScriptData(from: html) {
+            content += "TikTok Data:\n\(scriptContent)\n\n"
+        }
+        
+        // 6. Always include clean content, even if we have structured data
+        // This ensures we don't miss any content not in structured data
+        let cleanContent = cleanHTML(html)
+        if !cleanContent.isEmpty {
+            content += "Page Content:\n\(cleanContent)\n"
+        }
+        
+        return content.isEmpty ? "No content extracted from web page" : content
     }
     
     // MARK: - HTML Parsing Utilities
@@ -246,11 +158,32 @@ class WebScrapingService: ObservableObject {
     }
     
     private func extractRecipeJSONLD(from html: String) -> String? {
-        guard let jsonLD = extractJSONLD(from: html) else { return nil }
-        
-        // Check if it contains recipe data
-        if jsonLD.lowercased().contains("recipe") {
-            return jsonLD
+        // Extract all JSON-LD blocks
+        let pattern = #"<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>"#
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators])
+            let range = NSRange(html.startIndex..., in: html)
+            let matches = regex.matches(in: html, options: [], range: range)
+            
+            // Check each JSON-LD block for Recipe schema
+            for match in matches {
+                if match.numberOfRanges > 1 {
+                    let matchRange = match.range(at: 1)
+                    if let swiftRange = Range(matchRange, in: html) {
+                        let jsonString = String(html[swiftRange])
+                        // Check if this JSON-LD contains Recipe schema
+                        // Look for @type containing Recipe or recipeInstructions/recipeIngredient properties
+                        if jsonString.contains("\"@type\"") && 
+                           (jsonString.contains("\"Recipe\"") || 
+                            jsonString.contains("recipeIngredient") || 
+                            jsonString.contains("recipeInstructions")) {
+                            return jsonString
+                        }
+                    }
+                }
+            }
+        } catch {
+            // Regex compilation failed
         }
         
         return nil
@@ -319,9 +252,9 @@ class WebScrapingService: ObservableObject {
     private func cleanHTML(_ html: String) -> String {
         var cleaned = html
         
-        // Remove script and style tags
+        // Remove script and style tags, but preserve JSON-LD
         let removePatterns = [
-            #"<script[^>]*>.*?</script>"#,
+            #"<script(?![^>]*type=["\']application/ld\+json["\'])[^>]*>.*?</script>"#,
             #"<style[^>]*>.*?</style>"#,
             #"<nav[^>]*>.*?</nav>"#,
             #"<header[^>]*>.*?</header>"#,
@@ -370,15 +303,6 @@ class WebScrapingService: ObservableObject {
 
 // MARK: - Supporting Types
 
-extension WebScrapingService {
-    enum Platform {
-        case instagram
-        case tiktok
-        case youtube
-        case recipeWebsite
-        case general
-    }
-}
 
 enum WebScrapingError: LocalizedError {
     case invalidURL

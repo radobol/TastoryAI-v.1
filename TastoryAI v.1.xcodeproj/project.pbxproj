@@ -58,6 +58,17 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BE4DC9E12E3FFAAB0058391C /* Exceptions for "TastoryAI v.1" folder in "TastoryShare" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/Recipe.swift,
+				Services/OpenAIService.swift,
+				Services/RecipeExtractionService.swift,
+				Services/RecipeStorageManager.swift,
+				Services/WebScrapingService.swift,
+			);
+			target = BE7EBE282E329C5700CBBF7C /* TastoryShare */;
+		};
 		BE7EBE372E329C5700CBBF7C /* Exceptions for "TastoryShare" folder in "TastoryShare" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -78,6 +89,9 @@
 		};
 		BEB6BB2D2E313B410030CBAB /* TastoryAI v.1 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BE4DC9E12E3FFAAB0058391C /* Exceptions for "TastoryAI v.1" folder in "TastoryShare" target */,
+			);
 			path = "TastoryAI v.1";
 			sourceTree = "<group>";
 		};

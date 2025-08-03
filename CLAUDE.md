@@ -55,7 +55,8 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 #### Planned Architecture (Phase 2+)
 - **Backend**: Supabase (Postgres, Auth, Storage, Edge Functions)
 - **AI Service**: OpenAI GPT-4o for multi-modal recipe extraction
-- **Auth**: Sign in with Apple or Google (optional) sign-in 
+- **Auth**: Sign in with Apple or Google (optional) sign-in
+- **Ingredient Database**: USDA FoodData Central API integration for missing ingredients 
 
 
 ### UI/UX Requirements
@@ -82,10 +83,11 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
    - ✅ Share Extension recipe editing - Full UI with editable fields matching ReciMe design
    - [ ] Auto-categorization and tagging - Planned for Phase 2B
 
-3. **Recipe Management** ✅ **COMPLETED**
+3. **Recipe Management** ✅ **COMPLETED - Phase 2A Enhanced**
    - ✅ CRUD operations with editable fields - Full RecipeStorageManager with JSON persistence
    - [ ] US/Metric unit toggle - Planned for Phase 2B with IngredientParser extension
-   - ✅ Dynamic serving size scaling - Advanced IngredientParser with unit recognition
+   - ✅ Dynamic serving size scaling - Enhanced IngredientParser with local ingredient database and fuzzy matching
+   - ✅ Local ingredient database - 100 common cooking ingredients with scaling properties
    - [ ] Custom categories and tags - Planned for Phase 2C
    - ✅ Share recipe via system sheet - Built-in iOS share integration
 
@@ -205,3 +207,52 @@ Recipe editing UI → User edits → Save to App Groups → Success alert
 - **Editable Fields**: All text fields and text views allow user modifications
 - **Professional Design**: Clean layout with orange accent colors and proper spacing
 - **Save/Cancel Flow**: Clear user actions with success feedback
+
+## Enhanced Recipe Scaling System (Phase 2A Complete)
+
+### Current Implementation
+- **Local Ingredient Database**: 100 common cooking ingredients with scaling properties and fuzzy matching (cooking_ingredients.json) (IngredientDatabase.swift)
+- **Simplified IngredientParser**: Removed complex categorization, focus on quantity detection and database lookup (enhanced IngredientParser.swift)
+- **Enhanced AI Prompts**: Standardized ingredient format requests ("2 cups flour" not "flour (2 cups)") (OpenAIService.swift)
+- **Database-Driven Scaling**: Ingredient-specific scaling rules (salt/pepper marked as non-scalable)
+- **Fuzzy Matching**: Handles ingredient name variations ("tomato" vs "tomatoes")
+
+### Phase 2B: USDA API Integration (Future Enhancement)
+
+#### USDA FoodData Central Integration Plan
+- **API Endpoint**: https://api.nal.usda.gov/fdc/v1/
+- **Rate Limits**: 1,000 requests/hour (generous compared to other APIs)
+- **Authentication**: API key required (free registration)
+- **Data Coverage**: 600,000+ food items, Foundation Foods for raw ingredients
+
+#### Implementation Strategy
+1. **Fallback Architecture**: Local database primary, API for missing ingredients
+2. **Caching System**: Store API responses locally for 30 days
+3. **Background Sync**: Update local database with frequently requested items
+4. **Error Handling**: Graceful degradation when API unavailable
+5. **User Experience**: Seamless integration with "Looking up ingredient..." feedback
+
+#### Technical Components
+- **USDAAPIService.swift**: API communication and response parsing
+- **IngredientCache.swift**: Local storage for API responses
+- **Enhanced IngredientDatabase**: Auto-expansion with API data
+- **Background Tasks**: Periodic database updates and cleanup
+
+#### Data Flow
+```
+User scales recipe → Check local database → If not found → Query USDA API
+→ Cache response → Apply scaling → Display scaled ingredient
+```
+
+#### Rate Limiting Strategy
+- **Batch Requests**: Group multiple ingredient lookups
+- **Smart Caching**: Prioritize commonly used ingredients
+- **User Feedback**: Progress indicators for API calls
+- **Offline Mode**: Full functionality without internet
+
+#### Security & Privacy
+- **API Key Management**: Secure storage in Keychain
+- **No User Data**: Only ingredient names sent to API
+- **Local Processing**: All scaling calculations done locally
+
+This approach ensures reliable offline scaling while providing comprehensive ingredient coverage through USDA's authoritative database.

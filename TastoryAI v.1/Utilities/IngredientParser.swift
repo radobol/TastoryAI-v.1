@@ -9,66 +9,17 @@ import Foundation
 
 struct IngredientParser {
     
-    // MARK: - Scalable Units
+    private static let database = IngredientDatabaseManager.shared
     
-    private static let scalableUnits: Set<String> = [
-        // Volume - Metric
-        "ml", "milliliter", "milliliters", "millilitre", "millilitres",
-        "l", "liter", "liters", "litre", "litres",
-        "cl", "centiliter", "centiliters", "centilitre", "centilitres",
-        
-        // Volume - Imperial
-        "cup", "cups", "c",
-        "tablespoon", "tablespoons", "tbsp", "tbs", "tb",
-        "teaspoon", "teaspoons", "tsp", "ts",
-        "fluid ounce", "fluid ounces", "fl oz", "floz",
-        "pint", "pints", "pt", "pts",
-        "quart", "quarts", "qt", "qts",
-        "gallon", "gallons", "gal", "gals",
-        
-        // Weight - Metric
-        "g", "gram", "grams", "gramme", "grammes",
-        "kg", "kilogram", "kilograms", "kilogramme", "kilogrammes",
-        "mg", "milligram", "milligrams", "milligramme", "milligrammes",
-        
-        // Weight - Imperial
-        "oz", "ounce", "ounces",
-        "lb", "lbs", "pound", "pounds",
-        
-        // Generic measurements that are usually scalable
-        "serving", "servings",
-        "portion", "portions",
-        "piece", "pieces", "pc", "pcs", // sometimes scalable
-        "slice", "slices",
-        "sheet", "sheets",
-        "can", "cans",
-        "jar", "jars",
-        "bottle", "bottles",
-        "pack", "packs", "package", "packages"
-    ]
+    // MARK: - Non-scalable Patterns
     
-    private static let nonScalableUnits: Set<String> = [
-        // Individual items that shouldn't scale
-        "clove", "cloves",
-        "head", "heads",
-        "bulb", "bulbs",
-        "bunch", "bunches",
-        "sprig", "sprigs",
-        "stalk", "stalks",
-        "leaf", "leaves",
-        "bay leaf", "bay leaves",
-        "egg", "eggs", // debatable, but usually counted
-        "onion", "onions",
-        "carrot", "carrots",
-        "potato", "potatoes",
-        
-        // Taste-based additions
+    private static let nonScalablePatterns: [String] = [
         "to taste",
         "as needed",
         "for seasoning",
-        "pinch", "pinches",
-        "dash", "dashes",
-        "splash", "splashes"
+        "pinch",
+        "dash",
+        "splash"
     ]
     
     // MARK: - Parsing Logic
@@ -78,10 +29,10 @@ struct IngredientParser {
         
         let lowercased = ingredient.lowercased()
         
-        // Check if ingredient contains non-scalable indicators
-        for nonScalableUnit in nonScalableUnits {
-            if lowercased.contains(nonScalableUnit) {
-                return ingredient // Don't scale "salt to taste", "1 clove garlic"
+        // Check for non-scalable patterns first (these override database settings)
+        for pattern in nonScalablePatterns {
+            if lowercased.contains(pattern) {
+                return ingredient // Don't scale "salt to taste", "as needed", etc.
             }
         }
         
@@ -92,17 +43,11 @@ struct IngredientParser {
         let components = ingredient.components(separatedBy: " ")
         var result = components
         
-        // Look for quantity patterns in the first few words
-        for (index, component) in components.prefix(4).enumerated() {
-            if let quantity = extractQuantity(from: component) {
-                let scaledQuantity = quantity * multiplier
-                result[index] = formatQuantity(scaledQuantity)
-                return result.joined(separator: " ")
-            }
-            
-            // Check for mixed numbers like "1 1/2"
+        // First, check for mixed numbers like "1 1/2" (higher priority)
+        for (index, component) in components.prefix(3).enumerated() {
             if index < components.count - 1 {
                 if let wholeNumber = Double(component),
+                   wholeNumber.truncatingRemainder(dividingBy: 1) == 0, // Ensure it's a whole number
                    let fraction = extractFraction(from: components[index + 1]) {
                     let totalQuantity = wholeNumber + fraction
                     let scaledQuantity = totalQuantity * multiplier
@@ -113,6 +58,40 @@ struct IngredientParser {
                     result.remove(at: index + 1)
                     return result.joined(separator: " ")
                 }
+            }
+        }
+        
+        // Then look for single quantities (including fractions and units like "400g")
+        for (index, component) in components.prefix(4).enumerated() {
+            if let quantity = extractQuantity(from: component) {
+                let scaledQuantity = quantity * multiplier
+                
+                // Handle different types of quantities
+                if component.contains("/") {
+                    // It's a fraction, just replace with scaled result
+                    result[index] = formatQuantity(scaledQuantity)
+                } else if component.contains("-") {
+                    // It's a range, replace entire component with scaled average
+                    result[index] = formatQuantity(scaledQuantity)
+                } else {
+                    // Check for attached units like "400g"
+                    // Extract the number part from the original component to find units
+                    let numberPattern = "^([0-9]*\\.?[0-9]+)"
+                    if let regex = try? NSRegularExpression(pattern: numberPattern),
+                       let match = regex.firstMatch(in: component, range: NSRange(component.startIndex..., in: component)) {
+                        let numberRange = Range(match.range(at: 1), in: component)!
+                        let numberPart = String(component[numberRange])
+                        let unit = String(component.dropFirst(numberPart.count))
+                        if !unit.isEmpty {
+                            result[index] = formatQuantity(scaledQuantity) + unit
+                        } else {
+                            result[index] = formatQuantity(scaledQuantity)
+                        }
+                    } else {
+                        result[index] = formatQuantity(scaledQuantity)
+                    }
+                }
+                return result.joined(separator: " ")
             }
         }
         
@@ -138,6 +117,15 @@ struct IngredientParser {
                let max = Double(parts[1]) {
                 return (min + max) / 2.0
             }
+        }
+        
+        // Handle quantities with units attached like "400g", "2lbs", "500ml"
+        let numberPattern = "^([0-9]*\\.?[0-9]+)"
+        if let regex = try? NSRegularExpression(pattern: numberPattern),
+           let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) {
+            let numberRange = Range(match.range(at: 1), in: text)!
+            let numberString = String(text[numberRange])
+            return Double(numberString)
         }
         
         return nil
@@ -168,27 +156,40 @@ struct IngredientParser {
             return String(Int(quantity.rounded()))
         }
         
-        // Check if it's close to a common fraction
+        // Check for mixed numbers first (quantities > 1)
+        if quantity > 1 {
+            let whole = Int(quantity)
+            let fractional = quantity - Double(whole)
+            
+            // Common fractions for fractional parts
+            let fractions: [(Double, String)] = [
+                (0.125, "1/8"), (0.25, "1/4"), (0.333, "1/3"), (0.375, "3/8"),
+                (0.5, "1/2"), (0.625, "5/8"), (0.667, "2/3"), (0.75, "3/4"), (0.875, "7/8")
+            ]
+            
+            for (value, fraction) in fractions {
+                if abs(fractional - value) < 0.05 {
+                    return "\(whole) \(fraction)"
+                }
+            }
+            
+            // If no common fraction matches, use decimal for fractional part
+            if fractional > 0.01 {
+                return String(format: "%.1f", quantity)
+            } else {
+                return String(whole)
+            }
+        }
+        
+        // Check if it's close to a common fraction (for quantities < 1)
         let commonFractions: [(Double, String)] = [
-            (0.125, "1/8"), (0.25, "1/4"), (0.333, "1/3"), (0.5, "1/2"),
-            (0.667, "2/3"), (0.75, "3/4"), (1.5, "1 1/2"), (2.5, "2 1/2")
+            (0.125, "1/8"), (0.25, "1/4"), (0.333, "1/3"), (0.375, "3/8"),
+            (0.5, "1/2"), (0.625, "5/8"), (0.667, "2/3"), (0.75, "3/4"), (0.875, "7/8")
         ]
         
         for (value, fraction) in commonFractions {
             if abs(quantity - value) < 0.05 {
                 return fraction
-            }
-        }
-        
-        // Check for mixed numbers
-        if quantity > 1 {
-            let whole = Int(quantity)
-            let fractional = quantity - Double(whole)
-            
-            for (value, fraction) in commonFractions {
-                if abs(fractional - value) < 0.05 && value < 1 {
-                    return "\(whole) \(fraction)"
-                }
             }
         }
         
@@ -204,11 +205,21 @@ struct IngredientParser {
 // MARK: - Extensions for Testing
 
 extension IngredientParser {
-    static func isScalableUnit(_ unit: String) -> Bool {
-        return scalableUnits.contains(unit.lowercased())
+    static func isIngredientScalable(_ ingredient: String) -> Bool {
+        let lowercased = ingredient.lowercased()
+        
+        // Check for non-scalable patterns
+        for pattern in nonScalablePatterns {
+            if lowercased.contains(pattern) {
+                return false
+            }
+        }
+        
+        // Check database
+        return database.isIngredientScalable(ingredient)
     }
     
-    static func isNonScalableUnit(_ unit: String) -> Bool {
-        return nonScalableUnits.contains(unit.lowercased())
+    static func findIngredientInDatabase(_ ingredient: String) -> (name: String, category: String, scalable: Bool)? {
+        return database.getIngredientInfo(ingredient)
     }
 }

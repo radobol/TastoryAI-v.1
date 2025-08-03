@@ -1,0 +1,804 @@
+{
+  "ingredients": [
+    {
+      "id": 1,
+      "name": "onions",
+      "aliases": ["onion", "yellow onion", "white onion", "sweet onion"],
+      "category": "vegetables",
+      "subcategory": "alliums",
+      "scalable": true
+    },
+    {
+      "id": 2,
+      "name": "garlic",
+      "aliases": ["garlic clove", "garlic cloves", "fresh garlic"],
+      "category": "vegetables",
+      "subcategory": "alliums",
+      "scalable": true
+    },
+    {
+      "id": 3,
+      "name": "shallots",
+      "aliases": ["shallot", "french shallot"],
+      "category": "vegetables",
+      "subcategory": "alliums",
+      "scalable": true
+    },
+    {
+      "id": 4,
+      "name": "leeks",
+      "aliases": ["leek"],
+      "category": "vegetables",
+      "subcategory": "alliums",
+      "scalable": true
+    },
+    {
+      "id": 5,
+      "name": "scallions",
+      "aliases": ["green onions", "spring onions", "scallion"],
+      "category": "vegetables",
+      "subcategory": "alliums",
+      "scalable": true
+    },
+    {
+      "id": 6,
+      "name": "chives",
+      "aliases": ["fresh chives"],
+      "category": "herbs",
+      "subcategory": "fresh_herbs",
+      "scalable": true
+    },
+    {
+      "id": 7,
+      "name": "tomatoes",
+      "aliases": ["tomato", "fresh tomatoes", "ripe tomatoes"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 8,
+      "name": "canned tomatoes",
+      "aliases": ["canned whole tomatoes", "whole tomatoes"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 9,
+      "name": "tomato paste",
+      "aliases": ["concentrated tomato paste"],
+      "category": "condiments",
+      "subcategory": "sauces",
+      "scalable": true
+    },
+    {
+      "id": 10,
+      "name": "potatoes",
+      "aliases": ["potato", "russet potatoes", "yukon potatoes"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 11,
+      "name": "sweet potato",
+      "aliases": ["sweet potatoes"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 12,
+      "name": "bell peppers",
+      "aliases": ["bell pepper", "red pepper", "green pepper", "yellow pepper"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 13,
+      "name": "jalapeño",
+      "aliases": ["jalapeno", "jalapeño pepper", "jalapeno pepper"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 14,
+      "name": "eggplant",
+      "aliases": ["aubergine"],
+      "category": "vegetables",
+      "subcategory": "nightshades",
+      "scalable": true
+    },
+    {
+      "id": 15,
+      "name": "broccoli",
+      "aliases": ["broccoli florets"],
+      "category": "vegetables",
+      "subcategory": "cruciferous",
+      "scalable": true
+    },
+    {
+      "id": 16,
+      "name": "cauliflower",
+      "aliases": ["cauliflower florets"],
+      "category": "vegetables",
+      "subcategory": "cruciferous",
+      "scalable": true
+    },
+    {
+      "id": 17,
+      "name": "cabbage",
+      "aliases": ["green cabbage", "red cabbage"],
+      "category": "vegetables",
+      "subcategory": "cruciferous",
+      "scalable": true
+    },
+    {
+      "id": 18,
+      "name": "carrots",
+      "aliases": ["carrot", "baby carrots"],
+      "category": "vegetables",
+      "subcategory": "root_vegetables",
+      "scalable": true
+    },
+    {
+      "id": 19,
+      "name": "celery",
+      "aliases": ["celery stalks", "celery stalk"],
+      "category": "vegetables",
+      "subcategory": "other",
+      "scalable": true
+    },
+    {
+      "id": 20,
+      "name": "corn",
+      "aliases": ["sweet corn", "corn kernels"],
+      "category": "vegetables",
+      "subcategory": "other",
+      "scalable": true
+    },
+    {
+      "id": 21,
+      "name": "zucchini",
+      "aliases": ["courgette"],
+      "category": "vegetables",
+      "subcategory": "other",
+      "scalable": true
+    },
+    {
+      "id": 22,
+      "name": "spinach",
+      "aliases": ["fresh spinach", "baby spinach"],
+      "category": "vegetables",
+      "subcategory": "leafy_greens",
+      "scalable": true
+    },
+    {
+      "id": 23,
+      "name": "mushrooms",
+      "aliases": ["white mushrooms", "button mushrooms", "shiitake", "portobello"],
+      "category": "vegetables",
+      "subcategory": "fungi",
+      "scalable": true
+    },
+    {
+      "id": 24,
+      "name": "asparagus",
+      "aliases": ["asparagus spears"],
+      "category": "vegetables",
+      "subcategory": "other",
+      "scalable": true
+    },
+    {
+      "id": 25,
+      "name": "oranges",
+      "aliases": ["orange", "naval oranges"],
+      "category": "fruits",
+      "subcategory": "citrus",
+      "scalable": true
+    },
+    {
+      "id": 26,
+      "name": "lemons",
+      "aliases": ["lemon"],
+      "category": "fruits",
+      "subcategory": "citrus",
+      "scalable": true
+    },
+    {
+      "id": 27,
+      "name": "lemon juice",
+      "aliases": ["fresh lemon juice"],
+      "category": "condiments",
+      "subcategory": "citrus",
+      "scalable": true
+    },
+    {
+      "id": 28,
+      "name": "limes",
+      "aliases": ["lime"],
+      "category": "fruits",
+      "subcategory": "citrus",
+      "scalable": true
+    },
+    {
+      "id": 29,
+      "name": "lime juice",
+      "aliases": ["fresh lime juice"],
+      "category": "condiments",
+      "subcategory": "citrus",
+      "scalable": true
+    },
+    {
+      "id": 30,
+      "name": "apples",
+      "aliases": ["apple"],
+      "category": "fruits",
+      "subcategory": "tree_fruits",
+      "scalable": true
+    },
+    {
+      "id": 31,
+      "name": "bananas",
+      "aliases": ["banana"],
+      "category": "fruits",
+      "subcategory": "tropical",
+      "scalable": true
+    },
+    {
+      "id": 32,
+      "name": "avocados",
+      "aliases": ["avocado"],
+      "category": "fruits",
+      "subcategory": "tropical",
+      "scalable": true
+    },
+    {
+      "id": 33,
+      "name": "strawberries",
+      "aliases": ["strawberry", "fresh strawberries"],
+      "category": "fruits",
+      "subcategory": "berries",
+      "scalable": true
+    },
+    {
+      "id": 34,
+      "name": "blueberries",
+      "aliases": ["blueberry", "fresh blueberries"],
+      "category": "fruits",
+      "subcategory": "berries",
+      "scalable": true
+    },
+    {
+      "id": 35,
+      "name": "white rice",
+      "aliases": ["rice", "long grain rice", "basmati rice", "jasmine rice"],
+      "category": "grains",
+      "subcategory": "rice",
+      "scalable": true
+    },
+    {
+      "id": 36,
+      "name": "brown rice",
+      "aliases": ["whole grain rice"],
+      "category": "grains",
+      "subcategory": "rice",
+      "scalable": true
+    },
+    {
+      "id": 37,
+      "name": "all-purpose flour",
+      "aliases": ["flour", "white flour", "plain flour"],
+      "category": "grains",
+      "subcategory": "flour",
+      "scalable": true
+    },
+    {
+      "id": 38,
+      "name": "whole wheat flour",
+      "aliases": ["whole grain flour"],
+      "category": "grains",
+      "subcategory": "flour",
+      "scalable": true
+    },
+    {
+      "id": 39,
+      "name": "pasta",
+      "aliases": ["spaghetti", "penne", "linguine", "fettuccine"],
+      "category": "grains",
+      "subcategory": "pasta",
+      "scalable": true
+    },
+    {
+      "id": 40,
+      "name": "quinoa",
+      "aliases": ["quinoa grain"],
+      "category": "grains",
+      "subcategory": "other",
+      "scalable": true
+    },
+    {
+      "id": 41,
+      "name": "oats",
+      "aliases": ["rolled oats", "old fashioned oats"],
+      "category": "grains",
+      "subcategory": "other",
+      "scalable": true
+    },
+    {
+      "id": 42,
+      "name": "whole milk",
+      "aliases": ["milk", "fresh milk"],
+      "category": "dairy",
+      "subcategory": "milk",
+      "scalable": true
+    },
+    {
+      "id": 43,
+      "name": "heavy cream",
+      "aliases": ["heavy whipping cream", "whipping cream"],
+      "category": "dairy",
+      "subcategory": "cream",
+      "scalable": true
+    },
+    {
+      "id": 44,
+      "name": "sour cream",
+      "aliases": ["cultured sour cream"],
+      "category": "dairy",
+      "subcategory": "cream",
+      "scalable": true
+    },
+    {
+      "id": 45,
+      "name": "yogurt",
+      "aliases": ["plain yogurt", "greek yogurt"],
+      "category": "dairy",
+      "subcategory": "yogurt",
+      "scalable": true
+    },
+    {
+      "id": 46,
+      "name": "cheddar cheese",
+      "aliases": ["cheddar", "sharp cheddar"],
+      "category": "dairy",
+      "subcategory": "cheese",
+      "scalable": true
+    },
+    {
+      "id": 47,
+      "name": "mozzarella",
+      "aliases": ["mozzarella cheese", "fresh mozzarella"],
+      "category": "dairy",
+      "subcategory": "cheese",
+      "scalable": true
+    },
+    {
+      "id": 48,
+      "name": "parmesan",
+      "aliases": ["parmesan cheese", "parmigiano-reggiano", "grated parmesan"],
+      "category": "dairy",
+      "subcategory": "cheese",
+      "scalable": true
+    },
+    {
+      "id": 49,
+      "name": "feta cheese",
+      "aliases": ["feta"],
+      "category": "dairy",
+      "subcategory": "cheese",
+      "scalable": true
+    },
+    {
+      "id": 50,
+      "name": "cream cheese",
+      "aliases": ["cream cheese block"],
+      "category": "dairy",
+      "subcategory": "cheese",
+      "scalable": true
+    },
+    {
+      "id": 51,
+      "name": "butter",
+      "aliases": ["unsalted butter", "salted butter"],
+      "category": "dairy",
+      "subcategory": "butter",
+      "scalable": true
+    },
+    {
+      "id": 52,
+      "name": "eggs",
+      "aliases": ["egg", "large eggs", "fresh eggs"],
+      "category": "dairy",
+      "subcategory": "eggs",
+      "scalable": true
+    },
+    {
+      "id": 53,
+      "name": "chicken breast",
+      "aliases": ["chicken breasts", "boneless chicken breast"],
+      "category": "protein",
+      "subcategory": "poultry",
+      "scalable": true
+    },
+    {
+      "id": 54,
+      "name": "chicken thighs",
+      "aliases": ["chicken thigh", "boneless chicken thighs"],
+      "category": "protein",
+      "subcategory": "poultry",
+      "scalable": true
+    },
+    {
+      "id": 55,
+      "name": "ground beef",
+      "aliases": ["ground chuck", "lean ground beef"],
+      "category": "protein",
+      "subcategory": "beef",
+      "scalable": true
+    },
+    {
+      "id": 56,
+      "name": "beef steak",
+      "aliases": ["ribeye", "sirloin", "strip steak"],
+      "category": "protein",
+      "subcategory": "beef",
+      "scalable": true
+    },
+    {
+      "id": 57,
+      "name": "pork chops",
+      "aliases": ["pork chop", "bone-in pork chops"],
+      "category": "protein",
+      "subcategory": "pork",
+      "scalable": true
+    },
+    {
+      "id": 58,
+      "name": "bacon",
+      "aliases": ["bacon strips"],
+      "category": "protein",
+      "subcategory": "pork",
+      "scalable": true
+    },
+    {
+      "id": 59,
+      "name": "salmon",
+      "aliases": ["salmon fillet", "atlantic salmon"],
+      "category": "protein",
+      "subcategory": "seafood",
+      "scalable": true
+    },
+    {
+      "id": 60,
+      "name": "shrimp",
+      "aliases": ["prawns", "large shrimp"],
+      "category": "protein",
+      "subcategory": "seafood",
+      "scalable": true
+    },
+    {
+      "id": 61,
+      "name": "black beans",
+      "aliases": ["black bean", "cooked black beans"],
+      "category": "legumes",
+      "subcategory": "beans",
+      "scalable": true
+    },
+    {
+      "id": 62,
+      "name": "chickpeas",
+      "aliases": ["garbanzo beans", "canned chickpeas"],
+      "category": "legumes",
+      "subcategory": "beans",
+      "scalable": true
+    },
+    {
+      "id": 63,
+      "name": "lentils",
+      "aliases": ["red lentils", "green lentils"],
+      "category": "legumes",
+      "subcategory": "lentils",
+      "scalable": true
+    },
+    {
+      "id": 64,
+      "name": "tofu",
+      "aliases": ["firm tofu", "silken tofu"],
+      "category": "protein",
+      "subcategory": "soy",
+      "scalable": true
+    },
+    {
+      "id": 65,
+      "name": "olive oil",
+      "aliases": ["extra virgin olive oil", "virgin olive oil"],
+      "category": "fats",
+      "subcategory": "oils",
+      "scalable": true
+    },
+    {
+      "id": 66,
+      "name": "vegetable oil",
+      "aliases": ["canola oil", "cooking oil"],
+      "category": "fats",
+      "subcategory": "oils",
+      "scalable": true
+    },
+    {
+      "id": 67,
+      "name": "coconut oil",
+      "aliases": ["virgin coconut oil"],
+      "category": "fats",
+      "subcategory": "oils",
+      "scalable": true
+    },
+    {
+      "id": 68,
+      "name": "sesame oil",
+      "aliases": ["toasted sesame oil"],
+      "category": "fats",
+      "subcategory": "oils",
+      "scalable": true
+    },
+    {
+      "id": 69,
+      "name": "basil",
+      "aliases": ["fresh basil", "basil leaves"],
+      "category": "herbs",
+      "subcategory": "fresh_herbs",
+      "scalable": true
+    },
+    {
+      "id": 70,
+      "name": "parsley",
+      "aliases": ["fresh parsley", "flat-leaf parsley", "italian parsley"],
+      "category": "herbs",
+      "subcategory": "fresh_herbs",
+      "scalable": true
+    },
+    {
+      "id": 71,
+      "name": "cilantro",
+      "aliases": ["fresh cilantro", "coriander leaves"],
+      "category": "herbs",
+      "subcategory": "fresh_herbs",
+      "scalable": true
+    },
+    {
+      "id": 72,
+      "name": "oregano",
+      "aliases": ["dried oregano", "fresh oregano"],
+      "category": "herbs",
+      "subcategory": "dried_herbs",
+      "scalable": true
+    },
+    {
+      "id": 73,
+      "name": "thyme",
+      "aliases": ["dried thyme", "fresh thyme"],
+      "category": "herbs",
+      "subcategory": "dried_herbs",
+      "scalable": true
+    },
+    {
+      "id": 74,
+      "name": "rosemary",
+      "aliases": ["fresh rosemary", "dried rosemary"],
+      "category": "herbs",
+      "subcategory": "dried_herbs",
+      "scalable": true
+    },
+    {
+      "id": 75,
+      "name": "salt",
+      "aliases": ["table salt", "sea salt", "kosher salt"],
+      "category": "seasonings",
+      "subcategory": "salt",
+      "scalable": true
+    },
+    {
+      "id": 76,
+      "name": "black pepper",
+      "aliases": ["pepper", "ground black pepper", "freshly ground pepper"],
+      "category": "seasonings",
+      "subcategory": "pepper",
+      "scalable": true
+    },
+    {
+      "id": 77,
+      "name": "paprika",
+      "aliases": ["sweet paprika", "smoked paprika"],
+      "category": "spices",
+      "subcategory": "ground_spices",
+      "scalable": true
+    },
+    {
+      "id": 78,
+      "name": "cumin",
+      "aliases": ["ground cumin", "cumin powder"],
+      "category": "spices",
+      "subcategory": "ground_spices",
+      "scalable": true
+    },
+    {
+      "id": 79,
+      "name": "chili powder",
+      "aliases": ["chili seasoning"],
+      "category": "spices",
+      "subcategory": "ground_spices",
+      "scalable": true
+    },
+    {
+      "id": 80,
+      "name": "cinnamon",
+      "aliases": ["ground cinnamon", "cinnamon powder"],
+      "category": "spices",
+      "subcategory": "ground_spices",
+      "scalable": true
+    },
+    {
+      "id": 81,
+      "name": "ginger",
+      "aliases": ["ground ginger", "fresh ginger", "ginger root"],
+      "category": "spices",
+      "subcategory": "fresh_spices",
+      "scalable": true
+    },
+    {
+      "id": 82,
+      "name": "garlic powder",
+      "aliases": ["granulated garlic"],
+      "category": "seasonings",
+      "subcategory": "powder",
+      "scalable": true
+    },
+    {
+      "id": 83,
+      "name": "onion powder",
+      "aliases": ["granulated onion"],
+      "category": "seasonings",
+      "subcategory": "powder",
+      "scalable": true
+    },
+    {
+      "id": 84,
+      "name": "soy sauce",
+      "aliases": ["low sodium soy sauce", "tamari"],
+      "category": "condiments",
+      "subcategory": "sauces",
+      "scalable": true
+    },
+    {
+      "id": 85,
+      "name": "vinegar",
+      "aliases": ["white vinegar", "apple cider vinegar", "balsamic vinegar"],
+      "category": "condiments",
+      "subcategory": "vinegar",
+      "scalable": true
+    },
+    {
+      "id": 86,
+      "name": "honey",
+      "aliases": ["pure honey"],
+      "category": "condiments",
+      "subcategory": "sweeteners",
+      "scalable": true
+    },
+    {
+      "id": 87,
+      "name": "vanilla extract",
+      "aliases": ["pure vanilla extract"],
+      "category": "baking",
+      "subcategory": "extracts",
+      "scalable": true
+    },
+    {
+      "id": 88,
+      "name": "almonds",
+      "aliases": ["sliced almonds", "whole almonds"],
+      "category": "nuts",
+      "subcategory": "tree_nuts",
+      "scalable": true
+    },
+    {
+      "id": 89,
+      "name": "walnuts",
+      "aliases": ["walnut halves", "chopped walnuts"],
+      "category": "nuts",
+      "subcategory": "tree_nuts",
+      "scalable": true
+    },
+    {
+      "id": 90,
+      "name": "peanuts",
+      "aliases": ["roasted peanuts"],
+      "category": "nuts",
+      "subcategory": "legume_nuts",
+      "scalable": true
+    },
+    {
+      "id": 91,
+      "name": "peanut butter",
+      "aliases": ["smooth peanut butter", "crunchy peanut butter"],
+      "category": "nuts",
+      "subcategory": "nut_butters",
+      "scalable": true
+    },
+    {
+      "id": 92,
+      "name": "sugar",
+      "aliases": ["granulated sugar", "white sugar", "cane sugar"],
+      "category": "baking",
+      "subcategory": "sugars",
+      "scalable": true
+    },
+    {
+      "id": 93,
+      "name": "brown sugar",
+      "aliases": ["light brown sugar", "dark brown sugar", "packed brown sugar"],
+      "category": "baking",
+      "subcategory": "sugars",
+      "scalable": true
+    },
+    {
+      "id": 94,
+      "name": "baking soda",
+      "aliases": ["sodium bicarbonate"],
+      "category": "baking",
+      "subcategory": "leavening",
+      "scalable": true
+    },
+    {
+      "id": 95,
+      "name": "baking powder",
+      "aliases": ["double acting baking powder"],
+      "category": "baking",
+      "subcategory": "leavening",
+      "scalable": true
+    },
+    {
+      "id": 96,
+      "name": "chicken broth",
+      "aliases": ["chicken stock", "low sodium chicken broth"],
+      "category": "broths",
+      "subcategory": "poultry",
+      "scalable": true
+    },
+    {
+      "id": 97,
+      "name": "vegetable broth",
+      "aliases": ["vegetable stock", "veggie broth"],
+      "category": "broths",
+      "subcategory": "vegetable",
+      "scalable": true
+    },
+    {
+      "id": 98,
+      "name": "coconut milk",
+      "aliases": ["canned coconut milk", "full fat coconut milk"],
+      "category": "dairy_alternatives",
+      "subcategory": "plant_milk",
+      "scalable": true
+    },
+    {
+      "id": 99,
+      "name": "red wine",
+      "aliases": ["cooking wine", "dry red wine"],
+      "category": "alcohol",
+      "subcategory": "wine",
+      "scalable": true
+    },
+    {
+      "id": 100,
+      "name": "white wine",
+      "aliases": ["dry white wine", "cooking white wine"],
+      "category": "alcohol",
+      "subcategory": "wine",
+      "scalable": true
+    }
+  ]
+}

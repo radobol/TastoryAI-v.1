@@ -15,24 +15,59 @@ struct IngredientParserTests {
         
         let testCases: [(String, Double, String)] = [
             // (original, multiplier, expected)
-            ("400g spaghetti", 2.0, "800g spaghetti"),
-            ("200g guanciale or pancetta", 0.5, "100g guanciale or pancetta"),
+            
+            // Database ingredient tests - scalable
+            ("2 cups all-purpose flour", 2.0, "4 cups all-purpose flour"),
+            ("1 cup milk", 1.5, "1 1/2 cups milk"),
             ("4 large eggs", 3.0, "12 large eggs"),
-            ("100g Pecorino Romano cheese, grated", 1.5, "150g Pecorino Romano cheese, grated"),
-            ("2 cloves garlic", 2.0, "2 cloves garlic"), // Should NOT scale
-            ("1/2 cup white wine", 2.0, "1 cup white wine"),
-            ("Black pepper to taste", 3.0, "Black pepper to taste"), // Should NOT scale
-            ("Salt as needed", 2.0, "Salt as needed"), // Should NOT scale
-            ("500g chicken breast, cubed", 2.0, "1000g chicken breast, cubed"),
-            ("2 cups mixed vegetables", 0.5, "1 cup mixed vegetables"),
-            ("1 medium onion, sliced", 2.0, "1 medium onion, sliced"), // Debatable
-            ("2 tbsp soy sauce", 1.5, "3 tbsp soy sauce"),
-            ("1 tbsp sesame oil", 3.0, "3 tbsp sesame oil"),
-            ("1 tsp cornstarch", 2.0, "2 tsp cornstarch"),
-            ("1/4 cup chicken broth", 4.0, "1 cup chicken broth"),
-            ("2 green onions, chopped", 2.0, "2 green onions, chopped"), // Should NOT scale
+            ("2 tbsp olive oil", 2.0, "4 tbsp olive oil"),
+            ("1/2 cup butter", 3.0, "1 1/2 cups butter"),
+            ("3 cups chicken broth", 0.5, "1 1/2 cups chicken broth"),
+            ("1 lb ground beef", 2.0, "2 lbs ground beef"),
+            ("500g spaghetti", 1.5, "750g spaghetti"),
+            ("2 cups white rice", 2.0, "4 cups white rice"),
+            ("1 cup cheddar cheese", 2.0, "2 cups cheddar cheese"),
+            
+            // Pattern-based non-scalable (only "to taste" patterns)
+            ("Salt to taste", 3.0, "Salt to taste"),
+            ("Black pepper to taste", 2.0, "Black pepper to taste"),
+            
+            // Specific quantities of salt/pepper SHOULD scale
+            ("1 tsp salt", 2.0, "2 tsp salt"), // Salt with quantity should scale
+            ("1/2 tsp black pepper", 2.0, "1 tsp black pepper"), // Pepper with quantity should scale
+            ("1/2 teaspoon sea salt", 2.0, "1 teaspoon sea salt"), // Specific case from user's recipe
+            
+            // Pattern-based non-scalable
+            ("Garlic powder as needed", 2.0, "Garlic powder as needed"),
+            ("Olive oil for drizzling", 1.5, "Olive oil for drizzling"),
+            ("A pinch of red pepper flakes", 2.0, "A pinch of red pepper flakes"),
+            ("A dash of hot sauce", 3.0, "A dash of hot sauce"),
+            
+            // Scalable ingredients with quantities
+            ("2 medium onions", 2.0, "4 medium onions"),
+            ("3 cloves garlic", 1.5, "4 1/2 cloves garlic"),
+            ("1 lb chicken breast", 0.5, "1/2 lb chicken breast"),
+            ("2 cups fresh spinach", 3.0, "6 cups fresh spinach"),
+            ("1/4 cup lemon juice", 4.0, "1 cup lemon juice"),
+            ("3 tbsp soy sauce", 2.0, "6 tbsp soy sauce"),
+            ("1 1/2 cups brown sugar", 2.0, "3 cups brown sugar"),
+            
+            // Mixed number and fraction tests
             ("1 1/2 cups flour", 2.0, "3 cups flour"),
-            ("2-3 carrots", 2.0, "5 carrots"), // Takes average of range
+            ("1 1/4 tsp vanilla", 2.0, "2 1/2 tsp vanilla"), // Fixed expectation
+            ("1/2 cup coconut oil", 3.0, "1 1/2 cups coconut oil"),
+            ("3/4 cup honey", 2.0, "1 1/2 cups honey"),
+            ("1 1/2 cups brown sugar", 0.5, "3/4 cups brown sugar"), // Fixed expectation
+            
+            // Range handling (should take average)
+            ("2-3 carrots", 2.0, "5 carrots"),
+            ("1-2 tbsp vanilla extract", 3.0, "4 1/2 tbsp vanilla extract"),
+            
+            // Edge cases
+            ("400g pasta", 1.5, "600g pasta"), // Fixed expectation  
+            ("0.25 cups vegetable oil", 4.0, "1 cups vegetable oil"),
+            ("0.5 cups water", 4.0, "2 cups water"),
+            ("12 oz salmon fillet", 1.5, "18 oz salmon fillet"),
         ]
         
         var passedTests = 0

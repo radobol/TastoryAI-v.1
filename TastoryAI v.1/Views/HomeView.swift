@@ -37,6 +37,17 @@ struct HomeView: View {
                         .cornerRadius(8)
                         .padding(.leading, Theme.Spacing.medium)
                         
+                        // Add Scaling Test Button
+                        Button("⚖️ Test Scaling") {
+                            print("🧪 Starting scaling tests...")
+                            ScalingSystemTester.runAllTests()
+                        }
+                        .padding()
+                        .background(Theme.Colors.accent.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                        .padding(.leading, Theme.Spacing.small)
+                        
                         Spacer()
                         AddRecipeButton(showingAddRecipe: $showingAddRecipe)
                             .padding(.trailing, Theme.Spacing.medium)

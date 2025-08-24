@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct RecipeEditingView: View {
     @Environment(\.dismiss) var dismiss
     @State private var recipe: Recipe
     @State private var ingredients: [String]
     @State private var steps: [String]
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var isProcessingPhoto = false
     
     let onSave: (Recipe) -> Void
     let onCancel: () -> Void
@@ -30,15 +33,63 @@ struct RecipeEditingView: View {
                 VStack(alignment: .leading, spacing: Theme.Spacing.large) {
                     // Recipe Header
                     HStack(alignment: .top, spacing: Theme.Spacing.medium) {
-                        // Recipe Image Placeholder
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.Colors.secondaryBackground)
-                            .frame(width: 100, height: 100)
-                            .overlay(
-                                Image(systemName: "photo")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(Theme.Colors.tertiaryText)
-                            )
+                        // Recipe Image
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            if let imageURL = recipe.imageURL, !imageURL.isEmpty {
+                                AsyncImage(url: URL(string: imageURL)) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Theme.Colors.secondaryBackground)
+                                            .frame(width: 100, height: 100)
+                                            .overlay(
+                                                ProgressView()
+                                                    .scaleEffect(0.8)
+                                            )
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 100, height: 100)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    case .failure(_):
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Theme.Colors.secondaryBackground)
+                                            .frame(width: 100, height: 100)
+                                            .overlay(
+                                                Image(systemName: "photo")
+                                                    .font(.system(size: 30))
+                                                    .foregroundColor(Theme.Colors.tertiaryText)
+                                            )
+                                    @unknown default:
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Theme.Colors.secondaryBackground)
+                                            .frame(width: 100, height: 100)
+                                            .overlay(
+                                                Image(systemName: "photo")
+                                                    .font(.system(size: 30))
+                                                    .foregroundColor(Theme.Colors.tertiaryText)
+                                            )
+                                    }
+                                }
+                            } else {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Theme.Colors.secondaryBackground)
+                                    .frame(width: 100, height: 100)
+                                    .overlay(
+                                        VStack(spacing: 4) {
+                                            Image(systemName: "photo")
+                                                .font(.system(size: 24))
+                                                .foregroundColor(Theme.Colors.tertiaryText)
+                                            
+                                            Text("Tap to add")
+                                                .font(.system(size: 10))
+                                                .foregroundColor(Theme.Colors.tertiaryText)
+                                        }
+                                    )
+                            }
+                        }
+                        .disabled(isProcessingPhoto)
                         
                         // Recipe Title
                         VStack(alignment: .leading, spacing: Theme.Spacing.small) {
@@ -137,6 +188,13 @@ struct RecipeEditingView: View {
                     .fontWeight(.semibold)
                 }
             }
+            .onChange(of: selectedPhotoItem) { _, newItem in
+                Task {
+                    if let newItem = newItem {
+                        await loadPhoto(from: newItem)
+                    }
+                }
+            }
         }
     }
     
@@ -172,6 +230,28 @@ struct RecipeEditingView: View {
         )
         
         onSave(updatedRecipe)
+    }
+    
+    private func loadPhoto(from item: PhotosPickerItem) async {
+        await MainActor.run {
+            isProcessingPhoto = true
+        }
+        
+        do {
+            if let data = try await item.loadTransferable(type: Data.self),
+               let image = UIImage(data: data),
+               let dataURL = ImageDataURL.create(from: image) {
+                
+                await MainActor.run {
+                    recipe.imageURL = dataURL
+                    isProcessingPhoto = false
+                }
+            }
+        } catch {
+            await MainActor.run {
+                isProcessingPhoto = false
+            }
+        }
     }
 }
 

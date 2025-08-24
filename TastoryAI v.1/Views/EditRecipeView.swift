@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct EditRecipeView: View {
     @State private var title: String
@@ -15,6 +16,9 @@ struct EditRecipeView: View {
     @State private var newIngredient: String = ""
     @State private var steps: [String]
     @State private var newStep: String = ""
+    @State private var imageURL: String?
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var isProcessingPhoto = false
     
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isAddingIngredient: Bool
@@ -32,11 +36,86 @@ struct EditRecipeView: View {
         _servings = State(initialValue: recipe.servings)
         _ingredients = State(initialValue: recipe.ingredients)
         _steps = State(initialValue: recipe.steps)
+        _imageURL = State(initialValue: recipe.imageURL)
     }
     
     var body: some View {
         NavigationView {
             Form {
+                Section(header: Text("Recipe Image")) {
+                    HStack {
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            if let imageURL = imageURL, !imageURL.isEmpty {
+                                AsyncImage(url: URL(string: imageURL)) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color(.systemGray5))
+                                            .frame(width: 80, height: 80)
+                                            .overlay(
+                                                ProgressView()
+                                                    .scaleEffect(0.8)
+                                            )
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 80, height: 80)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    case .failure(_):
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color(.systemGray5))
+                                            .frame(width: 80, height: 80)
+                                            .overlay(
+                                                Image(systemName: "photo")
+                                                    .font(.system(size: 24))
+                                                    .foregroundColor(.secondary)
+                                            )
+                                    @unknown default:
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(Color(.systemGray5))
+                                            .frame(width: 80, height: 80)
+                                            .overlay(
+                                                Image(systemName: "photo")
+                                                    .font(.system(size: 24))
+                                                    .foregroundColor(.secondary)
+                                            )
+                                    }
+                                }
+                            } else {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 80, height: 80)
+                                    .overlay(
+                                        VStack(spacing: 4) {
+                                            Image(systemName: "photo")
+                                                .font(.system(size: 20))
+                                                .foregroundColor(.secondary)
+                                            
+                                            Text("Tap to add photo")
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                                .multilineTextAlignment(.center)
+                                        }
+                                    )
+                            }
+                        }
+                        .disabled(isProcessingPhoto)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Recipe Photo")
+                                .font(.headline)
+                            
+                            Text(imageURL != nil ? "Tap to replace photo" : "Tap to add a photo for this recipe")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                }
+                
                 Section(header: Text("Recipe Details")) {
                     TextField("Recipe Title", text: $title)
                         .font(Typography.Body.regular)
@@ -143,9 +222,37 @@ struct EditRecipeView: View {
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .onChange(of: selectedPhotoItem) { _, newItem in
+                Task {
+                    if let newItem = newItem {
+                        await loadPhoto(from: newItem)
+                    }
+                }
+            }
         }
     }
     
+    private func loadPhoto(from item: PhotosPickerItem) async {
+        await MainActor.run {
+            isProcessingPhoto = true
+        }
+        
+        do {
+            if let data = try await item.loadTransferable(type: Data.self),
+               let image = UIImage(data: data),
+               let dataURL = ImageDataURL.create(from: image) {
+                
+                await MainActor.run {
+                    imageURL = dataURL
+                    isProcessingPhoto = false
+                }
+            }
+        } catch {
+            await MainActor.run {
+                isProcessingPhoto = false
+            }
+        }
+    }
     
     private func addIngredient() {
         let trimmedIngredient = newIngredient.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -171,7 +278,7 @@ struct EditRecipeView: View {
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
-            imageURL: originalRecipe.imageURL,
+            imageURL: imageURL,
             category: category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : category.trimmingCharacters(in: .whitespacesAndNewlines),
             servings: servings,
             createdAt: originalRecipe.createdAt,

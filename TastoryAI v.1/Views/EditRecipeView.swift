@@ -16,6 +16,8 @@ struct EditRecipeView: View {
     @State private var newIngredient: String = ""
     @State private var steps: [String]
     @State private var newStep: String = ""
+    @State private var tips: [String]
+    @State private var newTip: String = ""
     @State private var imageURL: String?
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isProcessingPhoto = false
@@ -23,6 +25,7 @@ struct EditRecipeView: View {
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isAddingIngredient: Bool
     @FocusState private var isAddingStep: Bool
+    @FocusState private var isAddingTip: Bool
     
     let originalRecipe: Recipe
     let onSave: (Recipe) -> Void
@@ -36,6 +39,7 @@ struct EditRecipeView: View {
         _servings = State(initialValue: recipe.servings)
         _ingredients = State(initialValue: recipe.ingredients)
         _steps = State(initialValue: recipe.steps)
+        _tips = State(initialValue: recipe.tips)
         _imageURL = State(initialValue: recipe.imageURL)
     }
     
@@ -204,6 +208,49 @@ struct EditRecipeView: View {
                             .disabled(newStep.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
+                
+                Section(header: Text("Tips & Notes")) {
+                    ForEach(Array(tips.enumerated()), id: \.offset) { index, tip in
+                        HStack(alignment: .top) {
+                            Image(systemName: "lightbulb")
+                                .font(.system(size: 16))
+                                .foregroundColor(Theme.Colors.accent)
+                                .frame(width: 20, alignment: .leading)
+                                .padding(.top, 2)
+                            
+                            TextField("Tip", text: Binding(
+                                get: { tips[index] },
+                                set: { tips[index] = $0 }
+                            ), axis: .vertical)
+                            .font(Typography.Body.regular)
+                            .lineLimit(2...6)
+                            
+                            Button(action: { tips.remove(at: index) }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                    
+                    HStack(alignment: .top) {
+                        Image(systemName: "lightbulb")
+                            .font(.system(size: 16))
+                            .foregroundColor(Theme.Colors.accent)
+                            .frame(width: 20, alignment: .leading)
+                            .padding(.top, 2)
+                        
+                        TextField("Add tip or note", text: $newTip, axis: .vertical)
+                            .font(Typography.Body.regular)
+                            .lineLimit(2...6)
+                            .focused($isAddingTip)
+                            .onSubmit {
+                                addTip()
+                            }
+                        
+                        Button("Add", action: addTip)
+                            .disabled(newTip.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
             }
             .navigationTitle("Edit Recipe")
             .navigationBarTitleDisplayMode(.inline)
@@ -272,6 +319,15 @@ struct EditRecipeView: View {
         }
     }
     
+    private func addTip() {
+        let trimmedTip = newTip.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedTip.isEmpty {
+            tips.append(trimmedTip)
+            newTip = ""
+            isAddingTip = true
+        }
+    }
+    
     private func saveRecipe() {
         let updatedRecipe = Recipe(
             id: originalRecipe.id,
@@ -281,6 +337,8 @@ struct EditRecipeView: View {
             imageURL: imageURL,
             category: category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : category.trimmingCharacters(in: .whitespacesAndNewlines),
             servings: servings,
+            sourceURL: originalRecipe.sourceURL,
+            tips: tips.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             createdAt: originalRecipe.createdAt,
             updatedAt: Date()
         )

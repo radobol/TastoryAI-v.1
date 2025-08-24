@@ -37,6 +37,12 @@ struct RecipeDetailView: View {
                     
                     // Instructions
                     instructionsSection
+                    
+                    // Tips & Notes
+                    tipsSection
+                    
+                    // Source URL
+                    sourceURLSection
                 }
                 .padding(Theme.Spacing.medium)
             }
@@ -226,6 +232,58 @@ struct RecipeDetailView: View {
                 ForEach(Array(viewModel.recipe.steps.enumerated()), id: \.offset) { index, step in
                     InstructionStep(number: index + 1, instruction: step)
                 }
+            }
+        }
+    }
+    
+    private var tipsSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
+            if !viewModel.recipe.tips.isEmpty {
+                Text("Tips & Notes")
+                    .font(Typography.Headline.regular)
+                    .foregroundColor(Theme.Colors.text)
+                
+                VStack(alignment: .leading, spacing: Theme.Spacing.small) {
+                    ForEach(viewModel.recipe.tips, id: \.self) { tip in
+                        HStack(alignment: .top, spacing: Theme.Spacing.small) {
+                            Image(systemName: "lightbulb")
+                                .font(.system(size: 16))
+                                .foregroundColor(Theme.Colors.accent)
+                                .padding(.top, 2)
+                            
+                            Text(tip)
+                                .font(Typography.Body.regular)
+                                .foregroundColor(Theme.Colors.text)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                }
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    private var sourceURLSection: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
+            if let sourceURL = viewModel.recipe.sourceURL, !sourceURL.isEmpty {
+                HStack(spacing: Theme.Spacing.small) {
+                    Image(systemName: "link")
+                        .font(.system(size: 16))
+                        .foregroundColor(Theme.Colors.accent)
+                    
+                    if let url = URL(string: sourceURL) {
+                        Link("Original recipe", destination: url)
+                            .font(Typography.Body.semibold)
+                            .foregroundColor(Theme.Colors.accent)
+                    } else {
+                        Text("Original recipe")
+                            .font(Typography.Body.semibold)
+                            .foregroundColor(Theme.Colors.secondaryText)
+                    }
+                }
+            } else {
+                EmptyView()
             }
         }
     }

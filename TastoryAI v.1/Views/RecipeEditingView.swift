@@ -13,6 +13,7 @@ struct RecipeEditingView: View {
     @State private var recipe: Recipe
     @State private var ingredients: [String]
     @State private var steps: [String]
+    @State private var tips: [String]
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isProcessingPhoto = false
     
@@ -23,6 +24,7 @@ struct RecipeEditingView: View {
         self._recipe = State(initialValue: recipe)
         self._ingredients = State(initialValue: recipe.ingredients.isEmpty ? [""] : recipe.ingredients)
         self._steps = State(initialValue: recipe.steps.isEmpty ? [""] : recipe.steps)
+        self._tips = State(initialValue: recipe.tips.isEmpty ? [""] : recipe.tips)
         self.onSave = onSave
         self.onCancel = onCancel
     }
@@ -161,6 +163,35 @@ struct RecipeEditingView: View {
                         .padding(.horizontal, Theme.Spacing.medium)
                     }
                     
+                    // Tips Section
+                    VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
+                        HStack {
+                            Text("TIPS & NOTES")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color(.secondaryLabel))
+                                .padding(.horizontal, Theme.Spacing.medium)
+                            
+                            Spacer()
+                            
+                            Button(action: addTip) {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(Theme.Colors.accent)
+                                    .font(.system(size: 20))
+                            }
+                            .padding(.trailing, Theme.Spacing.medium)
+                        }
+                        
+                        VStack(spacing: 12) {
+                            ForEach(Array(tips.enumerated()), id: \.offset) { index, tip in
+                                RecipeTipRow(
+                                    text: $tips[index],
+                                    onDelete: tips.count > 1 ? { deleteTip(at: index) } : nil
+                                )
+                            }
+                        }
+                        .padding(.horizontal, Theme.Spacing.medium)
+                    }
+                    
                     // Add some bottom padding for the save button
                     Spacer(minLength: 80)
                 }
@@ -216,6 +247,14 @@ struct RecipeEditingView: View {
         steps.remove(at: index)
     }
     
+    private func addTip() {
+        tips.append("")
+    }
+    
+    private func deleteTip(at index: Int) {
+        tips.remove(at: index)
+    }
+    
     private func saveRecipe() {
         let updatedRecipe = Recipe(
             id: recipe.id,
@@ -225,6 +264,8 @@ struct RecipeEditingView: View {
             imageURL: recipe.imageURL,
             category: recipe.category,
             servings: recipe.servings,
+            sourceURL: recipe.sourceURL,
+            tips: tips.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             createdAt: recipe.createdAt,
             updatedAt: Date()
         )
@@ -314,6 +355,41 @@ struct RecipeStepRow: View {
                         Spacer()
                         Button(action: onDelete) {
                             Text("Remove Step")
+                                .font(Typography.Caption1.regular)
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, Theme.Spacing.small)
+    }
+}
+
+struct RecipeTipRow: View {
+    @Binding var text: String
+    let onDelete: (() -> Void)?
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "lightbulb")
+                .foregroundColor(Theme.Colors.accent)
+                .font(.system(size: 16))
+                .frame(width: 20, height: 20)
+                .padding(.top, 2)
+            
+            VStack(alignment: .leading, spacing: Theme.Spacing.small) {
+                TextField("Tip or note", text: $text, axis: .vertical)
+                    .font(.system(size: 16))
+                    .foregroundColor(Color(.label))
+                    .textFieldStyle(.plain)
+                    .lineLimit(2...8)
+                
+                if let onDelete = onDelete {
+                    HStack {
+                        Spacer()
+                        Button(action: onDelete) {
+                            Text("Remove Tip")
                                 .font(Typography.Caption1.regular)
                                 .foregroundColor(.red)
                         }

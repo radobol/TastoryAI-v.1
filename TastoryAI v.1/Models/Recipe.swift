@@ -15,6 +15,8 @@ struct Recipe: Identifiable, Codable, Hashable {
     var imageURL: String?
     var category: String?
     var servings: Int
+    var sourceURL: String?
+    var tips: [String]
     let createdAt: Date
     var updatedAt: Date
     
@@ -26,6 +28,8 @@ struct Recipe: Identifiable, Codable, Hashable {
         imageURL: String? = nil,
         category: String? = nil,
         servings: Int = 4,
+        sourceURL: String? = nil,
+        tips: [String] = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -36,6 +40,8 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.imageURL = imageURL
         self.category = category
         self.servings = servings
+        self.sourceURL = sourceURL
+        self.tips = tips
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }

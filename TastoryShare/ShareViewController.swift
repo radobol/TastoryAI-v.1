@@ -33,6 +33,8 @@ class ShareViewController: UIViewController {
     private var recipeTitleField: UITextField!
     private var ingredientsStackView: UIStackView!
     private var stepsStackView: UIStackView!
+    private var tipsStackView: UIStackView!
+    private var tipsLabel: UILabel!
     private var saveButton: UIButton!
     
     private var extractedURLs: [URL] = []
@@ -423,6 +425,18 @@ class ShareViewController: UIViewController {
         stepsStackView.spacing = 12
         stepsStackView.translatesAutoresizingMaskIntoConstraints = false
         
+        // Tips section  
+        tipsLabel = UILabel()
+        tipsLabel.text = "Tips & Notes"
+        tipsLabel.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        tipsLabel.textColor = UIColor.label
+        tipsLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        tipsStackView = UIStackView()
+        tipsStackView.axis = .vertical
+        tipsStackView.spacing = 12
+        tipsStackView.translatesAutoresizingMaskIntoConstraints = false
+        
         // Save button
         saveButton = UIButton(type: .system)
         saveButton.setTitle("Save", for: .normal)
@@ -443,6 +457,8 @@ class ShareViewController: UIViewController {
         contentView.addSubview(ingredientsStackView)
         contentView.addSubview(stepsLabel)
         contentView.addSubview(stepsStackView)
+        contentView.addSubview(tipsLabel)
+        contentView.addSubview(tipsStackView)
         
         // Add save button to main view (fixed position)
         view.addSubview(saveButton)
@@ -490,7 +506,16 @@ class ShareViewController: UIViewController {
             stepsStackView.topAnchor.constraint(equalTo: stepsLabel.bottomAnchor, constant: 12),
             stepsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             stepsStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            stepsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
+            
+            // Tips section
+            tipsLabel.topAnchor.constraint(equalTo: stepsStackView.bottomAnchor, constant: 30),
+            tipsLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            tipsLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            tipsStackView.topAnchor.constraint(equalTo: tipsLabel.bottomAnchor, constant: 12),
+            tipsStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            tipsStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            tipsStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20),
             
             // Save button
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -511,6 +536,11 @@ class ShareViewController: UIViewController {
         // Add steps
         for (index, step) in recipe.steps.enumerated() {
             addStepRow(number: index + 1, text: step)
+        }
+        
+        // Add tips
+        for tip in recipe.tips {
+            addTipRow(text: tip)
         }
         
         // Load the recipe image if available
@@ -621,6 +651,45 @@ class ShareViewController: UIViewController {
         stepsStackView.addArrangedSubview(containerView)
     }
     
+    private func addTipRow(text: String) {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let iconLabel = UILabel()
+        iconLabel.text = "💡"
+        iconLabel.font = UIFont.systemFont(ofSize: 18)
+        iconLabel.textAlignment = .center
+        iconLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        let textView = UITextView()
+        textView.text = text
+        textView.font = UIFont.systemFont(ofSize: 16)
+        textView.textColor = UIColor.label
+        textView.backgroundColor = UIColor.clear
+        textView.isScrollEnabled = false
+        textView.textContainer.lineFragmentPadding = 0
+        textView.textContainerInset = UIEdgeInsets.zero
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        
+        containerView.addSubview(iconLabel)
+        containerView.addSubview(textView)
+        
+        NSLayoutConstraint.activate([
+            iconLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            iconLabel.topAnchor.constraint(equalTo: containerView.topAnchor),
+            iconLabel.widthAnchor.constraint(equalToConstant: 30),
+            iconLabel.heightAnchor.constraint(equalToConstant: 30),
+            
+            textView.leadingAnchor.constraint(equalTo: iconLabel.trailingAnchor, constant: 16),
+            textView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            textView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            textView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+        ])
+        
+        tipsStackView.addArrangedSubview(containerView)
+    }
+    
     @objc private func saveRecipe() {
         guard let originalRecipe = processedRecipe else { return }
         
@@ -628,6 +697,7 @@ class ShareViewController: UIViewController {
         let updatedTitle = recipeTitleField.text ?? originalRecipe.title
         var updatedIngredients: [String] = []
         var updatedSteps: [String] = []
+        var updatedTips: [String] = []
         
         // Collect ingredients from text fields
         for case let containerView as UIView in ingredientsStackView.arrangedSubviews {
@@ -647,6 +717,15 @@ class ShareViewController: UIViewController {
             }
         }
         
+        // Collect tips from text views
+        for case let containerView as UIView in tipsStackView.arrangedSubviews {
+            for subview in containerView.subviews {
+                if let textView = subview as? UITextView, !textView.text.isEmpty {
+                    updatedTips.append(textView.text)
+                }
+            }
+        }
+        
         // Create updated recipe
         let updatedRecipe = Recipe(
             id: originalRecipe.id,
@@ -656,6 +735,8 @@ class ShareViewController: UIViewController {
             imageURL: originalRecipe.imageURL,
             category: originalRecipe.category,
             servings: originalRecipe.servings,
+            sourceURL: originalRecipe.sourceURL,
+            tips: updatedTips.isEmpty ? originalRecipe.tips : updatedTips,
             createdAt: originalRecipe.createdAt,
             updatedAt: Date()
         )

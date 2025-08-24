@@ -12,9 +12,11 @@ struct ExtractedRecipeData {
     let title: String
     let ingredients: [String]
     let steps: [String]
+    let tips: [String]
     let category: String?
     let servings: Int
     let imageURL: String?
+    let sourceURL: String?
 }
 
 @MainActor
@@ -72,9 +74,11 @@ class RecipeExtractionService: ObservableObject {
                     title: extractedData.title,
                     ingredients: extractedData.ingredients,
                     steps: extractedData.steps,
+                    tips: extractedData.tips,
                     category: extractedData.category,
                     servings: extractedData.servings,
-                    imageURL: imageURL
+                    imageURL: imageURL,
+                    sourceURL: extractedData.sourceURL
                 )
             }
             
@@ -249,9 +253,11 @@ class RecipeExtractionService: ObservableObject {
                     title: extractedData.title,
                     ingredients: extractedData.ingredients,
                     steps: extractedData.steps,
+                    tips: extractedData.tips,
                     category: extractedData.category,
                     servings: extractedData.servings,
-                    imageURL: imageURL
+                    imageURL: imageURL,
+                    sourceURL: extractedData.sourceURL
                 )
             }
             
@@ -309,17 +315,21 @@ class RecipeExtractionService: ObservableObject {
                 throw RecipeExtractionError.missingSteps
             }
             
+            let tips = json["tips"] as? [String] ?? []
             let category = json["category"] as? String
             let servings = (json["servings"] as? Int) ?? 4
             let imageURL = json["imageURL"] as? String
+            let sourceURL = json["sourceURL"] as? String
             
             return ExtractedRecipeData(
                 title: title,
                 ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
+                tips: tips.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 category: category?.isEmpty == true ? nil : category,
                 servings: max(1, min(20, servings)), // Clamp servings between 1-20
-                imageURL: imageURL?.isEmpty == true ? nil : imageURL
+                imageURL: imageURL?.isEmpty == true ? nil : imageURL,
+                sourceURL: sourceURL?.isEmpty == true ? nil : sourceURL
             )
             
         } catch let error as RecipeExtractionError {
@@ -336,7 +346,9 @@ class RecipeExtractionService: ObservableObject {
             steps: data.steps,
             imageURL: data.imageURL,
             category: data.category,
-            servings: data.servings
+            servings: data.servings,
+            sourceURL: data.sourceURL,
+            tips: data.tips
         )
     }
     

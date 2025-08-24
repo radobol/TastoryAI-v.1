@@ -129,6 +129,7 @@ class OpenAIService: ObservableObject {
           "title": "Recipe Name",
           "ingredients": ["ingredient 1", "ingredient 2"],
           "steps": ["step 1", "step 2"],
+          "tips": ["tip 1", "tip 2"],
           "category": "category name or null",
           "servings": 4
         }
@@ -140,7 +141,8 @@ class OpenAIService: ObservableObject {
         - Use standard units: cups, tablespoons (tbsp), teaspoons (tsp), ounces (oz), pounds (lbs), grams (g)
         - Format ingredients as: "2 cups flour" NOT "flour (2 cups)" or "flour - 2 cups"
         - Use consistent quantity formats: "1/2 cup", "1.5 cups", "2 cups" (no ranges like "1-2 cups")
-        - Steps should be clear and sequential, playful and with all information that will be needed for cooking. 
+        - Steps should be clear and sequential, playful and with all information that will be needed for cooking.
+        - Tips should be helpful cooking advice that's NOT actual steps - things like temperature notes, storage tips, ingredient substitutions, technique advice, or serving suggestions
         - Return only the JSON, no additional text
         - If no valid recipe is found, return: {"error": "No recipe found"}
         
@@ -174,8 +176,10 @@ class OpenAIService: ObservableObject {
           "title": "Recipe Name",
           "ingredients": ["ingredient 1", "ingredient 2"],
           "steps": ["step 1", "step 2"],
+          "tips": ["tip 1", "tip 2"],
           "category": "category name or null",
-          "servings": 4
+          "servings": 4,
+          "sourceURL": "\(url)"
         }
         
         Rules:
@@ -185,7 +189,11 @@ class OpenAIService: ObservableObject {
         - Use standard units: cups, tablespoons (tbsp), teaspoons (tsp), ounces (oz), pounds (lbs), grams (g)
         - Format ingredients as: "2 cups flour" NOT "flour (2 cups)" or "flour - 2 cups"
         - Use consistent quantity formats: "1/2 cup", "1.5 cups", "2 cups" (no ranges like "1-2 cups")
-        - Steps should be clear and sequential, playful and with all information that will be needed for cooking.        - Ignore ads, comments, and unrelated content
+        - Steps should be clear and sequential, playful and with all information that will be needed for cooking.
+        - Tips should be helpful cooking advice that's NOT actual steps - things like temperature notes, storage tips, ingredient substitutions, technique advice, or serving suggestions
+        - Extract existing tips from the webpage
+        - Always include the provided sourceURL in the response
+        - Ignore ads, comments, and unrelated content
         - Return only the JSON, no additional text
         - If no valid recipe is found, return: {"error": "No recipe found"}
         

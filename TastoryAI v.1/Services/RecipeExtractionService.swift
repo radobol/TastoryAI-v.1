@@ -13,7 +13,6 @@ struct ExtractedRecipeData {
     let ingredients: [String]
     let steps: [String]
     let category: String?
-    let tags: [String]
     let servings: Int
 }
 
@@ -272,7 +271,6 @@ class RecipeExtractionService: ObservableObject {
             }
             
             let category = json["category"] as? String
-            let tags = (json["tags"] as? [String]) ?? []
             let servings = (json["servings"] as? Int) ?? 4
             
             return ExtractedRecipeData(
@@ -280,7 +278,6 @@ class RecipeExtractionService: ObservableObject {
                 ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 category: category?.isEmpty == true ? nil : category,
-                tags: tags.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 servings: max(1, min(20, servings)) // Clamp servings between 1-20
             )
             
@@ -297,7 +294,6 @@ class RecipeExtractionService: ObservableObject {
             ingredients: data.ingredients,
             steps: data.steps,
             category: data.category,
-            tags: data.tags,
             servings: data.servings
         )
     }

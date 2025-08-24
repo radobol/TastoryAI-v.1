@@ -5,7 +5,10 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:fdc.nal.usda.gov)",
       "WebFetch(domain:www.loveandlemons.com)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(xcodebuild clean:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(xcrun simctl install:*)"
     ],
     "deny": []
   }

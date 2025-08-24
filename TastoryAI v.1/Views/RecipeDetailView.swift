@@ -116,16 +116,6 @@ struct RecipeDetailView: View {
                 .foregroundColor(Theme.Colors.accent)
             }
             
-            if !viewModel.recipe.tags.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Theme.Spacing.xSmall) {
-                        ForEach(viewModel.recipe.tags, id: \.self) { tag in
-                            TagChip(text: tag)
-                        }
-                    }
-                    .padding(.horizontal, Theme.Spacing.xxSmall)
-                }
-            }
         }
     }
     
@@ -201,19 +191,6 @@ struct RecipeDetailView: View {
     }
 }
 
-struct TagChip: View {
-    let text: String
-    
-    var body: some View {
-        Text(text)
-            .font(Typography.Caption1.medium)
-            .foregroundColor(Theme.Colors.accent)
-            .padding(.horizontal, Theme.Spacing.small)
-            .padding(.vertical, Theme.Spacing.xxSmall)
-            .background(Theme.Colors.accent.opacity(0.1))
-            .cornerRadius(Theme.CornerRadius.small)
-    }
-}
 
 struct IngredientRow: View {
     let ingredient: String

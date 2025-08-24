@@ -101,7 +101,6 @@ class RecipeStorageManager: ObservableObject {
             steps: originalRecipe.steps,
             imageURL: originalRecipe.imageURL,
             category: originalRecipe.category,
-            tags: originalRecipe.tags,
             servings: originalRecipe.servings
         )
         
@@ -119,7 +118,6 @@ class RecipeStorageManager: ObservableObject {
         return recipes.filter { recipe in
             recipe.title.localizedCaseInsensitiveContains(query) ||
             recipe.category?.localizedCaseInsensitiveContains(query) == true ||
-            recipe.tags.contains { $0.localizedCaseInsensitiveContains(query) } ||
             recipe.ingredients.contains { $0.localizedCaseInsensitiveContains(query) }
         }
     }

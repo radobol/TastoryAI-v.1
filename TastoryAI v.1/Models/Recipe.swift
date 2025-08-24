@@ -14,7 +14,6 @@ struct Recipe: Identifiable, Codable, Hashable {
     var steps: [String]
     var imageURL: String?
     var category: String?
-    var tags: [String]
     var servings: Int
     let createdAt: Date
     var updatedAt: Date
@@ -26,7 +25,6 @@ struct Recipe: Identifiable, Codable, Hashable {
         steps: [String] = [],
         imageURL: String? = nil,
         category: String? = nil,
-        tags: [String] = [],
         servings: Int = 4,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -37,7 +35,6 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.steps = steps
         self.imageURL = imageURL
         self.category = category
-        self.tags = tags
         self.servings = servings
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -66,7 +63,6 @@ extension Recipe {
                 "Remove from heat and add egg mixture, stirring quickly"
             ],
             category: "Italian",
-            tags: ["pasta", "quick", "classic"],
             servings: 4
         ),
         Recipe(
@@ -91,7 +87,6 @@ extension Recipe {
                 "Season with soy sauce and sesame oil"
             ],
             category: "Asian",
-            tags: ["healthy", "quick", "protein"],
             servings: 4
         )
     ]

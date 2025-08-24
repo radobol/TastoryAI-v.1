@@ -166,7 +166,6 @@ struct RecipeEditingView: View {
             steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             imageURL: recipe.imageURL,
             category: recipe.category,
-            tags: recipe.tags,
             servings: recipe.servings,
             createdAt: recipe.createdAt,
             updatedAt: Date()

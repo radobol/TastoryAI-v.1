@@ -130,7 +130,6 @@ class OpenAIService: ObservableObject {
           "ingredients": ["ingredient 1", "ingredient 2"],
           "steps": ["step 1", "step 2"],
           "category": "category name or null",
-          "tags": ["tag1", "tag2"],
           "servings": 4
         }
         
@@ -176,7 +175,6 @@ class OpenAIService: ObservableObject {
           "ingredients": ["ingredient 1", "ingredient 2"],
           "steps": ["step 1", "step 2"],
           "category": "category name or null",
-          "tags": ["tag1", "tag2"],
           "servings": 4
         }
         

@@ -75,26 +75,47 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
    - ✅ Manual entry with validation - Complete form with dynamic ingredients/steps
    - ✅ URL input handling - Complete AI processing pipeline integrated
 
-2. **AI Processing** ✅ **COMPLETED - Phase 2A**
+2. **AI Processing** ✅ **COMPLETED**
    - ✅ Structured recipe extraction (title, ingredients, steps, tips) - OpenAI GPT-4o integration with secure xcconfig API key management
    - ✅ Multi-modal processing pipeline - Text, URL, OCR, and Share Extension content processing
    - ✅ Rate limiting (10 req/min/user) - Implemented with queue system and user feedback
    - ✅ Web scraping service - Platform-specific extraction for Instagram, TikTok, recipe sites
    - ✅ Share Extension recipe editing - Full UI with editable fields matching ReciMe design
-   - [ ] Auto-categorization and tagging - Planned for Phase 2B
+   
 
-3. **Recipe Management** ✅ **COMPLETED - Phase 2A Enhanced**
+3. **Recipe Management** ✅ **COMPLETED**
    - ✅ CRUD operations with editable fields - Full RecipeStorageManager with JSON persistence
    - [ ] US/Metric unit toggle - Planned for Phase 2B with IngredientParser extension
    - ✅ Dynamic serving size scaling - Enhanced IngredientParser with local ingredient database and fuzzy matching
    - ✅ Local ingredient database - 100 common cooking ingredients with scaling properties
-   - [ ] Custom categories and tags - Planned for Phase 2C
    - ✅ Share recipe via system sheet - Built-in iOS share integration
 
-4. **Search & Organization** 📋 **PLANNED - Phase 2B**
-   - [ ] Full-text search - RecipeSearchManager design ready
-   - [ ] Filter by category/tag - Interactive chips system planned
-   - [ ] Grid view with category chips - Extension of existing RecipeGridView
+4. Category System  **PLANNED**
+   - [ ] Adjust Recipes creation and edit UI to choose from existing, create a new category. By default, all new recipes have "New recipes" category
+         Update schema
+         categories(id, name, slug, is_system)
+         recipe_categories(recipe_id, category_id, is_primary)
+         Constraints: unique (recipe_id, category_id); exactly one is_primary=true per recipe_id
+   - [ ] Seed reserved category New recipes (is_system=true, non‑deletable)
+   - [ ] Recipe create behavior: auto‑assign New recipes as primary; editor allows adding more categories and changing the primary
+   - [ ] Create a new "Categories" section, a new tab + icon (instead of the current "Search") in the app and add an icon to the main menu
+   - [ ] Create "Categories" section UI with 
+         - filtering by category
+         - recipes grouped by category, each recipe appears in all categories that set up
+         - “New recipes” first; others sorted A→Z (locale + case/diacritic‑insensitive)
+         - “+ New category” button opens overlay (create with validation)
+         - “Edit” opens rename / delete 
+
+   - [ ]  Category delete rules: reassign affected primaries to New recipes (or next remaining); block delete if is_system=true
+   - [ ] Validation: name required, 1–32 chars, trimmed; case‑insensitive uniqueness (no duplicates after trimming/diacritics)   
+
+5. Search & Organization  **PLANNED**
+   - [ ] Search bar in HomeView with 250 ms debounce; search title, ingredients, categories, steps; case/diacritic‑insensitive; AND across tokens; highlight matches; works with active category filter
+   - [ ] Add option to select recipies(simmilar as Apple photo app have) and with follow functionality(long‑press or “Select”):
+         - delete selected recipes
+         - change existed or add new category; Add, Remove, Set primary (single)
+   - [ ] Add option to share each recipe directly from thumbnail card of recipe in home screen
+   - [ ] Rename items to ingredients on recipe cards
 
 
 ### Performance Requirements
@@ -120,6 +141,20 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 - Maintain 80% unit test coverage
 - Implement snapshot UI tests
 - Follow MVVM architecture pattern
+
+### Debug & Testing Guidelines
+- **All future test features and debug tools should be added to the DebugMenuView** - accessed via Profile → Debug & Testing
+- Test buttons and debug functionality must never appear on the main screens
+- Keep debug tools organized in dedicated development sections
+
+### Testing & Build Process
+When implementing changes, follow this testing workflow:
+1. `xcodebuild clean` - Clear old build data
+2. `xcodebuild build` - Compile the updated app
+3. Install the updated app in the simulator using `xcrun simctl install`
+4. Launch the app with `xcrun simctl launch`
+5. Wait for user confirmation that everything works as expected
+6. Only after user confirmation, update status documentation
 
 ### State Management
 - Use SwiftUI's built-in state management

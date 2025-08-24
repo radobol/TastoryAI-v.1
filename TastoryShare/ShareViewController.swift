@@ -629,7 +629,6 @@ class ShareViewController: UIViewController {
             steps: updatedSteps.isEmpty ? originalRecipe.steps : updatedSteps,
             imageURL: originalRecipe.imageURL,
             category: originalRecipe.category,
-            tags: originalRecipe.tags,
             servings: originalRecipe.servings,
             createdAt: originalRecipe.createdAt,
             updatedAt: Date()

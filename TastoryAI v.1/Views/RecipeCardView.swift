@@ -13,14 +13,55 @@ struct RecipeCardView: View {
     var body: some View {
         NavigationLink(destination: RecipeDetailView(recipeId: recipe.id)) {
             VStack(alignment: .leading, spacing: 0) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                        .fill(Theme.Colors.tertiaryBackground)
-                        .aspectRatio(1.2, contentMode: .fit)
-                    
-                    Image(systemName: "photo")
-                        .font(.system(size: 40))
-                        .foregroundColor(Theme.Colors.tertiaryText)
+                if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            ZStack {
+                                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                                    .fill(Theme.Colors.tertiaryBackground)
+                                    .aspectRatio(1.2, contentMode: .fit)
+                                
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                            }
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(1.2, contentMode: .fill)
+                                .clipped()
+                        case .failure(_):
+                            ZStack {
+                                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                                    .fill(Theme.Colors.tertiaryBackground)
+                                    .aspectRatio(1.2, contentMode: .fit)
+                                
+                                Image(systemName: "photo")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(Theme.Colors.tertiaryText)
+                            }
+                        @unknown default:
+                            ZStack {
+                                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                                    .fill(Theme.Colors.tertiaryBackground)
+                                    .aspectRatio(1.2, contentMode: .fit)
+                                
+                                Image(systemName: "photo")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(Theme.Colors.tertiaryText)
+                            }
+                        }
+                    }
+                } else {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
+                            .fill(Theme.Colors.tertiaryBackground)
+                            .aspectRatio(1.2, contentMode: .fit)
+                        
+                        Image(systemName: "photo")
+                            .font(.system(size: 40))
+                            .foregroundColor(Theme.Colors.tertiaryText)
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: Theme.Spacing.xSmall) {

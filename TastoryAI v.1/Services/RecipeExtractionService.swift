@@ -14,6 +14,7 @@ struct ExtractedRecipeData {
     let steps: [String]
     let category: String?
     let servings: Int
+    let imageURL: String?
 }
 
 @MainActor
@@ -46,8 +47,14 @@ class RecipeExtractionService: ObservableObject {
         }
         
         do {
-            // Step 1: Scrape web content
+            // Step 1: Scrape web content and extract image
             let webContent = try await webScrapingService.extractContent(from: urlString)
+            processingProgress = 0.3
+            processingStatus = "Extracting images..."
+            
+            // Extract image URL
+            let imageURL = try? await webScrapingService.extractImageURL(from: urlString)
+            
             processingProgress = 0.4
             processingStatus = "Processing content with AI..."
             
@@ -57,7 +64,20 @@ class RecipeExtractionService: ObservableObject {
             processingStatus = "Parsing recipe data..."
             
             // Step 3: Parse and validate
-            let extractedData = try parseAIResponse(aiResponse)
+            var extractedData = try parseAIResponse(aiResponse)
+            
+            // Add image URL if we found one and the AI didn't provide one
+            if extractedData.imageURL == nil, let imageURL = imageURL {
+                extractedData = ExtractedRecipeData(
+                    title: extractedData.title,
+                    ingredients: extractedData.ingredients,
+                    steps: extractedData.steps,
+                    category: extractedData.category,
+                    servings: extractedData.servings,
+                    imageURL: imageURL
+                )
+            }
+            
             processingProgress = 0.9
             processingStatus = "Creating recipe..."
             
@@ -171,6 +191,7 @@ class RecipeExtractionService: ObservableObject {
         
         do {
             var combinedContent = ""
+            var extractedImageURL: String? = nil
             
             // Process URLs first (highest priority)
             if !urls.isEmpty {
@@ -179,6 +200,11 @@ class RecipeExtractionService: ObservableObject {
                     do {
                         let webContent = try await webScrapingService.extractContent(from: url.absoluteString)
                         combinedContent += "URL Content from \(url.absoluteString):\n\(webContent)\n\n"
+                        
+                        // Try to extract image from the first URL if we haven't found one yet
+                        if extractedImageURL == nil {
+                            extractedImageURL = try? await webScrapingService.extractImageURL(from: url.absoluteString)
+                        }
                     } catch {
                         // Continue with other content if URL fails
                         continue
@@ -215,7 +241,20 @@ class RecipeExtractionService: ObservableObject {
             processingStatus = "Parsing recipe data..."
             
             // Parse and validate
-            let extractedData = try parseAIResponse(aiResponse)
+            var extractedData = try parseAIResponse(aiResponse)
+            
+            // Add image URL if we found one and the AI didn't provide one
+            if extractedData.imageURL == nil, let imageURL = extractedImageURL {
+                extractedData = ExtractedRecipeData(
+                    title: extractedData.title,
+                    ingredients: extractedData.ingredients,
+                    steps: extractedData.steps,
+                    category: extractedData.category,
+                    servings: extractedData.servings,
+                    imageURL: imageURL
+                )
+            }
+            
             processingProgress = 0.9
             processingStatus = "Creating recipe..."
             
@@ -272,13 +311,15 @@ class RecipeExtractionService: ObservableObject {
             
             let category = json["category"] as? String
             let servings = (json["servings"] as? Int) ?? 4
+            let imageURL = json["imageURL"] as? String
             
             return ExtractedRecipeData(
                 title: title,
                 ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
                 category: category?.isEmpty == true ? nil : category,
-                servings: max(1, min(20, servings)) // Clamp servings between 1-20
+                servings: max(1, min(20, servings)), // Clamp servings between 1-20
+                imageURL: imageURL?.isEmpty == true ? nil : imageURL
             )
             
         } catch let error as RecipeExtractionError {
@@ -293,6 +334,7 @@ class RecipeExtractionService: ObservableObject {
             title: data.title,
             ingredients: data.ingredients,
             steps: data.steps,
+            imageURL: data.imageURL,
             category: data.category,
             servings: data.servings
         )

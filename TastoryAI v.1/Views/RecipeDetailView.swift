@@ -89,14 +89,58 @@ struct RecipeDetailView: View {
     }
     
     private var heroImageSection: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 0)
-                .fill(Theme.Colors.tertiaryBackground)
-                .frame(height: 250)
-            
-            Image(systemName: "photo")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.tertiaryText)
+        Group {
+            if let imageURL = viewModel.recipe.imageURL, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 0)
+                                .fill(Theme.Colors.tertiaryBackground)
+                                .frame(height: 250)
+                            
+                            ProgressView()
+                                .scaleEffect(1.2)
+                        }
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 250)
+                            .clipped()
+                    case .failure(_):
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 0)
+                                .fill(Theme.Colors.tertiaryBackground)
+                                .frame(height: 250)
+                            
+                            Image(systemName: "photo")
+                                .font(.system(size: 60))
+                                .foregroundColor(Theme.Colors.tertiaryText)
+                        }
+                    @unknown default:
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 0)
+                                .fill(Theme.Colors.tertiaryBackground)
+                                .frame(height: 250)
+                            
+                            Image(systemName: "photo")
+                                .font(.system(size: 60))
+                                .foregroundColor(Theme.Colors.tertiaryText)
+                        }
+                    }
+                }
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(Theme.Colors.tertiaryBackground)
+                        .frame(height: 250)
+                    
+                    Image(systemName: "photo")
+                        .font(.system(size: 60))
+                        .foregroundColor(Theme.Colors.tertiaryText)
+                }
+            }
         }
     }
     

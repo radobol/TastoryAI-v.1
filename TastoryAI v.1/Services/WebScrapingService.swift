@@ -43,6 +43,31 @@ class WebScrapingService: ObservableObject {
         }
     }
     
+    func extractImageURL(from urlString: String) async throws -> String? {
+        guard let url = URL(string: urlString.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            throw WebScrapingError.invalidURL
+        }
+        
+        do {
+            // Fetch the HTML content
+            let htmlContent = try await fetchHTML(from: url)
+            
+            // Try different methods to extract image URL
+            if let imageURL = extractOGImage(from: htmlContent) ?? 
+                              extractTwitterImage(from: htmlContent) ?? 
+                              extractJSONLDImage(from: htmlContent) ?? 
+                              extractFirstContentImage(from: htmlContent) {
+                // Convert relative URLs to absolute
+                return normalizeImageURL(imageURL, baseURL: url)
+            }
+            
+            return nil
+            
+        } catch {
+            throw WebScrapingError.contentExtractionFailed(error.localizedDescription)
+        }
+    }
+    
     // MARK: - Private Methods
     
     private func fetchHTML(from url: URL) async throws -> String {
@@ -298,6 +323,167 @@ class WebScrapingService: ObservableObject {
             .replacingOccurrences(of: "&quot;", with: "\"")
             .replacingOccurrences(of: "&#39;", with: "'")
             .replacingOccurrences(of: "&nbsp;", with: " ")
+    }
+    
+    // MARK: - Image Extraction Methods
+    
+    private func extractOGImage(from html: String) -> String? {
+        if let imageURL = extractMetaContent(from: html, property: "og:image") {
+            // Skip data URLs and SVG images
+            if !imageURL.hasPrefix("data:") && !imageURL.contains(".svg") {
+                return imageURL
+            }
+        }
+        return nil
+    }
+    
+    private func extractTwitterImage(from html: String) -> String? {
+        if let imageURL = extractMetaContent(from: html, property: "twitter:image") {
+            // Skip data URLs and SVG images
+            if !imageURL.hasPrefix("data:") && !imageURL.contains(".svg") {
+                return imageURL
+            }
+        }
+        return nil
+    }
+    
+    private func extractJSONLDImage(from html: String) -> String? {
+        // Extract all JSON-LD blocks
+        let pattern = #"<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>"#
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators])
+            let range = NSRange(html.startIndex..., in: html)
+            let matches = regex.matches(in: html, options: [], range: range)
+            
+            for match in matches {
+                if match.numberOfRanges > 1 {
+                    let matchRange = match.range(at: 1)
+                    if let swiftRange = Range(matchRange, in: html) {
+                        let jsonString = String(html[swiftRange])
+                        
+                        // Try to parse JSON and extract image
+                        if let data = jsonString.data(using: .utf8),
+                           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                            
+                            // Look for image in different possible locations
+                            if let image = json["image"] as? String {
+                                // Skip data URLs and SVG images
+                                if !image.hasPrefix("data:") && !image.contains(".svg") {
+                                    return image
+                                }
+                            } else if let imageObj = json["image"] as? [String: Any],
+                                      let url = imageObj["url"] as? String {
+                                // Skip data URLs and SVG images
+                                if !url.hasPrefix("data:") && !url.contains(".svg") {
+                                    return url
+                                }
+                            } else if let imageArray = json["image"] as? [[String: Any]],
+                                      let firstImage = imageArray.first,
+                                      let url = firstImage["url"] as? String {
+                                // Skip data URLs and SVG images
+                                if !url.hasPrefix("data:") && !url.contains(".svg") {
+                                    return url
+                                }
+                            } else if let graph = json["@graph"] as? [[String: Any]] {
+                                // Check in @graph array for Recipe schema
+                                for item in graph {
+                                    if let type = item["@type"] as? String,
+                                       type.contains("Recipe") {
+                                        if let image = item["image"] as? String {
+                                            // Skip data URLs and SVG images
+                                            if !image.hasPrefix("data:") && !image.contains(".svg") {
+                                                return image
+                                            }
+                                        } else if let imageObj = item["image"] as? [String: Any],
+                                                  let url = imageObj["url"] as? String {
+                                            // Skip data URLs and SVG images
+                                            if !url.hasPrefix("data:") && !url.contains(".svg") {
+                                                return url
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {
+            // Regex compilation failed
+        }
+        
+        return nil
+    }
+    
+    private func extractFirstContentImage(from html: String) -> String? {
+        // Look for img tags in content area (excluding headers, footers, ads)
+        let patterns = [
+            #"<img[^>]*src=["\']([^"\']+)["\'][^>]*>"#,
+            #"<img[^>]*data-src=["\']([^"\']+)["\'][^>]*>"#,  // For lazy-loaded images
+            #"<img[^>]*srcset=["\']([^"\']+)["\'][^>]*>"#     // For responsive images
+        ]
+        
+        for pattern in patterns {
+            if let imageURL = extractWithRegex(from: html, pattern: pattern, groupIndex: 1) {
+                // Skip small images (likely icons or buttons), data URLs, and SVG images
+                if !imageURL.contains("icon") && !imageURL.contains("logo") && !imageURL.contains("avatar") 
+                   && !imageURL.hasPrefix("data:") && !imageURL.contains(".svg") {
+                    // For srcset, extract the first URL
+                    if pattern.contains("srcset") {
+                        let urls = imageURL.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                        if let firstURL = urls.first?.split(separator: " ").first {
+                            let url = String(firstURL)
+                            // Skip data URLs and SVG images
+                            if !url.hasPrefix("data:") && !url.contains(".svg") {
+                                return url
+                            }
+                        }
+                    } else {
+                        return imageURL
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    private func normalizeImageURL(_ imageURL: String, baseURL: URL) -> String {
+        let trimmedURL = imageURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Already absolute URL
+        if trimmedURL.hasPrefix("http://") || trimmedURL.hasPrefix("https://") {
+            return trimmedURL
+        }
+        
+        // Protocol-relative URL
+        if trimmedURL.hasPrefix("//") {
+            return "https:" + trimmedURL
+        }
+        
+        // Relative URL starting with /
+        if trimmedURL.hasPrefix("/") {
+            guard let scheme = baseURL.scheme,
+                  let host = baseURL.host else {
+                return trimmedURL
+            }
+            return "\(scheme)://\(host)\(trimmedURL)"
+        }
+        
+        // Relative URL without /
+        guard let scheme = baseURL.scheme,
+              let host = baseURL.host else {
+            return trimmedURL
+        }
+        
+        let path = baseURL.path
+        let basePath = path.components(separatedBy: "/").dropLast().joined(separator: "/")
+        
+        if basePath.isEmpty {
+            return "\(scheme)://\(host)/\(trimmedURL)"
+        } else {
+            return "\(scheme)://\(host)\(basePath)/\(trimmedURL)"
+        }
     }
 }
 

@@ -8,7 +8,9 @@
       "Bash(find:*)",
       "Bash(xcodebuild clean:*)",
       "Bash(xcodebuild:*)",
-      "Bash(xcrun simctl install:*)"
+      "Bash(xcrun simctl install:*)",
+      "Read(//var/folders/8p/ms8848194n9f6c1s30vtps2h0000gq/T/TemporaryItems/NSIRD_screencaptureui_UkY9ot/**)",
+      "Read(//Users/denis.radabolski/Screenshots/**)"
     ],
     "deny": []
   }

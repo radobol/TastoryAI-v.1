@@ -10,6 +10,7 @@ import SwiftUI
 struct DebugMenuView: View {
     @State private var showingAPITest = false
     @State private var apiTestResult = ""
+    @State private var showingImageExtractorView = false
     
     var body: some View {
         List {
@@ -28,6 +29,32 @@ struct DebugMenuView: View {
                                 .foregroundColor(.primary)
                             
                             Text("Verify API connection and response")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.vertical, 2)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            
+            // Image Extraction Testing Section
+            Section("Image Extraction") {
+                Button(action: { showingImageExtractorView = true }) {
+                    HStack {
+                        Image(systemName: "photo.badge.arrow.down")
+                            .foregroundColor(Theme.Colors.accent)
+                            .font(.title3)
+                            .frame(width: 24, height: 24)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Test Image URL Extraction")
+                                .font(.body)
+                                .foregroundColor(.primary)
+                            
+                            Text("Extract images from recipe URLs")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -120,6 +147,9 @@ struct DebugMenuView: View {
             Button("OK") {}
         } message: {
             Text(apiTestResult)
+        }
+        .sheet(isPresented: $showingImageExtractorView) {
+            ImageExtractorTestView()
         }
     }
     

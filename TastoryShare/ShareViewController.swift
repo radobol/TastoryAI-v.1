@@ -513,9 +513,35 @@ class ShareViewController: UIViewController {
             addStepRow(number: index + 1, text: step)
         }
         
-        // Set a placeholder image (in a real app, you might extract from the shared content)
-        recipeImageView.image = UIImage(systemName: "photo")
-        recipeImageView.tintColor = UIColor.systemGray3
+        // Load the recipe image if available
+        if let imageURLString = recipe.imageURL, let imageURL = URL(string: imageURLString) {
+            loadImage(from: imageURL)
+        } else {
+            // Set a placeholder image
+            recipeImageView.image = UIImage(systemName: "photo")
+            recipeImageView.tintColor = UIColor.systemGray3
+        }
+    }
+    
+    private func loadImage(from url: URL) {
+        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self,
+                  let data = data,
+                  let image = UIImage(data: data),
+                  error == nil else {
+                DispatchQueue.main.async {
+                    self?.recipeImageView.image = UIImage(systemName: "photo")
+                    self?.recipeImageView.tintColor = UIColor.systemGray3
+                }
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.recipeImageView.image = image
+                self.recipeImageView.contentMode = .scaleAspectFill
+            }
+        }
+        task.resume()
     }
     
     private func addIngredientRow(text: String) {

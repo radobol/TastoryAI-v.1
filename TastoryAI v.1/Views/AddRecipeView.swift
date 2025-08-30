@@ -92,6 +92,8 @@ struct ManualRecipeEntryView: View {
                 title: "",
                 ingredients: [""],
                 steps: [""],
+                categoryIds: [CategoryManager.shared.getNewRecipesCategory().id],
+                primaryCategoryId: CategoryManager.shared.getNewRecipesCategory().id,
                 servings: 4
             ),
             onSave: { recipe in

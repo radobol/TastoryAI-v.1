@@ -71,15 +71,15 @@ struct RecipeCardView: View {
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     
-                    if let category = recipe.category {
-                        HStack(spacing: Theme.Spacing.xxSmall) {
-                            Image(systemName: "tag.fill")
-                                .font(.system(size: 10))
-                            Text(category)
-                                .font(Typography.Caption1.medium)
-                        }
-                        .foregroundColor(Theme.Colors.secondaryText)
+                    // Display primary category from new category system
+                    let categoryName = getCategoryDisplayName(for: recipe)
+                    HStack(spacing: Theme.Spacing.xxSmall) {
+                        Image(systemName: "tag.fill")
+                            .font(.system(size: 10))
+                        Text(categoryName)
+                            .font(Typography.Caption1.medium)
                     }
+                    .foregroundColor(Theme.Colors.secondaryText)
                     
                     HStack(spacing: Theme.Spacing.small) {
                         Label("\(recipe.servings)", systemImage: "person.2.fill")
@@ -105,6 +105,16 @@ struct RecipeCardView: View {
             )
         }
         .buttonStyle(PlainButtonStyle())
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func getCategoryDisplayName(for recipe: Recipe) -> String {
+        guard let primaryCategoryId = recipe.primaryCategoryId else {
+            return "New recipes" // Default fallback
+        }
+        
+        return CategoryManager.shared.getCategoryName(for: primaryCategoryId) ?? "New recipes"
     }
 }
 

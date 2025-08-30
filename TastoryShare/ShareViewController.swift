@@ -727,13 +727,31 @@ class ShareViewController: UIViewController {
         }
         
         // Create updated recipe
+        // Ensure recipe has proper category assignment
+        let finalCategoryIds: [UUID]
+        let finalPrimaryCategoryId: UUID?
+        
+        if originalRecipe.categoryIds.isEmpty {
+            // Safety fallback: if somehow we got here without categories, assign "New recipes"
+            // This should rarely happen since RecipeExtractionService now assigns categories correctly
+            // Use the shared "New recipes" category UUID
+            let newRecipesCategoryId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+            finalCategoryIds = [newRecipesCategoryId]
+            finalPrimaryCategoryId = newRecipesCategoryId
+        } else {
+            finalCategoryIds = originalRecipe.categoryIds
+            finalPrimaryCategoryId = originalRecipe.primaryCategoryId ?? originalRecipe.categoryIds.first
+        }
+        
         let updatedRecipe = Recipe(
             id: originalRecipe.id,
             title: updatedTitle,
             ingredients: updatedIngredients.isEmpty ? originalRecipe.ingredients : updatedIngredients,
             steps: updatedSteps.isEmpty ? originalRecipe.steps : updatedSteps,
             imageURL: originalRecipe.imageURL,
-            category: originalRecipe.category,
+            categoryIds: finalCategoryIds,
+            primaryCategoryId: finalPrimaryCategoryId,
+            category: originalRecipe.category, // Keep legacy category for now
             servings: originalRecipe.servings,
             sourceURL: originalRecipe.sourceURL,
             tips: updatedTips.isEmpty ? originalRecipe.tips : updatedTips,

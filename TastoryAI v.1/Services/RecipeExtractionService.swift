@@ -345,7 +345,9 @@ class RecipeExtractionService: ObservableObject {
             ingredients: data.ingredients,
             steps: data.steps,
             imageURL: data.imageURL,
-            category: data.category,
+            categoryIds: [UUID(uuidString: "00000000-0000-0000-0000-000000000001")!], // Assign to "New recipes" by default
+            primaryCategoryId: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+            category: nil, // Clear legacy field - force use of new category system
             servings: data.servings,
             sourceURL: data.sourceURL,
             tips: data.tips

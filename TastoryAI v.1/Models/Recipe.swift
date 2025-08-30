@@ -3,7 +3,7 @@
 //  TastoryAI
 //
 //  Created by Denis Radabolski on 7/23/25.
-//
+//Great. Now let's return to the previous task and start implementation of categories. Let's first repeat our to-do plan implementation plan first and after that start implementation to do by to do face by face. If we have implemented during some phase enough features to testing in the app let's pause implementation let's prepare build let know me that some capabilities and what exactly are ready for testing I will finish app installation and everything and test it and let you know if it's worked correctly and if yes we will move on on the next task and face if something not working as expected we will try to fix the issue first and only after we will move forward. I agree with this approach and let's maybe incorporated to the plan.
 
 import Foundation
 
@@ -13,7 +13,14 @@ struct Recipe: Identifiable, Codable, Hashable {
     var ingredients: [String]
     var steps: [String]
     var imageURL: String?
+    
+    // MARK: - Category System (New)
+    var categoryIds: [UUID]
+    var primaryCategoryId: UUID?
+    
+    // MARK: - Legacy category field (for migration)
     var category: String?
+    
     var servings: Int
     var sourceURL: String?
     var tips: [String]
@@ -26,7 +33,9 @@ struct Recipe: Identifiable, Codable, Hashable {
         ingredients: [String] = [],
         steps: [String] = [],
         imageURL: String? = nil,
-        category: String? = nil,
+        categoryIds: [UUID] = [],
+        primaryCategoryId: UUID? = nil,
+        category: String? = nil, // Legacy field for migration
         servings: Int = 4,
         sourceURL: String? = nil,
         tips: [String] = [],
@@ -38,6 +47,8 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.ingredients = ingredients
         self.steps = steps
         self.imageURL = imageURL
+        self.categoryIds = categoryIds
+        self.primaryCategoryId = primaryCategoryId
         self.category = category
         self.servings = servings
         self.sourceURL = sourceURL
@@ -45,6 +56,45 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
+    
+    // MARK: - Category Helper Methods
+    
+    /// Check if recipe has a specific category
+    func hasCategory(_ categoryId: UUID) -> Bool {
+        return categoryIds.contains(categoryId)
+    }
+    
+    /// Add a category to this recipe
+    mutating func addCategory(_ categoryId: UUID, asPrimary: Bool = false) {
+        if !categoryIds.contains(categoryId) {
+            categoryIds.append(categoryId)
+        }
+        
+        if asPrimary {
+            primaryCategoryId = categoryId
+        } else if primaryCategoryId == nil {
+            // If no primary category set, make this the primary
+            primaryCategoryId = categoryId
+        }
+    }
+    
+    /// Remove a category from this recipe
+    mutating func removeCategory(_ categoryId: UUID) {
+        categoryIds.removeAll { $0 == categoryId }
+        
+        // If removing the primary category, assign a new primary
+        if primaryCategoryId == categoryId {
+            primaryCategoryId = categoryIds.first
+        }
+    }
+    
+    /// Set the primary category
+    mutating func setPrimaryCategory(_ categoryId: UUID) {
+        if hasCategory(categoryId) {
+            primaryCategoryId = categoryId
+        }
+    }
+    
 }
 
 extension Recipe {
@@ -68,7 +118,6 @@ extension Recipe {
                 "Toss hot pasta with guanciale and fat",
                 "Remove from heat and add egg mixture, stirring quickly"
             ],
-            category: "Italian",
             servings: 4
         ),
         Recipe(
@@ -92,7 +141,6 @@ extension Recipe {
                 "Add vegetables and garlic",
                 "Season with soy sauce and sesame oil"
             ],
-            category: "Asian",
             servings: 4
         )
     ]

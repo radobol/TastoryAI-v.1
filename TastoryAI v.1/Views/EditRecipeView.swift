@@ -10,7 +10,8 @@ import PhotosUI
 
 struct EditRecipeView: View {
     @State private var title: String
-    @State private var category: String
+    @State private var category: String // Legacy field - for display purposes
+    @State private var selectedCategoryId: UUID
     @State private var servings: Int
     @State private var ingredients: [String]
     @State private var newIngredient: String = ""
@@ -27,6 +28,8 @@ struct EditRecipeView: View {
     @FocusState private var isAddingStep: Bool
     @FocusState private var isAddingTip: Bool
     
+    @StateObject private var categoryManager = CategoryManager.shared
+    
     let originalRecipe: Recipe
     let onSave: (Recipe) -> Void
     
@@ -36,6 +39,8 @@ struct EditRecipeView: View {
         
         _title = State(initialValue: recipe.title)
         _category = State(initialValue: recipe.category ?? "")
+        // Ensure selectedCategoryId always has a valid value - fallback to "New recipes" if nil
+        _selectedCategoryId = State(initialValue: recipe.primaryCategoryId ?? Category.newRecipesCategoryId)
         _servings = State(initialValue: recipe.servings)
         _ingredients = State(initialValue: recipe.ingredients)
         _steps = State(initialValue: recipe.steps)
@@ -124,8 +129,20 @@ struct EditRecipeView: View {
                     TextField("Recipe Title", text: $title)
                         .font(Typography.Body.regular)
                     
-                    TextField("Category (optional)", text: $category)
+                    // Category Picker
+                    HStack {
+                        Text("Category")
+                            .font(Typography.Body.regular)
+                        Spacer()
+                        Picker("Category", selection: $selectedCategoryId) {
+                            ForEach(categoryManager.categories, id: \.id) { category in
+                                Text(category.name)
+                                    .tag(category.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
                         .font(Typography.Body.regular)
+                    }
                     
                     HStack {
                         Text("Servings")
@@ -276,6 +293,10 @@ struct EditRecipeView: View {
                     }
                 }
             }
+            .onAppear {
+                // Ensure "New recipes" category exists in CategoryManager
+                let _ = categoryManager.getNewRecipesCategory()
+            }
         }
     }
     
@@ -329,13 +350,18 @@ struct EditRecipeView: View {
     }
     
     private func saveRecipe() {
-        let updatedRecipe = Recipe(
+        // Use the selected category ID directly since it's guaranteed to be valid
+        let finalCategoryId = selectedCategoryId
+        
+        var updatedRecipe = Recipe(
             id: originalRecipe.id,
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             imageURL: imageURL,
-            category: category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : category.trimmingCharacters(in: .whitespacesAndNewlines),
+            categoryIds: [finalCategoryId], // Simple single category for now
+            primaryCategoryId: finalCategoryId,
+            category: nil, // Clear legacy field
             servings: servings,
             sourceURL: originalRecipe.sourceURL,
             tips: tips.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },

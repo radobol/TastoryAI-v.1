@@ -156,15 +156,15 @@ struct RecipeDetailView: View {
                 .font(Typography.Title1.bold)
                 .foregroundColor(Theme.Colors.text)
             
-            if let category = viewModel.recipe.category {
-                HStack(spacing: Theme.Spacing.xSmall) {
-                    Image(systemName: "tag.fill")
-                        .font(.system(size: 12))
-                    Text(category)
-                        .font(Typography.Subheadline.semibold)
-                }
-                .foregroundColor(Theme.Colors.accent)
+            // Display primary category from new category system
+            let categoryName = getCategoryDisplayName(for: viewModel.recipe)
+            HStack(spacing: Theme.Spacing.xSmall) {
+                Image(systemName: "tag.fill")
+                    .font(.system(size: 12))
+                Text(categoryName)
+                    .font(Typography.Subheadline.semibold)
             }
+            .foregroundColor(Theme.Colors.accent)
             
         }
     }
@@ -290,6 +290,14 @@ struct RecipeDetailView: View {
     
     private func duplicateRecipe() {
         _ = viewModel.duplicateRecipe()
+    }
+    
+    private func getCategoryDisplayName(for recipe: Recipe) -> String {
+        guard let primaryCategoryId = recipe.primaryCategoryId else {
+            return "New recipes" // Default fallback
+        }
+        
+        return CategoryManager.shared.getCategoryName(for: primaryCategoryId) ?? "New recipes"
     }
 }
 

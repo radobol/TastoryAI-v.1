@@ -34,9 +34,11 @@ class RecipeStorageManager: ObservableObject {
         if recipes.isEmpty {
             print("📖 No recipes found in main app, loading sample data")
             recipes = Recipe.sampleRecipes
+            assignNewRecipesCategoryToRecipesWithoutCategories()
             saveRecipes()
         } else {
             print("📖 Main app loaded \(recipes.count) existing recipes")
+            assignNewRecipesCategoryToRecipesWithoutCategories()
         }
     }
     
@@ -95,14 +97,23 @@ class RecipeStorageManager: ObservableObject {
     func duplicateRecipe(withId id: UUID) -> Recipe? {
         guard let originalRecipe = getRecipe(withId: id) else { return nil }
         
-        let duplicatedRecipe = Recipe(
+        var duplicatedRecipe = Recipe(
             title: "\(originalRecipe.title) (Copy)",
             ingredients: originalRecipe.ingredients,
             steps: originalRecipe.steps,
             imageURL: originalRecipe.imageURL,
-            category: originalRecipe.category,
-            servings: originalRecipe.servings
+            categoryIds: originalRecipe.categoryIds,
+            primaryCategoryId: originalRecipe.primaryCategoryId,
+            servings: originalRecipe.servings,
+            sourceURL: originalRecipe.sourceURL,
+            tips: originalRecipe.tips
         )
+        
+        // If the original recipe has no categories, assign to "New recipes"
+        if duplicatedRecipe.categoryIds.isEmpty || duplicatedRecipe.primaryCategoryId == nil {
+            let newRecipesId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+            duplicatedRecipe.addCategory(newRecipesId, asPrimary: true)
+        }
         
         addRecipe(duplicatedRecipe)
         return duplicatedRecipe
@@ -124,5 +135,60 @@ class RecipeStorageManager: ObservableObject {
     
     func filterRecipes(by category: String) -> [Recipe] {
         return recipes.filter { $0.category?.lowercased() == category.lowercased() }
+    }
+    
+    // MARK: - Category-based filtering
+    
+    func filterRecipes(by categoryId: UUID) -> [Recipe] {
+        return recipes.filter { $0.categoryIds.contains(categoryId) }
+    }
+    
+    func getRecipesForCategory(_ categoryId: UUID) -> [Recipe] {
+        return recipes.filter { $0.hasCategory(categoryId) }
+    }
+    
+    
+    // MARK: - Category Management Integration
+    
+    /// Reassign recipes when a category is deleted
+    func reassignRecipesFromDeletedCategory(_ deletedCategoryId: UUID, to newCategoryId: UUID) {
+        var hasChanges = false
+        
+        for i in 0..<recipes.count {
+            var recipe = recipes[i]
+            
+            if recipe.hasCategory(deletedCategoryId) {
+                recipe.removeCategory(deletedCategoryId)
+                recipe.addCategory(newCategoryId)
+                recipes[i] = recipe
+                hasChanges = true
+                print("🔄 Reassigned recipe '\(recipe.title)' from deleted category")
+            }
+        }
+        
+        if hasChanges {
+            saveRecipes()
+        }
+    }
+    
+    /// Assign "New recipes" category to any recipes without categories
+    private func assignNewRecipesCategoryToRecipesWithoutCategories() {
+        let newRecipesId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+        var hasChanges = false
+        
+        for i in 0..<recipes.count {
+            var recipe = recipes[i]
+            
+            if recipe.categoryIds.isEmpty || recipe.primaryCategoryId == nil {
+                recipe.addCategory(newRecipesId, asPrimary: true)
+                recipes[i] = recipe
+                hasChanges = true
+                print("🆕 Assigned '\(recipe.title)' to New recipes category")
+            }
+        }
+        
+        if hasChanges {
+            saveRecipes()
+        }
     }
 }

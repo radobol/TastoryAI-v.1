@@ -262,7 +262,9 @@ struct RecipeEditingView: View {
             ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             imageURL: recipe.imageURL,
-            category: recipe.category,
+            categoryIds: recipe.categoryIds.isEmpty ? [Category.newRecipesCategoryId] : recipe.categoryIds,
+            primaryCategoryId: recipe.primaryCategoryId ?? Category.newRecipesCategoryId,
+            category: recipe.category, // Keep for migration purposes
             servings: recipe.servings,
             sourceURL: recipe.sourceURL,
             tips: tips.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },

@@ -117,6 +117,172 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
    - [ ] Add option to share each recipe directly from thumbnail card of recipe in home screen
    - [ ] Rename items to ingredients on recipe cards
 
+6. **iCloud Sync System** **PLANNED**
+   
+   ### Overview
+   Implement JSON + iCloud Documents sync for seamless multi-device recipe synchronization while maintaining full offline support and protecting existing user data.
+   
+   ### Architecture Decision
+   - **Storage**: JSON files in iCloud Documents container (not CloudKit)
+   - **Sync**: Automatic via iOS iCloud Documents
+   - **Fallback**: Local storage when iCloud unavailable
+   - **Migration**: Safe, non-destructive upgrade for existing users
+   
+   ### Implementation Requirements
+   
+   #### Phase 1: Core iCloud Setup
+   - [ ] Enable iCloud capability in Xcode project
+         - Add iCloud Documents container
+         - Configure entitlements: com.apple.developer.icloud-container-identifiers
+         - Update Info.plist with NSUbiquitousContainers configuration
+   
+   - [ ] Implement iCloud availability detection
+         ```swift
+         // Check if iCloud is available and user is signed in
+         if FileManager.default.ubiquityIdentityToken != nil {
+             // iCloud available
+         } else {
+             // Fallback to local storage
+         }
+         ```
+   
+   #### Phase 2: Migration Strategy (CRITICAL - Zero Data Loss)
+   - [ ] Implement safe migration for existing users
+         ```swift
+         class RecipeStorageManager {
+             func migrateToiCloudIfNeeded() {
+                 // 1. Check if local recipes.json exists
+                 // 2. Check if iCloud is available
+                 // 3. Check if iCloud recipes.json already exists
+                 // 4. If local exists but iCloud doesn't: copy to iCloud
+                 // 5. If both exist: merge (prefer newer based on timestamps)
+                 // 6. Keep local backup until migration confirmed
+                 // 7. Never delete local data without user confirmation
+             }
+         }
+         ```
+   
+   - [ ] Migration flow for existing users:
+         1. App update detects existing local recipes.json
+         2. Prompt user: "Enable iCloud sync to access recipes on all devices?"
+         3. If Yes: Copy local → iCloud, verify, then use iCloud
+         4. If No: Continue with local storage
+         5. Option to enable later in Settings
+   
+   #### Phase 3: Storage Manager Updates
+   - [ ] Update RecipeStorageManager for dual-mode operation
+         ```swift
+         private var storageMode: StorageMode = .local
+         enum StorageMode {
+             case local
+             case iCloud
+         }
+         
+         private var recipesFileURL: URL {
+             switch storageMode {
+             case .local:
+                 return localRecipesURL
+             case .iCloud:
+                 return iCloudRecipesURL
+             }
+         }
+         ```
+   
+   - [ ] Implement iCloud change monitoring
+         - NSMetadataQuery for file updates
+         - Conflict resolution (last-write-wins or merge)
+         - Update UI when sync occurs
+   
+   #### Phase 4: Share Extension Compatibility
+   - [ ] Update Share Extension for iCloud support
+         - Check iCloud availability in extension
+         - Write to same iCloud container
+         - Fallback to App Groups if iCloud unavailable
+   
+   #### Phase 5: UI/UX Updates
+   - [ ] Add sync status indicator in HomeView
+         - Cloud icon with status (synced/syncing/offline)
+         - Last sync timestamp
+   
+   - [ ] Add iCloud toggle in Settings
+         - Enable/disable iCloud sync
+         - Migration status for existing users
+         - Manual sync button
+   
+   - [ ] Error handling UI
+         - "No iCloud account" message
+         - "Storage full" warning
+         - "Sync conflict" resolution
+   
+   ### Technical Implementation Details
+   
+   #### iCloud Document Storage Path
+   ```swift
+   // Get iCloud container
+   if let iCloudURL = FileManager.default.url(forUbiquityContainerIdentifier: nil) {
+       let documentsURL = iCloudURL.appendingPathComponent("Documents")
+       let recipesURL = documentsURL.appendingPathComponent("recipes.json")
+   }
+   ```
+   
+   #### Monitoring iCloud Changes
+   ```swift
+   private func startMonitoringiCloud() {
+       metadataQuery = NSMetadataQuery()
+       metadataQuery?.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
+       metadataQuery?.predicate = NSPredicate(format: "%K LIKE 'recipes.json'", 
+                                             NSMetadataItemFSNameKey)
+       
+       NotificationCenter.default.addObserver(
+           self,
+           selector: #selector(queryDidUpdate),
+           name: .NSMetadataQueryDidUpdate,
+           object: metadataQuery
+       )
+       
+       metadataQuery?.start()
+   }
+   ```
+   
+   ### Testing Guidelines
+   
+   1. **Migration Testing**
+      - Install current version with local recipes
+      - Update to iCloud version
+      - Verify all recipes preserved
+      - Test both "Yes" and "No" to sync prompt
+   
+   2. **Sync Testing**
+      - Add recipe on iPhone → verify appears on iPad
+      - Edit recipe on iPad → verify updates on iPhone
+      - Delete recipe → verify removal syncs
+   
+   3. **Edge Cases**
+      - No iCloud account
+      - iCloud storage full
+      - Airplane mode / offline
+      - Sign out of iCloud
+      - Conflicts from simultaneous edits
+   
+   4. **Share Extension Testing**
+      - Share recipe with iCloud enabled
+      - Share recipe with iCloud disabled
+      - Share recipe while offline
+   
+   ### Important Considerations
+   
+   - **Privacy**: Recipes remain in user's personal iCloud, not our servers
+   - **Cost**: Free for users and developers (uses user's iCloud storage)
+   - **Performance**: Local cache ensures instant access even while syncing
+   - **Backwards Compatibility**: Users can disable iCloud and use local storage
+   - **Data Integrity**: Always maintain local backup during migration
+   
+   ### Success Metrics
+   - Zero data loss during migration
+   - Sync completes within 5 seconds on WiFi
+   - Seamless experience for non-iCloud users
+   - Share Extension continues working reliably
+
 
 ### Performance Requirements
 - Cold start ≤ 2 seconds

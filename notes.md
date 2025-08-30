@@ -1,5 +1,33 @@
 ### MEDIUM PRIORITY (Phase 2B)
 
+4. Category System  **PLANNED**
+   - [ ] Adjust Recipes creation and edit UI to choose from existing, create a new category. By default, all new recipes have "New recipes" category
+         Update schema
+         categories(id, name, slug, is_system)
+         recipe_categories(recipe_id, category_id, is_primary)
+         Constraints: unique (recipe_id, category_id); exactly one is_primary=true per recipe_id
+   - [ ] Seed reserved category New recipes (is_system=true, non‑deletable)
+   - [ ] Recipe create behavior: auto‑assign New recipes as primary; editor allows adding more categories and changing the primary
+   - [ ] Create a new "Categories" section, a new tab + icon (instead of the current "Search") in the app and add an icon to the main menu
+   - [ ] Create "Categories" section UI with 
+         - filtering by category
+         - recipes grouped by category, each recipe appears in all categories that set up
+         - “New recipes” first; others sorted A→Z (locale + case/diacritic‑insensitive)
+         - “+ New category” button opens overlay (create with validation)
+         - “Edit” opens rename / delete 
+
+   - [ ]  Category delete rules: reassign affected primaries to New recipes (or next remaining); block delete if is_system=true
+   - [ ] Validation: name required, 1–32 chars, trimmed; case‑insensitive uniqueness (no duplicates after trimming/diacritics)   
+
+5. Search & Organization  **PLANNED**
+   - [ ] Search bar in HomeView with 250 ms debounce; search title, ingredients, categories, steps; case/diacritic‑insensitive; AND across tokens; highlight matches; works with active category filter
+   - [ ] Add option to select recipies(simmilar as Apple photo app have) and with follow functionality(long‑press or “Select”):
+         - delete selected recipes
+         - change existed or add new category; Add, Remove, Set primary (single)
+   - [ ] Add option to share each recipe directly from thumbnail card of recipe in home screen
+   - [ ] Rename items to ingredients on recipe cards
+
+
 #### 5. AI-Powered Features
 - [ ] Implement AI-powered category detection
 - [ ] Generate relevant tags based on ingredients and cooking methods
@@ -92,3 +120,55 @@
 - Ensure mobile responsiveness for creators on-the-go  
 - Prioritize simplicity in every code change and design decision
 - Follow Apple UI best practices and iOS design guidelines
+
+
+
+
+
+
+
+
+ Here is Claude's plan:                                                                                                                                                                                                         │
+│ ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│ │ Category System Implementation Plan                                                                                                                                                                                        │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ Phase 1: Data Models & Storage (Backend Foundation)                                                                                                                                                                        │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ 1. Create Category Model - New Category.swift with id, name, slug, isSystem fields                                                                                                                                         │ │
+│ │ 2. Update Recipe Model - Replace single category field with categoryIds array and primaryCategoryId                                                                                                                        │ │
+│ │ 3. Create CategoryManager - New service to handle category CRUD operations with JSON persistence                                                                                                                           │ │
+│ │ 4. Migration Logic - Convert existing recipes' string categories to new category system                                                                                                                                    │ │
+│ │ 5. Seed System Category - Initialize "New recipes" as default system category                                                                                                                                              │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ Phase 2: Recipe Creation/Edit UI Updates                                                                                                                                                                                   │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ 6. Update AddRecipeView - Add category picker with multi-select and primary designation                                                                                                                                    │ │
+│ │ 7. Update EditRecipeView - Add category management UI with existing/new category options                                                                                                                                   │ │
+│ │ 8. Update RecipeEditingView - Ensure manual recipe creation assigns "New recipes" by default                                                                                                                               │ │
+│ │ 9. Create CategoryPicker Component - Reusable category selection UI with create new option                                                                                                                                 │ │
+│ │ 10. Update Share Extension - Ensure imported recipes get "New recipes" category                                                                                                                                            │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ Phase 3: Categories Tab & Navigation                                                                                                                                                                                       │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ 11. Replace Search Tab with Categories - Update MainTabView with new categories icon/tab                                                                                                                                   │ │
+│ │ 12. Create CategoriesView - Main categories screen with grouped recipe display                                                                                                                                             │ │
+│ │ 13. Implement Category Filtering - Show recipes by selected category                                                                                                                                                       │ │
+│ │ 14. Add Category Management UI - Create/rename/delete categories with validation                                                                                                                                           │ │
+│ │ 15. Sort & Display Logic - "New recipes" first, then A-Z sorting                                                                                                                                                           │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ Phase 4: Category Management Features                                                                                                                                                                                      │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ 16. Category Delete Logic - Reassign orphaned recipes to "New recipes"                                                                                                                                                     │ │
+│ │ 17. Validation Rules - 1-32 chars, trimmed, case-insensitive uniqueness                                                                                                                                                    │ │
+│ │ 18. Bulk Recipe Actions - Select multiple recipes to change categories                                                                                                                                                     │ │
+│ │ 19. Share Extension Updates - Ensure proper category assignment for shared recipes                                                                                                                                         │ │
+│ │ 20. Testing & Polish - Ensure smooth UX across all category operations                                                                                                                                                     │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ Implementation Approach:                                                                                                                                                                                                   │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ - Minimal disruption - Backward compatible with existing recipes                                                                                                                                                           │ │
+│ │ - Simple architecture - Leverage existing JSON storage pattern                                                                                                                                                             │ │
+│ │ - Clean UI - Follow Apple HIG and existing app design patterns                                                                                                                                                             │ │
+│ │ - Incremental rollout - Each phase is functional independently                                                                                                                                                             │ │
+│ │                                                                                                                                                                                                                            │ │
+│ │ This plan maintains simplicity while adding powerful organization features.    

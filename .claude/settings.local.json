@@ -11,7 +11,9 @@
       "Bash(xcrun simctl install:*)",
       "Read(//var/folders/8p/ms8848194n9f6c1s30vtps2h0000gq/T/TemporaryItems/NSIRD_screencaptureui_UkY9ot/**)",
       "Read(//Users/denis.radabolski/Screenshots/**)",
-      "Bash(xattr:*)"
+      "Bash(xattr:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

@@ -10,8 +10,8 @@ import PhotosUI
 
 struct EditRecipeView: View {
     @State private var title: String
-    @State private var category: String // Legacy field - for display purposes
-    @State private var selectedCategoryId: UUID
+    @State private var primaryCategoryId: UUID
+    @State private var additionalCategoryIds: [UUID]
     @State private var servings: Int
     @State private var ingredients: [String]
     @State private var newIngredient: String = ""
@@ -22,6 +22,12 @@ struct EditRecipeView: View {
     @State private var imageURL: String?
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isProcessingPhoto = false
+    
+    // Category creation
+    @State private var showingNewCategorySheet = false
+    @State private var newCategoryName = ""
+    @State private var categoryCreationError: String?
+    @State private var newCategoryForPrimary = false
     
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isAddingIngredient: Bool
@@ -38,9 +44,10 @@ struct EditRecipeView: View {
         self.onSave = onSave
         
         _title = State(initialValue: recipe.title)
-        _category = State(initialValue: recipe.category ?? "")
-        // Ensure selectedCategoryId always has a valid value - fallback to "New recipes" if nil
-        _selectedCategoryId = State(initialValue: recipe.primaryCategoryId ?? Category.newRecipesCategoryId)
+        // Ensure primary category is set - fallback to "New recipes" if nil
+        _primaryCategoryId = State(initialValue: recipe.primaryCategoryId ?? Category.newRecipesCategoryId)
+        // Get additional categories (all except primary)
+        _additionalCategoryIds = State(initialValue: recipe.getAdditionalCategoryIds())
         _servings = State(initialValue: recipe.servings)
         _ingredients = State(initialValue: recipe.ingredients)
         _steps = State(initialValue: recipe.steps)
@@ -129,19 +136,35 @@ struct EditRecipeView: View {
                     TextField("Recipe Title", text: $title)
                         .font(Typography.Body.regular)
                     
-                    // Category Picker
+                    // Primary Category Picker
                     HStack {
-                        Text("Category")
+                        Text("Primary Category")
                             .font(Typography.Body.regular)
                         Spacer()
-                        Picker("Category", selection: $selectedCategoryId) {
+                        Menu {
                             ForEach(categoryManager.categories, id: \.id) { category in
-                                Text(category.name)
-                                    .tag(category.id)
+                                Button(category.name) {
+                                    primaryCategoryId = category.id
+                                    // Remove from additional if it was there
+                                    additionalCategoryIds.removeAll { $0 == category.id }
+                                }
+                            }
+                            Divider()
+                            Button(action: {
+                                newCategoryForPrimary = true
+                                showingNewCategorySheet = true
+                            }) {
+                                Label("New Category", systemImage: "plus.circle")
+                            }
+                        } label: {
+                            HStack {
+                                Text(categoryManager.getCategoryName(for: primaryCategoryId) ?? "Select")
+                                    .foregroundColor(.primary)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                         }
-                        .pickerStyle(.menu)
-                        .font(Typography.Body.regular)
                     }
                     
                     HStack {
@@ -152,6 +175,66 @@ struct EditRecipeView: View {
                             Text("\(servings)")
                                 .font(Typography.Body.semibold)
                         }
+                    }
+                }
+                
+                // Additional Categories Section
+                Section(header: Text("Additional Categories")) {
+                    ForEach(additionalCategoryIds, id: \.self) { categoryId in
+                        HStack {
+                            Text(categoryManager.getCategoryName(for: categoryId) ?? "Unknown")
+                                .font(Typography.Body.regular)
+                            Spacer()
+                            Button(action: {
+                                additionalCategoryIds.removeAll { $0 == categoryId }
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    
+                    // Use same Menu style as primary category for consistency
+                    HStack {
+                        Text("Secondary Category")
+                            .font(Typography.Body.regular)
+                        Spacer()
+                        Menu {
+                            // Show all categories except primary and already added
+                            ForEach(categoryManager.categories.filter { category in
+                                category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                            }, id: \.id) { category in
+                                Button(category.name) {
+                                    additionalCategoryIds.append(category.id)
+                                }
+                            }
+                            
+                            if categoryManager.categories.filter({ category in
+                                category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                            }).isEmpty {
+                                Text("All categories already added")
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Divider()
+                            Button(action: {
+                                newCategoryForPrimary = false
+                                showingNewCategorySheet = true
+                            }) {
+                                Label("New Category", systemImage: "plus.circle")
+                            }
+                        } label: {
+                            HStack {
+                                Text("Select")
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .disabled(categoryManager.categories.filter { category in
+                            category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                        }.isEmpty && !showingNewCategorySheet)
                     }
                 }
                 
@@ -297,6 +380,41 @@ struct EditRecipeView: View {
                 // Ensure "New recipes" category exists in CategoryManager
                 let _ = categoryManager.getNewRecipesCategory()
             }
+            .sheet(isPresented: $showingNewCategorySheet) {
+                NewCategorySheet(
+                    categoryName: $newCategoryName,
+                    errorMessage: $categoryCreationError,
+                    onSave: { name in
+                        createNewCategory(name: name, setPrimary: newCategoryForPrimary)
+                    },
+                    onCancel: {
+                        newCategoryName = ""
+                        categoryCreationError = nil
+                        showingNewCategorySheet = false
+                    }
+                )
+            }
+        }
+    }
+    
+    private func createNewCategory(name: String, setPrimary: Bool = false) {
+        switch categoryManager.createCategory(name: name) {
+        case .success(let category):
+            if setPrimary {
+                // If setting as primary, remove from additional if present
+                primaryCategoryId = category.id
+                additionalCategoryIds.removeAll { $0 == category.id }
+            } else {
+                // Only add to additional if not already primary
+                if category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id) {
+                    additionalCategoryIds.append(category.id)
+                }
+            }
+            newCategoryName = ""
+            categoryCreationError = nil
+            showingNewCategorySheet = false
+        case .failure(let error):
+            categoryCreationError = error.localizedDescription
         }
     }
     
@@ -350,8 +468,11 @@ struct EditRecipeView: View {
     }
     
     private func saveRecipe() {
-        // Use the selected category ID directly since it's guaranteed to be valid
-        let finalCategoryId = selectedCategoryId
+        // Combine primary and additional categories
+        var allCategoryIds = additionalCategoryIds
+        if !allCategoryIds.contains(primaryCategoryId) {
+            allCategoryIds.insert(primaryCategoryId, at: 0)
+        }
         
         var updatedRecipe = Recipe(
             id: originalRecipe.id,
@@ -359,8 +480,8 @@ struct EditRecipeView: View {
             ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             imageURL: imageURL,
-            categoryIds: [finalCategoryId], // Simple single category for now
-            primaryCategoryId: finalCategoryId,
+            categoryIds: allCategoryIds,
+            primaryCategoryId: primaryCategoryId,
             category: nil, // Clear legacy field
             servings: servings,
             sourceURL: originalRecipe.sourceURL,

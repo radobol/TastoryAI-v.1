@@ -17,16 +17,16 @@ Implement a category system for recipe organization with multi-category support,
 - [x] Display category in recipe cards and detail views
 - [x] Basic category picker in EditRecipeView (single selection only currently)
 
-### 📋 Phase 1: Recipe Creation/Edit UI Enhancements
-- [ ] Add "+ New Category" option to category picker in:
-  - [ ] EditRecipeView.swift
-  - [ ] RecipeEditingView.swift
-  - [ ] AddRecipeView.swift (add category selection to manual entry)
-  - [ ] Share Extension (UIKit implementation)
-- [ ] Allow choosing from existing categories
-- [ ] Support multiple categories per recipe (multi-select)
-- [ ] UI to designate/change primary category
-- [ ] Validate new category names (case-insensitive uniqueness after trimming/diacritics)
+### ✅ Phase 1: Recipe Creation/Edit UI Enhancements (COMPLETED - 2025-09-10)
+- [x] Add "+ New Category" option to category picker in:
+  - [x] EditRecipeView.swift - Two-input system with Menu-based pickers
+  - [x] RecipeEditingView.swift - Consistent Menu UI for both primary/secondary
+  - [x] AddRecipeView.swift - Uses RecipeEditingView (already has category support)
+  - [x] ~Share Extension - UIKit implementation with primary/secondary pickers~ (Reverted - see Phase 8)
+- [x] Allow choosing from existing categories - Single shared category list
+- [x] Support multiple categories per recipe - Primary + Additional categories
+- [x] UI to designate/change primary category - Separate Primary/Secondary inputs
+- [x] Validate new category names - Case/diacritic-insensitive with proper error messages
 
 ### 📋 Phase 2: Categories Tab Implementation
 - [ ] Create new "Categories" tab (keep Search tab - don't replace)
@@ -85,12 +85,37 @@ Implement a category system for recipe organization with multi-category support,
 - [ ] Empty states for categories with no recipes
 - [ ] Smooth animations for filtering and transitions
 
+### 📋 Phase 8: Share Extension Deep Linking
+- [ ] Add "Edit Recipe" button to Share Extension
+  - [ ] Shows after recipe is saved successfully
+  - [ ] Opens main app directly to EditRecipeView for that recipe
+- [ ] Implement URL scheme for the main app (e.g., `tastoryai://edit-recipe/{recipe-id}`)
+- [ ] Handle deep link in TastoryAI_v_1App.swift
+- [ ] Navigate to EditRecipeView with the specified recipe
+- [ ] This avoids duplicating complex category UI in Share Extension
+- [ ] Users can still quickly save recipes, then edit categories in the main app
+
 ---
 
-## Current Technical Implementation (as of 2025-08-30)
+## Current Technical Implementation (Updated 2025-09-10)
 
 ### Overview
-The category system foundation has been implemented with core functionality working. All recipes are now assigned to categories using a UUID-based system, with "New recipes" as the default system category.
+The category system foundation has been implemented with core functionality working. Phase 1 is now complete with a two-input category system (Primary/Secondary) that maintains a single shared category list throughout the app.
+
+### Phase 1 Implementation Details (Completed 2025-09-10)
+
+#### Two-Input Category System
+- **Primary Category**: Required, single selection from all available categories
+- **Secondary Categories**: Optional, multiple selections (excluding primary)
+- **Consistent UI**: Both use Menu-based pickers (no overlays/sheets for selection)
+- **Single Category List**: All pickers draw from the same CategoryManager.categories
+
+#### Key Improvements Made
+1. **Fixed category filtering** - Secondary picker shows all categories except primary and already selected
+2. **Consistent Menu UI** - Replaced AddCategorySheet overlay with Menu-based approach
+3. **Proper validation** - Case/diacritic-insensitive duplicate checking with error messages
+4. **Data consistency** - Primary category always included in categoryIds array
+5. **Helper methods** - Added getAdditionalCategoryIds() to Recipe model
 
 ### Important Design Decisions
 
@@ -197,15 +222,17 @@ struct Recipe {
 - `/TastoryAI v.1/Services/CategoryManager.swift` - Category management service
 
 #### Modified Files:
-- `/TastoryAI v.1/Models/Recipe.swift` - Added category fields and methods
+- `/TastoryAI v.1/Models/Recipe.swift` - Added category fields and helper methods (setPrimaryCategory, getAdditionalCategoryIds)
 - `/TastoryAI v.1/Services/RecipeStorageManager.swift` - Category assignment logic
 - `/TastoryAI v.1/Services/RecipeExtractionService.swift` - Auto-assign "New recipes"
+- `/TastoryAI v.1/Services/CategoryManager.swift` - Enhanced validation (createCategory, validateCategoryName)
 - `/TastoryAI v.1/Views/RecipeCardView.swift` - Display category
 - `/TastoryAI v.1/Views/RecipeDetailView.swift` - Display category
-- `/TastoryAI v.1/Views/EditRecipeView.swift` - Category picker
-- `/TastoryAI v.1/Views/RecipeEditingView.swift` - Category assignment
-- `/TastoryAI v.1/Views/AddRecipeView.swift` - Auto-assign categories
-- `/TastoryShare/ShareViewController.swift` - Use hardcoded category UUID
+- `/TastoryAI v.1/Views/EditRecipeView.swift` - Two-input category system with Menu pickers
+- `/TastoryAI v.1/Views/RecipeEditingView.swift` - Consistent Menu-based category selection
+- `/TastoryAI v.1/Views/CategorySheets.swift` - NEW: Modal for creating new categories
+- `/TastoryAI v.1/Views/AddRecipeView.swift` - Auto-assign categories (needs category selection UI)
+- `/TastoryShare/ShareViewController.swift` - Use hardcoded category UUID (needs category picker)
 
 ### Known Issues (Fixed)
 
@@ -301,5 +328,20 @@ After completing each phase:
 - Multi-category recipe → Must appear in all assigned categories
 - Share Extension category sync → New categories must appear in main app
 
+## Remaining Work
+
+### Phase 1 COMPLETED ✅ (with modification)
+All recipe creation/import methods in the main app support the two-input category system:
+- Main app editing (EditRecipeView, RecipeEditingView)
+- Manual entry (via RecipeEditingView)
+
+**Note**: Share Extension category UI was reverted in favor of a simpler approach with deep linking (see Phase 8)
+
+### Next Priority - Phase 2: Categories Tab
+**Goal**: Create dedicated Categories tab for browsing and managing categories
+- Replace Search tab with Categories tab
+- Display all categories with recipe counts
+- Navigation to filtered recipe views
+
 ## Next Steps
-**Start with Phase 1**: Add "+ New Category" option to category picker in EditRecipeView.swift as prototype, then replicate in other views.
+**Continue with Phase 2**: Create CategoriesView.swift and integrate into MainTabView, replacing the placeholder Search tab.

@@ -139,16 +139,64 @@ class CategoryManager: ObservableObject {
     
     // MARK: - Validation
     
-    func isDuplicateName(_ name: String, excluding categoryId: UUID?) -> Bool {
-        let searchName = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    func isDuplicateName(_ name: String, excluding categoryId: UUID? = nil) -> Bool {
+        let searchName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        
         return categories.contains { category in
             category.id != categoryId && 
-            category.name.lowercased() == searchName
+            category.name.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current) == searchName
         }
     }
     
     func isValidCategoryName(_ name: String) -> Bool {
         return Category.isValidName(name) && !isDuplicateName(name, excluding: nil)
+    }
+    
+    enum CategoryError: LocalizedError {
+        case duplicateName
+        case invalidLength
+        case emptyName
+        
+        var errorDescription: String? {
+            switch self {
+            case .duplicateName:
+                return "A category with this name already exists"
+            case .invalidLength:
+                return "Category name must be 1-32 characters"
+            case .emptyName:
+                return "Category name cannot be empty"
+            }
+        }
+    }
+    
+    func validateCategoryName(_ name: String, excluding categoryId: UUID? = nil) -> Result<String, CategoryError> {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if trimmed.isEmpty {
+            return .failure(.emptyName)
+        }
+        
+        if trimmed.count > 32 {
+            return .failure(.invalidLength)
+        }
+        
+        if isDuplicateName(trimmed, excluding: categoryId) {
+            return .failure(.duplicateName)
+        }
+        
+        return .success(trimmed)
+    }
+    
+    func createCategory(name: String) -> Result<Category, CategoryError> {
+        switch validateCategoryName(name) {
+        case .success(let validName):
+            let newCategory = Category(name: validName)
+            addCategory(newCategory)
+            return .success(newCategory)
+        case .failure(let error):
+            return .failure(error)
+        }
     }
     
     // MARK: - Migration & Initialization

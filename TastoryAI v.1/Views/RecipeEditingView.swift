@@ -17,6 +17,16 @@ struct RecipeEditingView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isProcessingPhoto = false
     
+    // Category management
+    @State private var primaryCategoryId: UUID
+    @State private var additionalCategoryIds: [UUID]
+    @State private var showingNewCategorySheet = false
+    @State private var newCategoryName = ""
+    @State private var categoryCreationError: String?
+    @State private var newCategoryForPrimary = false
+    
+    @StateObject private var categoryManager = CategoryManager.shared
+    
     let onSave: (Recipe) -> Void
     let onCancel: () -> Void
     
@@ -25,6 +35,11 @@ struct RecipeEditingView: View {
         self._ingredients = State(initialValue: recipe.ingredients.isEmpty ? [""] : recipe.ingredients)
         self._steps = State(initialValue: recipe.steps.isEmpty ? [""] : recipe.steps)
         self._tips = State(initialValue: recipe.tips.isEmpty ? [""] : recipe.tips)
+        
+        // Initialize category fields
+        self._primaryCategoryId = State(initialValue: recipe.primaryCategoryId ?? Category.newRecipesCategoryId)
+        self._additionalCategoryIds = State(initialValue: recipe.getAdditionalCategoryIds())
+        
         self.onSave = onSave
         self.onCancel = onCancel
     }
@@ -103,6 +118,136 @@ struct RecipeEditingView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.horizontal, Theme.Spacing.medium)
+                    
+                    // Categories Section
+                    VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
+                        Text("CATEGORIES")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(.secondaryLabel))
+                            .padding(.horizontal, Theme.Spacing.medium)
+                        
+                        VStack(spacing: Theme.Spacing.small) {
+                            // Primary Category
+                            HStack {
+                                Text("Primary:")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(Theme.Colors.secondaryText)
+                                    .frame(width: 80, alignment: .leading)
+                                
+                                Menu {
+                                    ForEach(categoryManager.categories, id: \.id) { category in
+                                        Button(category.name) {
+                                            primaryCategoryId = category.id
+                                            additionalCategoryIds.removeAll { $0 == category.id }
+                                        }
+                                    }
+                                    Divider()
+                                    Button(action: {
+                                        newCategoryForPrimary = true
+                                        showingNewCategorySheet = true
+                                    }) {
+                                        Label("New Category", systemImage: "plus.circle")
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(categoryManager.getCategoryName(for: primaryCategoryId) ?? "Select")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Theme.Colors.secondaryBackground)
+                                    .cornerRadius(8)
+                                }
+                            }
+                            
+                            // Additional Categories
+                            if !additionalCategoryIds.isEmpty {
+                                HStack(alignment: .top) {
+                                    Text("Also in:")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(Theme.Colors.secondaryText)
+                                        .frame(width: 80, alignment: .leading)
+                                    
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        ForEach(additionalCategoryIds, id: \.self) { categoryId in
+                                            HStack {
+                                                Text(categoryManager.getCategoryName(for: categoryId) ?? "Unknown")
+                                                    .font(.system(size: 16))
+                                                    .foregroundColor(.primary)
+                                                
+                                                Button(action: {
+                                                    additionalCategoryIds.removeAll { $0 == categoryId }
+                                                }) {
+                                                    Image(systemName: "xmark.circle.fill")
+                                                        .foregroundColor(.secondary)
+                                                        .font(.system(size: 16))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                }
+                            }
+                            
+                            // Add Category Menu (same style as primary)
+                            HStack {
+                                Text("Secondary:")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(Theme.Colors.secondaryText)
+                                    .frame(width: 80, alignment: .leading)
+                                
+                                Menu {
+                                    // Show all categories except primary and already added
+                                    ForEach(categoryManager.categories.filter { category in
+                                        category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                                    }, id: \.id) { category in
+                                        Button(category.name) {
+                                            additionalCategoryIds.append(category.id)
+                                        }
+                                    }
+                                    
+                                    if categoryManager.categories.filter({ category in
+                                        category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                                    }).isEmpty {
+                                        Text("All categories already added")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Divider()
+                                    Button(action: {
+                                        newCategoryForPrimary = false
+                                        showingNewCategorySheet = true
+                                    }) {
+                                        Label("New Category", systemImage: "plus.circle")
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text("Select")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Theme.Colors.secondaryBackground)
+                                    .cornerRadius(8)
+                                }
+                                .disabled(categoryManager.categories.filter { category in
+                                    category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                                }.isEmpty)
+                            }
+                        }
+                        .padding(.horizontal, Theme.Spacing.medium)
+                    }
                     
                     // Ingredients Section
                     VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
@@ -226,6 +371,39 @@ struct RecipeEditingView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showingNewCategorySheet) {
+                NewCategorySheet(
+                    categoryName: $newCategoryName,
+                    errorMessage: $categoryCreationError,
+                    onSave: { name in
+                        createNewCategory(name: name, setPrimary: newCategoryForPrimary)
+                    },
+                    onCancel: {
+                        newCategoryName = ""
+                        categoryCreationError = nil
+                        showingNewCategorySheet = false
+                    }
+                )
+            }
+        }
+    }
+    
+    private func createNewCategory(name: String, setPrimary: Bool = false) {
+        switch categoryManager.createCategory(name: name) {
+        case .success(let category):
+            if setPrimary {
+                primaryCategoryId = category.id
+                additionalCategoryIds.removeAll { $0 == category.id }
+            } else {
+                if category.id != primaryCategoryId {
+                    additionalCategoryIds.append(category.id)
+                }
+            }
+            newCategoryName = ""
+            categoryCreationError = nil
+            showingNewCategorySheet = false
+        case .failure(let error):
+            categoryCreationError = error.localizedDescription
         }
     }
     
@@ -256,15 +434,21 @@ struct RecipeEditingView: View {
     }
     
     private func saveRecipe() {
+        // Combine primary and additional categories
+        var allCategoryIds = additionalCategoryIds
+        if !allCategoryIds.contains(primaryCategoryId) {
+            allCategoryIds.insert(primaryCategoryId, at: 0)
+        }
+        
         let updatedRecipe = Recipe(
             id: recipe.id,
             title: recipe.title.isEmpty ? "Untitled Recipe" : recipe.title,
             ingredients: ingredients.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             steps: steps.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },
             imageURL: recipe.imageURL,
-            categoryIds: recipe.categoryIds.isEmpty ? [Category.newRecipesCategoryId] : recipe.categoryIds,
-            primaryCategoryId: recipe.primaryCategoryId ?? Category.newRecipesCategoryId,
-            category: recipe.category, // Keep for migration purposes
+            categoryIds: allCategoryIds,
+            primaryCategoryId: primaryCategoryId,
+            category: nil, // Clear legacy field
             servings: recipe.servings,
             sourceURL: recipe.sourceURL,
             tips: tips.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty },

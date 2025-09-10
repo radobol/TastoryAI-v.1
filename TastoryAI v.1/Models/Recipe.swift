@@ -88,11 +88,17 @@ struct Recipe: Identifiable, Codable, Hashable {
         }
     }
     
-    /// Set the primary category
+    /// Set the primary category (ensures it's also in categoryIds)
     mutating func setPrimaryCategory(_ categoryId: UUID) {
-        if hasCategory(categoryId) {
-            primaryCategoryId = categoryId
+        primaryCategoryId = categoryId
+        if !categoryIds.contains(categoryId) {
+            categoryIds.append(categoryId)
         }
+    }
+    
+    /// Get additional categories (all categories except primary)
+    func getAdditionalCategoryIds() -> [UUID] {
+        return categoryIds.filter { $0 != primaryCategoryId }
     }
     
 }

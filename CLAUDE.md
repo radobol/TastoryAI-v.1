@@ -90,24 +90,47 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
    - ✅ Local ingredient database - 100 common cooking ingredients with scaling properties
    - ✅ Share recipe via system sheet - Built-in iOS share integration
 
-4. Category System  **PLANNED**
-   - [ ] Adjust Recipes creation and edit UI to choose from existing, create a new category. By default, all new recipes have "New recipes" category
-         Update schema
-         categories(id, name, slug, is_system)
-         recipe_categories(recipe_id, category_id, is_primary)
-         Constraints: unique (recipe_id, category_id); exactly one is_primary=true per recipe_id
-   - [ ] Seed reserved category New recipes (is_system=true, non‑deletable)
-   - [ ] Recipe create behavior: auto‑assign New recipes as primary; editor allows adding more categories and changing the primary
-   - [ ] Create a new "Categories" section, a new tab + icon (instead of the current "Search") in the app and add an icon to the main menu
-   - [ ] Create "Categories" section UI with 
-         - filtering by category
-         - recipes grouped by category, each recipe appears in all categories that set up
-         - “New recipes” first; others sorted A→Z (locale + case/diacritic‑insensitive)
-         - “+ New category” button opens overlay (create with validation)
-         - “Edit” opens rename / delete 
+4. **Category System** **Phase 1 ✅ COMPLETED, Phase 2 ✅ COMPLETED & TESTED**
 
-   - [ ]  Category delete rules: reassign affected primaries to New recipes (or next remaining); block delete if is_system=true
-   - [ ] Validation: name required, 1–32 chars, trimmed; case‑insensitive uniqueness (no duplicates after trimming/diacritics)   
+   **📋 Detailed Plan**: See [planForCategory4.md](./planForCategory4.md) for full implementation roadmap
+
+   **Phase 1 - Data Models & Recipe Editing** ✅ **COMPLETED**
+   - ✅ Category model with validation (Category.swift) - id, name, slug, isSystem fields
+   - ✅ Recipe model extended with categoryIds and primaryCategoryId (Recipe.swift)
+   - ✅ CategoryManager singleton with CRUD operations (CategoryManager.swift)
+   - ✅ "New recipes" system category with fixed UUID (00000000-0000-0000-0000-000000000001)
+   - ✅ Auto-assignment of "New recipes" to new recipes as primary category
+   - ✅ Recipe editing UI with primary and additional category pickers (EditRecipeView.swift)
+   - ✅ Category creation sheets (NewCategorySheet, AddCategorySheet) in CategorySheets.swift
+   - ✅ RecipeStorageManager category filtering methods (getRecipesForCategory)
+   - ✅ RecipeCardView displays primary category with tag icon
+   - ✅ Share Extension integration with category fields
+   - ✅ Validation: 1-32 chars, case/diacritic-insensitive uniqueness, system category protection
+   - ✅ Delete rules: reassign recipes to "New recipes", prevent system category deletion
+
+   **Phase 2 - Categories Tab UI** ✅ **COMPLETED & TESTED**
+   - ✅ Replaced Search tab with Categories tab (3 tabs: Recipes, Categories, Profile)
+   - ✅ Created CategoriesView.swift - category list with recipe counts
+   - ✅ Created FilteredRecipesView.swift - category-based recipe filtering
+   - ✅ Updated MainTabView.swift - replaced SearchView with CategoriesView
+   - ✅ Category list displays "New recipes" first, others A-Z sorted (locale-aware)
+   - ✅ Recipe count badges showing correct counts for each category
+   - ✅ "+ New Category" button with full validation (duplicates, length, empty names)
+   - ✅ Empty states for categories without recipes
+   - ✅ Navigation to filtered recipes working smoothly
+   - ✅ Multi-category support - recipes appear in all assigned categories
+   - ✅ All user testing completed successfully with zero issues
+
+   **Phase 3 - Category Management** **PLANNED**
+   - [ ] Category edit/rename functionality
+   - [ ] Category deletion with recipe reassignment
+   - [ ] Swipe actions for category management
+
+   **Phase 4 - Search Integration** **PLANNED**
+   - [ ] Add category filter to search functionality
+
+   **Phase 5 - Bulk Operations** **PLANNED**
+   - [ ] Multi-select recipes for bulk category assignment   
 
 5. Search & Organization  **PLANNED**
    - [ ] Search bar in HomeView with 250 ms debounce; search title, ingredients, categories, steps; case/diacritic‑insensitive; AND across tokens; highlight matches; works with active category filter

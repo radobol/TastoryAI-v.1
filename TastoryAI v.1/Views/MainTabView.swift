@@ -18,9 +18,9 @@ struct MainTabView: View {
                 }
                 .tag(0)
             
-            SearchView()
+            CategoriesView()
                 .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
+                    Label("Categories", systemImage: "folder.fill")
                 }
                 .tag(1)
             
@@ -31,20 +31,6 @@ struct MainTabView: View {
                 .tag(2)
         }
         .accentColor(Theme.Colors.accent)
-    }
-}
-
-struct SearchView: View {
-    var body: some View {
-        NavigationView {
-            VStack {
-                Text("Search coming soon")
-                    .font(Typography.Body.regular)
-                    .foregroundColor(Theme.Colors.secondaryText)
-            }
-            .navigationTitle("Search")
-            .background(Theme.Colors.background)
-        }
     }
 }
 

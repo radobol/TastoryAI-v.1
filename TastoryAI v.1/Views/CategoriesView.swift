@@ -15,6 +15,15 @@ struct CategoriesView: View {
     @State private var newCategoryName = ""
     @State private var categoryErrorMessage: String?
 
+    // Edit/Delete state
+    @State private var categoryToEdit: Category?
+    @State private var showingEditCategorySheet = false
+    @State private var editCategoryName = ""
+    @State private var editCategoryError: String?
+    @State private var categoryToDelete: Category?
+    @State private var showingDeleteAlert = false
+    @State private var deleteAffectedRecipeCount = 0
+
     var body: some View {
         NavigationStack {
             Group {
@@ -47,6 +56,39 @@ struct CategoriesView: View {
                     }
                 )
             }
+            .sheet(isPresented: $showingEditCategorySheet) {
+                if let category = categoryToEdit {
+                    EditCategorySheet(
+                        category: category,
+                        categoryName: $editCategoryName,
+                        errorMessage: $editCategoryError,
+                        onSave: { newName in
+                            handleUpdateCategory(category: category, newName: newName)
+                        },
+                        onCancel: {
+                            resetEditForm()
+                        }
+                    )
+                }
+            }
+            .alert("Delete Category", isPresented: $showingDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    if let category = categoryToDelete {
+                        handleDeleteCategory(category)
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    resetDeleteState()
+                }
+            } message: {
+                if let category = categoryToDelete {
+                    if deleteAffectedRecipeCount > 0 {
+                        Text("Are you sure you want to delete \"\(category.name)\"? \(deleteAffectedRecipeCount) recipe\(deleteAffectedRecipeCount == 1 ? "" : "s") will be moved to \"New recipes\". This action cannot be undone.")
+                    } else {
+                        Text("Are you sure you want to delete \"\(category.name)\"? This action cannot be undone.")
+                    }
+                }
+            }
         }
     }
 
@@ -60,6 +102,22 @@ struct CategoriesView: View {
                         category: category,
                         recipeCount: getRecipeCount(for: category.id)
                     )
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    if !category.isSystem {
+                        Button(role: .destructive) {
+                            handleDeleteSwipe(for: category)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+
+                        Button {
+                            handleEditSwipe(for: category)
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                        .tint(Theme.Colors.accent)
+                    }
                 }
             }
         }
@@ -111,6 +169,65 @@ struct CategoriesView: View {
     private func resetCategoryForm() {
         newCategoryName = ""
         categoryErrorMessage = nil
+    }
+
+    // MARK: - Edit/Delete Actions
+
+    private func handleEditSwipe(for category: Category) {
+        categoryToEdit = category
+        editCategoryName = category.name
+        editCategoryError = nil
+        showingEditCategorySheet = true
+    }
+
+    private func handleDeleteSwipe(for category: Category) {
+        categoryToDelete = category
+        deleteAffectedRecipeCount = getRecipeCount(for: category.id)
+        showingDeleteAlert = true
+    }
+
+    private func handleUpdateCategory(category: Category, newName: String) {
+        let result = categoryManager.validateCategoryName(newName, excluding: category.id)
+
+        switch result {
+        case .success(let validName):
+            var updatedCategory = category
+            updatedCategory.name = validName
+            updatedCategory.slug = Category.generateSlug(from: validName)
+            categoryManager.updateCategory(updatedCategory)
+            showingEditCategorySheet = false
+            resetEditForm()
+
+        case .failure(let error):
+            editCategoryError = error.localizedDescription
+        }
+    }
+
+    private func resetEditForm() {
+        categoryToEdit = nil
+        editCategoryName = ""
+        editCategoryError = nil
+    }
+
+    private func handleDeleteCategory(_ category: Category) {
+        let newRecipesCategory = categoryManager.getNewRecipesCategory()
+
+        // Step 1: Reassign affected recipes to "New recipes"
+        storageManager.reassignRecipesFromDeletedCategory(
+            category.id,
+            to: newRecipesCategory.id
+        )
+
+        // Step 2: Delete the category
+        categoryManager.deleteCategory(withId: category.id)
+
+        // Step 3: Clean up state
+        resetDeleteState()
+    }
+
+    private func resetDeleteState() {
+        categoryToDelete = nil
+        deleteAffectedRecipeCount = 0
     }
 }
 

@@ -64,6 +64,64 @@ struct NewCategorySheet: View {
     }
 }
 
+// MARK: - Edit Category Sheet
+struct EditCategorySheet: View {
+    let category: Category
+    @Binding var categoryName: String
+    @Binding var errorMessage: String?
+    let onSave: (String) -> Void
+    let onCancel: () -> Void
+
+    @FocusState private var isNameFieldFocused: Bool
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextField("Category Name", text: $categoryName)
+                        .font(Typography.Body.regular)
+                        .focused($isNameFieldFocused)
+                        .onChange(of: categoryName) { _, _ in
+                            errorMessage = nil
+                        }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                } header: {
+                    Text("Rename category")
+                } footer: {
+                    Text("Category names must be 1-32 characters and unique")
+                        .font(.caption)
+                }
+            }
+            .navigationTitle("Edit Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        onCancel()
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        onSave(categoryName)
+                    }
+                    .disabled(categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .onAppear {
+                isNameFieldFocused = true
+            }
+        }
+    }
+}
+
 // MARK: - Add Category Selection Sheet
 struct AddCategorySheet: View {
     let categories: [Category]

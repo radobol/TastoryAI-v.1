@@ -9,10 +9,11 @@ import SwiftUI
 
 struct RecipeCardView: View {
     let recipe: Recipe
-    
+    var isSelectionMode: Bool = false
+    var isSelected: Bool = false
+
     var body: some View {
-        NavigationLink(destination: RecipeDetailView(recipeId: recipe.id)) {
-            VStack(alignment: .leading, spacing: 0) {
+        let cardContent = VStack(alignment: .leading, spacing: 0) {
                 if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
                     AsyncImage(url: url) { phase in
                         switch phase {
@@ -21,7 +22,7 @@ struct RecipeCardView: View {
                                 RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
                                     .fill(Theme.Colors.tertiaryBackground)
                                     .aspectRatio(1.2, contentMode: .fit)
-                                
+
                                 ProgressView()
                                     .scaleEffect(0.8)
                             }
@@ -35,7 +36,7 @@ struct RecipeCardView: View {
                                 RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
                                     .fill(Theme.Colors.tertiaryBackground)
                                     .aspectRatio(1.2, contentMode: .fit)
-                                
+
                                 Image(systemName: "photo")
                                     .font(.system(size: 40))
                                     .foregroundColor(Theme.Colors.tertiaryText)
@@ -45,7 +46,7 @@ struct RecipeCardView: View {
                                 RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
                                     .fill(Theme.Colors.tertiaryBackground)
                                     .aspectRatio(1.2, contentMode: .fit)
-                                
+
                                 Image(systemName: "photo")
                                     .font(.system(size: 40))
                                     .foregroundColor(Theme.Colors.tertiaryText)
@@ -57,20 +58,20 @@ struct RecipeCardView: View {
                         RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
                             .fill(Theme.Colors.tertiaryBackground)
                             .aspectRatio(1.2, contentMode: .fit)
-                        
+
                         Image(systemName: "photo")
                             .font(.system(size: 40))
                             .foregroundColor(Theme.Colors.tertiaryText)
                     }
                 }
-                
+
                 VStack(alignment: .leading, spacing: Theme.Spacing.xSmall) {
                     Text(recipe.title)
                         .font(Typography.Callout.semibold)
                         .foregroundColor(Theme.Colors.text)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                    
+
                     // Display primary category from new category system
                     let categoryName = getCategoryDisplayName(for: recipe)
                     HStack(spacing: Theme.Spacing.xxSmall) {
@@ -80,14 +81,14 @@ struct RecipeCardView: View {
                             .font(Typography.Caption1.medium)
                     }
                     .foregroundColor(Theme.Colors.secondaryText)
-                    
+
                     HStack(spacing: Theme.Spacing.small) {
                         Label("\(recipe.servings)", systemImage: "person.2.fill")
                             .font(Typography.Caption1.regular)
                             .foregroundColor(Theme.Colors.tertiaryText)
-                        
+
                         Spacer()
-                        
+
                         Text("\(recipe.ingredients.count) items")
                             .font(Typography.Caption1.regular)
                             .foregroundColor(Theme.Colors.tertiaryText)
@@ -103,8 +104,38 @@ struct RecipeCardView: View {
                 x: Theme.Shadow.small.x,
                 y: Theme.Shadow.small.y
             )
+            .overlay(alignment: .topTrailing) {
+                if isSelectionMode {
+                    ZStack {
+                        Circle()
+                            .fill(isSelected ? Theme.Colors.accent : Theme.Colors.tertiaryBackground)
+                            .frame(width: 28, height: 28)
+                            .shadow(
+                                color: Theme.Shadow.small.color,
+                                radius: Theme.Shadow.small.radius
+                            )
+
+                        if isSelected {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding(8)
+                }
+            }
+
+        return Group {
+            if isSelectionMode {
+                cardContent
+                    .buttonStyle(PlainButtonStyle())
+            } else {
+                NavigationLink(destination: RecipeDetailView(recipeId: recipe.id)) {
+                    cardContent
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
-        .buttonStyle(PlainButtonStyle())
     }
     
     // MARK: - Helper Methods

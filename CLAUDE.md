@@ -90,9 +90,7 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
    - ✅ Local ingredient database - 100 common cooking ingredients with scaling properties
    - ✅ Share recipe via system sheet - Built-in iOS share integration
 
-4. **Category System** **Phase 1 ✅ COMPLETED, Phase 2 ✅ COMPLETED & TESTED**
-
-   **📋 Detailed Plan**: See [planForCategory4.md](./planForCategory4.md) for full implementation roadmap
+4. **Category System** ✅ **COMPLETED & TESTED** (Phases 1-5)
 
    **Phase 1 - Data Models & Recipe Editing** ✅ **COMPLETED**
    - ✅ Category model with validation (Category.swift) - id, name, slug, isSystem fields
@@ -121,22 +119,48 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
    - ✅ Multi-category support - recipes appear in all assigned categories
    - ✅ All user testing completed successfully with zero issues
 
-   **Phase 3 - Category Management** **PLANNED**
-   - [ ] Category edit/rename functionality
-   - [ ] Category deletion with recipe reassignment
-   - [ ] Swipe actions for category management
+   **Phase 3 - Category Management** ✅ **COMPLETED & TESTED**
+   - ✅ Category edit/rename functionality with EditCategorySheet in CategorySheets.swift
+   - ✅ Category deletion with automatic recipe reassignment to "New recipes"
+   - ✅ iOS-standard swipe actions (Edit with blue accent, Delete with red destructive role)
+   - ✅ Confirmation alerts for destructive operations with affected recipe counts
+   - ✅ System category protection (no swipe actions on "New recipes")
+   - ✅ Validation on rename (prevents duplicates, enforces 1-32 char limit)
+   - ✅ Auto-regenerates slug from new category name
+   - ✅ Primary category auto-reassignment when category deleted
 
-   **Phase 4 - Search Integration** **PLANNED**
-   - [ ] Add category filter to search functionality
+   **Phase 4 - Search Integration** ✅ **COMPLETED & TESTED**
+   - ✅ Search bar in HomeView with 250ms debounced search using Task.sleep()
+   - ✅ Comprehensive search across title, ingredients, steps, and category names
+   - ✅ CategoryManager integration for real-time category name resolution
+   - ✅ Case/diacritic-insensitive matching using String.folding()
+   - ✅ AND logic across search tokens (all terms must match)
+   - ✅ Search prompt: "Search recipes, ingredients, or categories"
+   - ✅ Empty state for no search results
 
-   **Phase 5 - Bulk Operations** **PLANNED**
-   - [ ] Multi-select recipes for bulk category assignment   
+   **Phase 5 - Bulk Operations** ✅ **COMPLETED & TESTED**
+   - ✅ Apple Photos-style multi-select mode in HomeView and FilteredRecipesView
+   - ✅ Select/Cancel toolbar button for toggling selection mode
+   - ✅ Checkmark overlay on recipe cards (RecipeCardView.swift) when in selection mode
+   - ✅ Efficient Set<UUID> for selected recipe tracking
+   - ✅ Created BulkCategorySheets.swift with 5 specialized sheets:
+     - AddCategoryToBulkSheet - Add secondary categories to selected recipes
+     - SetPrimaryCategorySheet - Set primary category for selected recipes with confirmation alert
+     - RemoveFromCategorySheet - Remove selected recipes from current category (FilteredRecipesView only)
+     - MoveToCategorySheet - Move recipes between categories (FilteredRecipesView only)
+     - (Bulk delete integrated in HomeView with system alert)
+   - ✅ HomeView bulk actions: Delete, Add Category, Set Primary
+   - ✅ FilteredRecipesView bulk actions: Remove from Category, Add Category, Move to Category
+   - ✅ "Create New Category" option integrated in all bulk sheets
+   - ✅ Confirmation alerts for destructive operations
+   - ✅ Proper selection state cleanup after operations
+   - ✅ RecipeGridView modified to support both selection and navigation modes   
 
-5. Search & Organization  **PLANNED**
-   - [ ] Search bar in HomeView with 250 ms debounce; search title, ingredients, categories, steps; case/diacritic‑insensitive; AND across tokens; highlight matches; works with active category filter
-   - [ ] Add option to select recipies(simmilar as Apple photo app have) and with follow functionality(long‑press or “Select”):
-         - delete selected recipes
-         - change existed or add new category; Add, Remove, Set primary (single)
+5. **Search & Organization** **PARTIALLY COMPLETED**
+   - ✅ Search bar in HomeView with 250ms debounce - search title, ingredients, categories, steps (COMPLETED in Category System Phase 4)
+   - ✅ Multi-select recipes (Apple Photos-style "Select" mode) with bulk operations (COMPLETED in Category System Phase 5):
+         - ✅ Delete selected recipes
+         - ✅ Add/Remove categories, Set primary category for selected recipes
    - [ ] Add option to share each recipe directly from thumbnail card of recipe in home screen
    - [ ] Rename items to ingredients on recipe cards
 

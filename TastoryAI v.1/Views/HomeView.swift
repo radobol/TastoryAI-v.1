@@ -14,6 +14,15 @@ struct HomeView: View {
     @State private var searchText = ""
     @State private var debouncedSearchText = ""
 
+    // Selection mode state
+    @State private var isSelectionMode = false
+    @State private var selectedRecipeIds: Set<UUID> = []
+
+    // Bulk operation sheets
+    @State private var showingBulkDeleteAlert = false
+    @State private var showingAddCategorySheet = false
+    @State private var showingSetPrimarySheet = false
+
     // Filtered recipes based on search
     private var filteredRecipes: [Recipe] {
         guard !debouncedSearchText.isEmpty else {
@@ -64,20 +73,44 @@ struct HomeView: View {
                 } else if filteredRecipes.isEmpty && !debouncedSearchText.isEmpty {
                     SearchEmptyStateView(searchText: debouncedSearchText)
                 } else {
-                    RecipeGridView(recipes: filteredRecipes)
+                    RecipeGridView(
+                        recipes: filteredRecipes,
+                        isSelectionMode: isSelectionMode,
+                        selectedRecipeIds: $selectedRecipeIds
+                    )
                 }
-                
+
                 VStack {
                     Spacer()
+
+                    // Bulk actions toolbar (shown in selection mode)
+                    if isSelectionMode && !selectedRecipeIds.isEmpty {
+                        bulkActionsToolbar
+                            .padding(.horizontal, Theme.Spacing.medium)
+                            .padding(.bottom, Theme.Spacing.small)
+                    }
+
                     HStack {
                         Spacer()
-                        AddRecipeButton(showingAddRecipe: $showingAddRecipe)
-                            .padding(.trailing, Theme.Spacing.medium)
-                            .padding(.bottom, Theme.Spacing.medium)
+                        if !isSelectionMode {
+                            AddRecipeButton(showingAddRecipe: $showingAddRecipe)
+                                .padding(.trailing, Theme.Spacing.medium)
+                                .padding(.bottom, Theme.Spacing.medium)
+                        }
                     }
                 }
             }
             .navigationTitle("My Recipes")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if !storageManager.recipes.isEmpty {
+                        Button(isSelectionMode ? "Cancel" : "Select") {
+                            toggleSelectionMode()
+                        }
+                        .foregroundColor(Theme.Colors.accent)
+                    }
+                }
+            }
             .searchable(text: $searchText, prompt: "Search recipes, ingredients, or categories")
             .onChange(of: searchText) { _, newValue in
                 // Debounce search with 250ms delay
@@ -91,6 +124,26 @@ struct HomeView: View {
             .sheet(isPresented: $showingAddRecipe) {
                 AddRecipeView()
             }
+            .sheet(isPresented: $showingAddCategorySheet) {
+                AddCategoryToBulkSheet(selectedRecipeIds: selectedRecipeIds) {
+                    isSelectionMode = false
+                    selectedRecipeIds.removeAll()
+                }
+            }
+            .sheet(isPresented: $showingSetPrimarySheet) {
+                SetPrimaryCategorySheet(selectedRecipeIds: selectedRecipeIds) {
+                    isSelectionMode = false
+                    selectedRecipeIds.removeAll()
+                }
+            }
+            .alert("Delete Recipes", isPresented: $showingBulkDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    handleBulkDelete()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Are you sure you want to delete \(selectedRecipeIds.count) recipe\(selectedRecipeIds.count == 1 ? "" : "s")? This action cannot be undone.")
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
@@ -101,6 +154,82 @@ struct HomeView: View {
             // Refresh when app comes back from background (after Share Extension)
             storageManager.loadRecipes()
         }
+    }
+
+    // MARK: - Bulk Actions Toolbar
+
+    private var bulkActionsToolbar: some View {
+        HStack(spacing: Theme.Spacing.medium) {
+            // Delete button
+            Button(action: {
+                showingBulkDeleteAlert = true
+            }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 20))
+                    Text("Delete")
+                        .font(Typography.Caption1.regular)
+                }
+                .foregroundColor(.red)
+            }
+
+            Spacer()
+
+            // Add Category button
+            Button(action: {
+                showingAddCategorySheet = true
+            }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "folder.badge.plus")
+                        .font(.system(size: 20))
+                    Text("Add")
+                        .font(Typography.Caption1.regular)
+                }
+                .foregroundColor(Theme.Colors.accent)
+            }
+
+            Spacer()
+
+            // Set Primary button
+            Button(action: {
+                showingSetPrimarySheet = true
+            }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "star")
+                        .font(.system(size: 20))
+                    Text("Primary")
+                        .font(Typography.Caption1.regular)
+                }
+                .foregroundColor(Theme.Colors.accent)
+            }
+        }
+        .padding(Theme.Spacing.medium)
+        .background(Theme.Colors.background)
+        .cornerRadius(12)
+        .shadow(
+            color: Theme.Shadow.medium.color,
+            radius: Theme.Shadow.medium.radius,
+            x: Theme.Shadow.medium.x,
+            y: Theme.Shadow.medium.y
+        )
+    }
+
+    // MARK: - Helper Methods
+
+    private func toggleSelectionMode() {
+        isSelectionMode.toggle()
+        if !isSelectionMode {
+            selectedRecipeIds.removeAll()
+        }
+    }
+
+    private func handleBulkDelete() {
+        selectedRecipeIds.forEach { recipeId in
+            storageManager.deleteRecipe(withId: recipeId)
+        }
+
+        isSelectionMode = false
+        selectedRecipeIds.removeAll()
     }
 }
 

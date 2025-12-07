@@ -542,518 +542,243 @@ Recipe Detail (existing RecipeDetailView)
 5. `/TastoryAI v.1/Design/Typography.swift` - Font definitions
 
 ---
-## Phase 3: Category Management (Edit, Delete, Rename) ✅ **COMPLETED & TESTED**
-
-**Goal**: Add edit/rename and delete functionality to Categories tab with iOS-standard swipe actions, validation, and smart recipe reassignment.
-
-**Status**: All sub-phases completed and tested successfully by user
-
-### Sub-Phase 3.1: Add Swipe Actions to CategoriesView ✅ COMPLETED
-
-**File Modified**: `/TastoryAI v.1/Views/CategoriesView.swift`
-
-**Implementation Details**:
-- Added state variables for edit/delete UI management
-- Implemented iOS-standard swipe actions on category rows
-- Edit action (blue) and Delete action (red) on trailing edge
-- System category protection: "New recipes" shows NO swipe actions
-- allowsFullSwipe: false to prevent accidental deletion
-
-**Code Added**:
-```swift
-// State variables (after line 16)
-@State private var categoryToEdit: Category?
-@State private var showingEditCategorySheet = false
-@State private var editCategoryName = ""
-@State private var editCategoryError: String?
-@State private var categoryToDelete: Category?
-@State private var showingDeleteAlert = false
-@State private var deleteAffectedRecipeCount = 0
-
-// Swipe actions on ForEach
-.swipeActions(edge: .trailing, allowsFullSwipe: false) {
-    if !category.isSystem {
-        Button(role: .destructive) {
-            handleDeleteSwipe(for: category)
-        } label: {
-            Label("Delete", systemImage: "trash")
-        }
-
-        Button {
-            handleEditSwipe(for: category)
-        } label: {
-            Label("Edit", systemImage: "pencil")
-        }
-        .tint(Theme.Colors.accent)
-    }
-}
-
-// Handler methods
-private func handleEditSwipe(for category: Category)
-private func handleDeleteSwipe(for category: Category)
-```
-
-**Testing Checklist**:
-- ✅ Swipe actions appear on custom categories
-- ✅ NO swipe actions on "New recipes" system category
-- ✅ Edit shows blue, Delete shows red
-- ✅ Full swipe doesn't immediately delete
-- ✅ Tapping actions triggers correct behavior
-
----
-
-### Sub-Phase 3.2: Create EditCategorySheet ✅ COMPLETED
-
-**File Modified**: `/TastoryAI v.1/Views/CategorySheets.swift`
-
-**Implementation Details**:
-- Created EditCategorySheet following NewCategorySheet pattern
-- Form-based UI with TextField for category name
-- Auto-focus on text field when sheet appears
-- Inline error display for validation failures
-- Validation using CategoryManager.validateCategoryName(excluding:)
-- Save/Cancel buttons with proper state management
-
-**Code Added**:
-```swift
-struct EditCategorySheet: View {
-    let category: Category
-    @Binding var categoryName: String
-    @Binding var errorMessage: String?
-    let onSave: (String) -> Void
-    let onCancel: () -> Void
-
-    @FocusState private var isNameFieldFocused: Bool
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    TextField("Category Name", text: $categoryName)
-                        .font(Typography.Body.regular)
-                        .focused($isNameFieldFocused)
-                        .onChange(of: categoryName) { _, _ in
-                            errorMessage = nil
-                        }
-
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.red)
-                    }
-                } header: {
-                    Text("Rename category")
-                } footer: {
-                    Text("Category names must be 1-32 characters and unique")
-                        .font(.caption)
-                }
-            }
-            .navigationTitle("Edit Category")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        onCancel()
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        onSave(categoryName)
-                    }
-                    .disabled(categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-            .onAppear {
-                isNameFieldFocused = true
-            }
-        }
-    }
-}
-```
-
-**CategoriesView Integration**:
-- Sheet presentation triggered by showingEditCategorySheet
-- handleUpdateCategory() validates and updates category
-- Uses validateCategoryName(excluding:) to prevent false duplicate errors
-- Auto-regenerates slug from new name
-- Only dismisses sheet on success
-
-**Testing Checklist**:
-- ✅ Edit sheet opens with current name pre-filled
-- ✅ Keyboard auto-focuses on text field
-- ✅ Empty names disable Save button
-- ✅ Duplicate names show validation error
-- ✅ Names >32 characters show error
-- ✅ Valid renames succeed and update list
-- ✅ Cancel discards changes
-- ✅ Sheet remains open on validation error
-
----
-
-### Sub-Phase 3.3: Implement Delete Confirmation ✅ COMPLETED
-
-**File Modified**: `/TastoryAI v.1/Views/CategoriesView.swift`
-
-**Implementation Details**:
-- Delete confirmation alert with destructive action
-- Shows affected recipe count in alert message
-- Proper singular/plural handling ("1 recipe" vs "N recipes")
-- Recipe reassignment to "New recipes" before deletion
-- Primary category reassignment handled automatically
-
-**Code Added**:
-```swift
-.alert("Delete Category", isPresented: $showingDeleteAlert) {
-    Button("Delete", role: .destructive) {
-        if let category = categoryToDelete {
-            handleDeleteCategory(category)
-        }
-    }
-    Button("Cancel", role: .cancel) {
-        resetDeleteState()
-    }
-} message: {
-    if let category = categoryToDelete {
-        if deleteAffectedRecipeCount > 0 {
-            Text("Are you sure you want to delete \"\(category.name)\"? \(deleteAffectedRecipeCount) recipe\(deleteAffectedRecipeCount == 1 ? "" : "s") will be moved to \"New recipes\". This action cannot be undone.")
-        } else {
-            Text("Are you sure you want to delete \"\(category.name)\"? This action cannot be undone.")
-        }
-    }
-}
-
-private func handleDeleteCategory(_ category: Category) {
-    let newRecipesCategory = categoryManager.getNewRecipesCategory()
-
-    // Step 1: Reassign affected recipes to "New recipes"
-    storageManager.reassignRecipesFromDeletedCategory(
-        category.id,
-        to: newRecipesCategory.id
-    )
-
-    // Step 2: Delete the category
-    categoryManager.deleteCategory(withId: category.id)
-
-    // Step 3: Clean up state
-    resetDeleteState()
-}
-
-private func resetDeleteState() {
-    categoryToDelete = nil
-    deleteAffectedRecipeCount = 0
-}
-```
-
-**Recipe Reassignment Flow**:
-1. RecipeStorageManager.reassignRecipesFromDeletedCategory() removes category from all recipes
-2. Recipe.removeCategory() auto-sets primary to first remaining category
-3. If no categories remain, "New recipes" is added as fallback
-4. CategoryManager.deleteCategory() removes category from list (with system category protection)
-
-**Testing Checklist**:
-- ✅ Alert shows before deletion
-- ✅ Correct recipe count displayed in alert message
-- ✅ Cancel button prevents deletion
-- ✅ Delete removes category from list
-- ✅ Recipes move to "New recipes" category
-- ✅ Primary category reassignment works correctly
-- ✅ System category cannot be deleted
-- ✅ Delete with 0 recipes works properly
-- ✅ Proper singular/plural grammar in messages
-
----
-
-## Phase 3 Success Criteria ✅ **FULLY COMPLETED & TESTED**
-
-### Functional Requirements:
-- ✅ Swipe actions on custom categories (Edit + Delete)
-- ✅ NO swipe actions on "New recipes" system category
-- ✅ Edit opens sheet with pre-filled name
-- ✅ Edit validates duplicates, length, empty names
-- ✅ Edit updates category and maintains sorting
-- ✅ Delete shows confirmation alert with recipe count
-- ✅ Delete reassigns recipes to "New recipes"
-- ✅ Primary category reassignment automatic
-- ✅ System category protection works
-
-### Technical Requirements:
-- ✅ No compilation errors
-- ✅ No runtime crashes
-- ✅ App stable in simulator
-- ✅ Proper Theme.swift and Typography.swift usage
-- ✅ Leverages existing CategoryManager validation methods
-- ✅ Uses RecipeStorageManager.reassignRecipesFromDeletedCategory()
-- ✅ Recipe.removeCategory() handles primary reassignment
-
-### User Testing Results:
-- ✅ **All swipe actions tested and working correctly**
-- ✅ **Edit functionality validated with various scenarios**
-- ✅ **Delete confirmation and recipe reassignment verified**
-- ✅ **System category protection confirmed**
-- ✅ **User confirmed: "Everything works as expected"**
-
-### Implementation Notes:
-- Followed iOS-standard swipe action patterns
-- Reused existing validation and deletion logic from CategoryManager
-- Maintained code simplicity by leveraging existing infrastructure
-- EditCategorySheet follows exact NewCategorySheet pattern
-- Delete flow properly cleans up recipes before removing category
-
-**Final Result**: Phase 3 completed successfully with zero issues reported during user testing.
-
----
-
-## Category Operations Summary
-
-**Current Implementation (Phases 1-3 Complete)**:
-
-1. **Category Operations**:
-  - ✅ Create: NewCategorySheet with full validation (Phase 1-2)
-  - ✅ Rename: EditCategorySheet with duplicate checking (Phase 3)
-  - ✅ Delete: Confirmation alert with recipe reassignment (Phase 3)
-
-2. **Delete Rules** (Implemented):
-```swift
-// RecipeStorageManager.reassignRecipesFromDeletedCategory()
-storageManager.recipes.forEach { recipe in
-    if recipe.hasCategory(fromCategoryId) {
-        var updatedRecipe = recipe
-        updatedRecipe.removeCategory(fromCategoryId)
-
-        if updatedRecipe.categoryIds.isEmpty {
-            updatedRecipe.addCategory(toCategoryId, asPrimary: true)
-        }
-
-        storageManager.updateRecipe(updatedRecipe)
-    }
-}
-```
-
-3. **Recipe Filtering** (Implemented):
-```swift
-func getRecipesForCategory(_ categoryId: UUID) -> [Recipe] {
-    return recipes.filter { $0.hasCategory(categoryId) }
-}
-```
-
-**Testing Results**:
-- ✅ Category CRUD maintains single list
-- ✅ Delete rules preserve data integrity
-- ✅ Recipes appear in all assigned categories
-
----
-## Phase 4: Search Integration in HomeView ✅ **COMPLETED & TESTED**
-
-**Goal**: Add comprehensive search functionality to HomeView including category names from CategoryManager
-
-**Status**: Fully implemented and tested successfully by user
-
-### Implementation Details
-
-**File Modified**: `/TastoryAI v.1/Views/HomeView.swift`
-
-**Features Implemented**:
-- Search bar with iOS-native `.searchable` modifier
-- 250ms debounced search for optimal performance
-- Case/diacritic-insensitive matching using `String.folding()`
-- AND logic across search tokens (all terms must match)
-- Category name resolution via CategoryManager.getCategory()
-- Empty state for no search results
-
-**Search Fields**:
-1. Recipe title
-2. Ingredients list
-3. Steps/instructions
-4. **Category names** (resolved from recipe.categoryIds)
-
-**Code Added**:
-```swift
-// State variables
-@StateObject private var categoryManager = CategoryManager.shared
-@State private var searchText = ""
-@State private var debouncedSearchText = ""
-
-// Filtered recipes with comprehensive search
-private var filteredRecipes: [Recipe] {
-    guard !debouncedSearchText.isEmpty else {
-        return storageManager.recipes
-    }
-
-    // Split search text into tokens and normalize
-    let searchTokens = debouncedSearchText
-        .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-        .split(separator: " ")
-        .map { String($0) }
-
-    guard !searchTokens.isEmpty else {
-        return storageManager.recipes
-    }
-
-    return storageManager.recipes.filter { recipe in
-        // Get category names for this recipe
-        let categoryNames = recipe.categoryIds.compactMap { categoryId in
-            categoryManager.getCategory(withId: categoryId)?.name
-        }.joined(separator: " ")
-
-        // Combine all searchable fields
-        let searchableContent = [
-            recipe.title,
-            recipe.ingredients.joined(separator: " "),
-            recipe.steps.joined(separator: " "),
-            categoryNames
-        ]
-        .joined(separator: " ")
-        .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-
-        // AND logic: all tokens must match
-        return searchTokens.allSatisfy { token in
-            searchableContent.contains(token)
-        }
-    }
-}
-
-// Searchable modifier with debounce
-.searchable(text: $searchText, prompt: "Search recipes, ingredients, or categories")
-.onChange(of: searchText) { _, newValue in
-    // Debounce search with 250ms delay
-    Task {
-        try? await Task.sleep(nanoseconds: 250_000_000)
-        if searchText == newValue {
-            debouncedSearchText = newValue
-        }
-    }
-}
-```
-
-**Empty State Component**:
-```swift
-struct SearchEmptyStateView: View {
-    let searchText: String
-
-    var body: some View {
-        VStack(spacing: Theme.Spacing.large) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.secondaryText)
-
-            VStack(spacing: Theme.Spacing.small) {
-                Text("No results found")
-                    .font(Typography.Title2.semibold)
-                    .foregroundColor(Theme.Colors.text)
-
-                Text("Try searching for different keywords")
-                    .font(Typography.Body.regular)
-                    .foregroundColor(Theme.Colors.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(Theme.Spacing.xLarge)
-    }
-}
-```
-
-**View Update**:
-```swift
-if storageManager.recipes.isEmpty {
-    EmptyStateView()
-} else if filteredRecipes.isEmpty && !debouncedSearchText.isEmpty {
-    SearchEmptyStateView(searchText: debouncedSearchText)
+Phase 3: Category Management & Filtering
+
+Goal: CRUD operations maintaining single category list
+
+Tasks:
+1. Category Operations:
+  - Create: Adds to single CategoryManager list
+  - Rename: Updates in CategoryManager
+  - Delete: Removes from CategoryManager + recipe cleanup
+2. Delete Rules:
+// For each recipe with this category:
+if recipe.primaryCategoryId == deletingCategoryId {
+    recipe.primaryCategoryId = Category.newRecipesCategoryId
+    recipe.categoryIds = [Category.newRecipesCategoryId] +
+                        recipe.categoryIds.filter { $0 != deletingCategoryId }
 } else {
-    RecipeGridView(recipes: filteredRecipes)
+    recipe.categoryIds.removeAll { $0 == deletingCategoryId }
 }
-```
+3. Recipe Filtering:
+  - Single method: getRecipes(for categoryId: UUID)
+  - Returns all where recipe.categoryIds.contains(categoryId)
 
-### Testing Checklist ✅
-
-**Basic Search**:
-- ✅ Search bar appears in navigation bar
-- ✅ Search by recipe title works
-- ✅ Search by ingredients works
-- ✅ Search by steps/instructions works
-
-**Category Search (NEW)**:
-- ✅ Search finds recipes by category names
-- ✅ Works for primary categories
-- ✅ Works for additional categories
-- ✅ CategoryManager integration successful
-
-**Advanced Features**:
-- ✅ Multi-word search (AND logic) works correctly
-- ✅ 250ms debounce implemented and working
-- ✅ Case-insensitive matching (PASTA = pasta = Pasta)
-- ✅ Diacritic-insensitive matching (café = cafe)
-- ✅ All search tokens must match (AND logic)
-
-**UI/UX**:
-- ✅ Empty state shows for no results
-- ✅ Search clears properly
-- ✅ Performance is smooth with debounce
-- ✅ iOS-native search behavior
-
-### User Testing Results:
-- ✅ **All search functionality tested and working correctly**
-- ✅ **Category name search verified**
-- ✅ **Multi-word search tested**
-- ✅ **Debounce performance confirmed**
-- ✅ **User confirmed: "Everything works as expected"**
-
-### Implementation Notes:
-- Used iOS-native `.searchable()` modifier for consistency
-- CategoryManager integration for real-time category name resolution
-- Debounced search prevents performance issues during typing
-- `String.folding()` handles both case and diacritic insensitivity
-- AND logic ensures all search terms must be present
-- Search works across all recipe fields including resolved category names
-
-**Final Result**: Phase 4 completed successfully with zero issues reported during user testing.
+Testing Checklist:
+- Category CRUD maintains single list
+- Delete rules preserve data integrity
+- Recipes appear in all assigned categories
 
 ---
-
-## Search Implementation Summary
-
-**Current Implementation (Phases 1-4 Complete)**:
-
-1. **Search Functionality**:
-   - ✅ Search bar in HomeView with `.searchable` modifier
-   - ✅ 250ms debounced search for performance
-   - ✅ Case/diacritic-insensitive matching
-   - ✅ AND logic across multiple search tokens
-   - ✅ Category name resolution from CategoryManager
-
-2. **Searchable Fields**:
-```swift
-// All fields combined for comprehensive search
-let searchableContent = [
-    recipe.title,                              // Recipe title
-    recipe.ingredients.joined(separator: " "), // All ingredients
-    recipe.steps.joined(separator: " "),       // All steps
-    categoryNames                              // Resolved category names
-].joined(separator: " ")
-```
-
-3. **Search Algorithm**:
-```swift
-// Normalize search text and split into tokens
-let searchTokens = debouncedSearchText
-    .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-    .split(separator: " ")
-
-// AND logic: all tokens must match somewhere in searchable content
-return searchTokens.allSatisfy { token in
-    searchableContent.contains(token)
-}
-```
-
-**Testing Results**:
-- ✅ Search finds recipes by title, ingredients, steps, and categories
-- ✅ Multi-word search works with AND logic
-- ✅ Performance optimized with 250ms debounce
-- ✅ Works for both primary and additional categories
-
----
+  848 +  ## Phase 4: Search Integration in HomeView ✅ **COMPLETED & TESTED**
+        849    
+        850 -  Goal: Search includes category names from single list
+        851    
+        852 +  **Status**: Fully implemented and tested successfully by user
+        853    
+        854 +  ### Implementation Details
+        855    
+        856 +  **File Modified**: `/TastoryAI v.1/Views/HomeView.swift`
+        857 +  
+        858 +  **Features Implemented**:
+        859 +  - Search bar with iOS-native `.searchable` modifier
+        860 +  - 250ms debounced search for optimal performance
+        861 +  - Case/diacritic-insensitive matching using `String.folding()`
+        862 +  - AND logic across search tokens (all terms must match)
+        863 +  - Category name resolution via CategoryManager.getCategory()
+        864 +  - Empty state for no search results
+        865 +  
+        866 +  **Search Fields**:
+        867 +  1. Recipe title
+        868 +  2. Ingredients list
+        869 +  3. Steps/instructions
+        870 +  4. **Category names** (resolved from recipe.categoryIds)
+        871 +  
+        872 +  **Code Added**:
+        873 +  ```swift
+        874 +  // State variables
+        875 +  @StateObject private var categoryManager = CategoryManager.shared
+        876 +  @State private var searchText = ""
+        877 +  @State private var debouncedSearchText = ""
+        878 +  
+        879 +  // Filtered recipes with comprehensive search
+        880 +  private var filteredRecipes: [Recipe] {
+        881 +      guard !debouncedSearchText.isEmpty else {
+        882 +          return storageManager.recipes
+        883 +      }
+        884 +  
+        885 +      // Split search text into tokens and normalize
+        886 +      let searchTokens = debouncedSearchText
+        887 +          .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        888 +          .split(separator: " ")
+        889 +          .map { String($0) }
+        890 +  
+        891 +      guard !searchTokens.isEmpty else {
+        892 +          return storageManager.recipes
+        893 +      }
+        894 +  
+        895 +      return storageManager.recipes.filter { recipe in
+        896 +          // Get category names for this recipe
+        897 +          let categoryNames = recipe.categoryIds.compactMap { categoryId in
+        898 +              categoryManager.getCategory(withId: categoryId)?.name
+        899 +          }.joined(separator: " ")
+        900 +  
+        901 +          // Combine all searchable fields
+        902 +          let searchableContent = [
+        903 +              recipe.title,
+        904 +              recipe.ingredients.joined(separator: " "),
+        905 +              recipe.steps.joined(separator: " "),
+        906 +              categoryNames
+        907 +          ]
+        908 +          .joined(separator: " ")
+        909 +          .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+        910 +  
+        911 +          // AND logic: all tokens must match
+        912 +          return searchTokens.allSatisfy { token in
+        913 +              searchableContent.contains(token)
+        914 +          }
+        915 +      }
+        916 +  }
+        917 +  
+        918 +  // Searchable modifier with debounce
+        919 +  .searchable(text: $searchText, prompt: "Search recipes, ingredients, or categories")
+        920 +  .onChange(of: searchText) { _, newValue in
+        921 +      // Debounce search with 250ms delay
+        922 +      Task {
+        923 +          try? await Task.sleep(nanoseconds: 250_000_000)
+        924 +          if searchText == newValue {
+        925 +              debouncedSearchText = newValue
+        926 +          }
+        927 +      }
+        928 +  }
+        929 +  ```
+        930 +  
+        931 +  **Empty State Component**:
+        932 +  ```swift
+        933 +  struct SearchEmptyStateView: View {
+        934 +      let searchText: String
+        935 +  
+        936 +      var body: some View {
+        937 +          VStack(spacing: Theme.Spacing.large) {
+        938 +              Image(systemName: "magnifyingglass")
+        939 +                  .font(.system(size: 60))
+        940 +                  .foregroundColor(Theme.Colors.secondaryText)
+        941 +  
+        942 +              VStack(spacing: Theme.Spacing.small) {
+        943 +                  Text("No results found")
+        944 +                      .font(Typography.Title2.semibold)
+        945 +                      .foregroundColor(Theme.Colors.text)
+        946 +  
+        947 +                  Text("Try searching for different keywords")
+        948 +                      .font(Typography.Body.regular)
+        949 +                      .foregroundColor(Theme.Colors.secondaryText)
+        950 +                      .multilineTextAlignment(.center)
+        951 +              }
+        952 +          }
+        953 +          .padding(Theme.Spacing.xLarge)
+        954 +      }
+        955 +  }
+        956 +  ```
+        957 +  
+        958 +  **View Update**:
+        959 +  ```swift
+        960 +  if storageManager.recipes.isEmpty {
+        961 +      EmptyStateView()
+        962 +  } else if filteredRecipes.isEmpty && !debouncedSearchText.isEmpty {
+        963 +      SearchEmptyStateView(searchText: debouncedSearchText)
+        964 +  } else {
+        965 +      RecipeGridView(recipes: filteredRecipes)
+        966 +  }
+        967 +  ```
+        968 +  
+        969 +  ### Testing Checklist ✅
+        970 +  
+        971 +  **Basic Search**:
+        972 +  - ✅ Search bar appears in navigation bar
+        973 +  - ✅ Search by recipe title works
+        974 +  - ✅ Search by ingredients works
+        975 +  - ✅ Search by steps/instructions works
+        976 +  
+        977 +  **Category Search (NEW)**:
+        978 +  - ✅ Search finds recipes by category names
+        979 +  - ✅ Works for primary categories
+        980 +  - ✅ Works for additional categories
+        981 +  - ✅ CategoryManager integration successful
+        982 +  
+        983 +  **Advanced Features**:
+        984 +  - ✅ Multi-word search (AND logic) works correctly
+        985 +  - ✅ 250ms debounce implemented and working
+        986 +  - ✅ Case-insensitive matching (PASTA = pasta = Pasta)
+        987 +  - ✅ Diacritic-insensitive matching (café = cafe)
+        988 +  - ✅ All search tokens must match (AND logic)
+        989 +  
+        990 +  **UI/UX**:
+        991 +  - ✅ Empty state shows for no results
+        992 +  - ✅ Search clears properly
+        993 +  - ✅ Performance is smooth with debounce
+        994 +  - ✅ iOS-native search behavior
+        995 +  
+        996 +  ### User Testing Results:
+        997 +  - ✅ **All search functionality tested and working correctly**
+        998 +  - ✅ **Category name search verified**
+        999 +  - ✅ **Multi-word search tested**
+       1000 +  - ✅ **Debounce performance confirmed**
+       1001 +  - ✅ **User confirmed: "Everything works as expected"**
+       1002 +  
+       1003 +  ### Implementation Notes:
+       1004 +  - Used iOS-native `.searchable()` modifier for consistency
+       1005 +  - CategoryManager integration for real-time category name resolution
+       1006 +  - Debounced search prevents performance issues during typing
+       1007 +  - `String.folding()` handles both case and diacritic insensitivity
+       1008 +  - AND logic ensures all search terms must be present
+       1009 +  - Search works across all recipe fields including resolved category names
+       1010 +  
+       1011 +  **Final Result**: Phase 4 completed successfully with zero issues reported during user testing.
+       1012 +  
+       1013    ---
+       1014 +  
+       1015 +  ## Search Implementation Summary
+       1016 +  
+       1017 +  **Current Implementation (Phases 1-4 Complete)**:
+       1018 +  
+       1019 +  1. **Search Functionality**:
+       1020 +     - ✅ Search bar in HomeView with `.searchable` modifier
+       1021 +     - ✅ 250ms debounced search for performance
+       1022 +     - ✅ Case/diacritic-insensitive matching
+       1023 +     - ✅ AND logic across multiple search tokens
+       1024 +     - ✅ Category name resolution from CategoryManager
+       1025 +  
+       1026 +  2. **Searchable Fields**:
+       1027 +  ```swift
+       1028 +  // All fields combined for comprehensive search
+       1029 +  let searchableContent = [
+       1030 +      recipe.title,                              // Recipe title
+       1031 +      recipe.ingredients.joined(separator: " "), // All ingredients
+       1032 +      recipe.steps.joined(separator: " "),       // All steps
+       1033 +      categoryNames                              // Resolved category names
+       1034 +  ].joined(separator: " ")
+       1035 +  ```
+       1036 +  
+       1037 +  3. **Search Algorithm**:
+       1038 +  ```swift
+       1039 +  // Normalize search text and split into tokens
+       1040 +  let searchTokens = debouncedSearchText
+       1041 +      .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+       1042 +      .split(separator: " ")
+       1043 +  
+       1044 +  // AND logic: all tokens must match somewhere in searchable content
+       1045 +  return searchTokens.allSatisfy { token in
+       1046 +      searchableContent.contains(token)
+       1047 +  }
+       1048 +  ```
+       1049 +  
+       1050 +  **Testing Results**:
+       1051 +  - ✅ Search finds recipes by title, ingredients, steps, and categories
+       1052 +  - ✅ Multi-word search works with AND logic
+       1053 +  - ✅ Performance optimized with 250ms debounce
+       1054 +  - ✅ Works for both primary and additional categories
+       1055 +  
+       1056 +  ---
 Phase 5: Bulk Selection
 
 Goal: Bulk category operations using single list
@@ -1089,4 +814,3 @@ This approach ensures:
 - Clear primary/additional distinction
 - Recipes properly appear in all assigned categories
 
-Ready to implement Phase 2 with this architecture?

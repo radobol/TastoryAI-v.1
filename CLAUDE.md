@@ -65,13 +65,34 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 
 ---
 
-## UI/UX Requirements
-- Modern digital cookbook aesthetic with notes-like feel
-- Clean, minimal, and functional design
-- Prioritize clarity, whitespace, and typography
-- Visual hierarchy: ingredients and steps over metadata
-- ShadCN-style components: neutral tones, soft shadows, rounded corners
+## UI/UX Requirements & Design System
+
+> **IMPORTANT**: All new UI elements, screens, and components MUST follow the Tastory-inspired design system defined in [newUX.md](newUX.md). This includes colors, typography, spacing, and reusable components.
+>
+> **Progress Tracking**: See [newUXtodo.md](newUXtodo.md) for implementation status.
+
+### Design Principles
+- Modern, clean aesthetic inspired by Tastory Suite
+- Consistent use of reusable components (TastoryButton, TastoryCard, TastoryListItem, etc.)
+- Primary accent color: Green (#1B6D3F)
+- Background: Off-white (#F5F5F5)
+- Cards: White with subtle shadows
 - Fully responsive between iPhone and iPad (portrait/landscape)
+
+### Component Library
+Use the following reusable components defined in `Views/Components/`:
+- `TastoryButton` - Primary, secondary, text, destructive button styles
+- `TastoryCard` - White card container with shadow
+- `TastoryListItem` - Standardized list row with icon, title, subtitle
+- `TastorySectionHeader` - Section headers with optional count and action
+- `TastoryTextField` - Styled input fields
+- `TastoryEmptyState` - Empty state displays
+- `TastoryLoadingView` - Loading indicators with animation
+- `TastoryBadge` - Tags and badges
+
+### Legacy Requirements (Being Updated)
+- Visual hierarchy: ingredients and steps over metadata
+- Prioritize clarity, whitespace, and typography
 
 ---
 
@@ -259,3 +280,5 @@ When implementing changes, follow this testing workflow:
 - Test your changes in real cooking scenarios
 - Keep the interface clean and focused on the recipe content
 - Refer to [implementation-details.md](implementation-details.md) for technical implementation patterns
+- **Use reusable components from `Views/Components/`** - avoid duplicating UI code
+- **Follow the design system in [newUX.md](newUX.md)** for all UI work

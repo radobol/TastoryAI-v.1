@@ -14,7 +14,8 @@
       "Bash(xattr:*)",
       "Bash(xcrun simctl launch:*)",
       "Bash(cat:*)",
-      "Bash(xcrun simctl:*)"
+      "Bash(xcrun simctl:*)",
+      "Bash(wc:*)"
     ],
     "deny": []
   }

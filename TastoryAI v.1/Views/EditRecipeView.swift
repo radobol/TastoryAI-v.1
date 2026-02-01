@@ -134,12 +134,12 @@ struct EditRecipeView: View {
                 
                 Section(header: Text("Recipe Details")) {
                     TextField("Recipe Title", text: $title)
-                        .font(Typography.Body.regular)
-                    
+                        .font(TastoryTypography.body)
+
                     // Primary Category Picker
                     HStack {
                         Text("Primary Category")
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.body)
                         Spacer()
                         Menu {
                             ForEach(categoryManager.categories, id: \.id) { category in
@@ -159,21 +159,21 @@ struct EditRecipeView: View {
                         } label: {
                             HStack {
                                 Text(categoryManager.getCategoryName(for: primaryCategoryId) ?? "Select")
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(TastoryColors.primaryGreen)
                                 Image(systemName: "chevron.up.chevron.down")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(TastoryColors.secondaryText)
                             }
                         }
                     }
-                    
+
                     HStack {
                         Text("Servings")
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.body)
                         Spacer()
                         Stepper(value: $servings, in: 1...20) {
                             Text("\(servings)")
-                                .font(Typography.Body.semibold)
+                                .font(TastoryTypography.headline)
                         }
                     }
                 }
@@ -182,22 +182,25 @@ struct EditRecipeView: View {
                 Section(header: Text("Additional Categories")) {
                     ForEach(additionalCategoryIds, id: \.self) { categoryId in
                         HStack {
-                            Text(categoryManager.getCategoryName(for: categoryId) ?? "Unknown")
-                                .font(Typography.Body.regular)
+                            TastoryBadge(
+                                text: categoryManager.getCategoryName(for: categoryId) ?? "Unknown",
+                                style: .tag,
+                                icon: "tag.fill"
+                            )
                             Spacer()
                             Button(action: {
                                 additionalCategoryIds.removeAll { $0 == categoryId }
                             }) {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(TastoryColors.secondaryText)
                             }
                         }
                     }
-                    
+
                     // Use same Menu style as primary category for consistency
                     HStack {
-                        Text("Secondary Category")
-                            .font(Typography.Body.regular)
+                        Text("Add Category")
+                            .font(TastoryTypography.body)
                         Spacer()
                         Menu {
                             // Show all categories except primary and already added
@@ -208,14 +211,14 @@ struct EditRecipeView: View {
                                     additionalCategoryIds.append(category.id)
                                 }
                             }
-                            
+
                             if categoryManager.categories.filter({ category in
                                 category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
                             }).isEmpty {
                                 Text("All categories already added")
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(TastoryColors.secondaryText)
                             }
-                            
+
                             Divider()
                             Button(action: {
                                 newCategoryForPrimary = false
@@ -225,11 +228,10 @@ struct EditRecipeView: View {
                             }
                         } label: {
                             HStack {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(TastoryColors.primaryGreen)
                                 Text("Select")
-                                    .foregroundColor(.secondary)
-                                Image(systemName: "chevron.up.chevron.down")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(TastoryColors.primaryGreen)
                             }
                         }
                         .disabled(categoryManager.categories.filter { category in
@@ -240,114 +242,120 @@ struct EditRecipeView: View {
                 
                 
                 Section(header: Text("Ingredients")) {
-                    ForEach(Array(ingredients.enumerated()), id: \.offset) { index, ingredient in
+                    ForEach(Array(ingredients.enumerated()), id: \.offset) { index, _ in
                         HStack {
+                            TastoryBullet()
                             TextField("Ingredient", text: Binding(
                                 get: { ingredients[index] },
                                 set: { ingredients[index] = $0 }
                             ))
-                            .font(Typography.Body.regular)
-                            
+                            .font(TastoryTypography.bodyRegular)
+
                             Button(action: { ingredients.remove(at: index) }) {
                                 Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(TastoryColors.errorRed)
                             }
                         }
                     }
-                    
+
                     HStack {
+                        TastoryBullet(color: TastoryColors.tertiaryText)
                         TextField("Add ingredient", text: $newIngredient)
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.bodyRegular)
                             .focused($isAddingIngredient)
                             .onSubmit {
                                 addIngredient()
                             }
-                        
+
                         Button("Add", action: addIngredient)
+                            .foregroundColor(TastoryColors.primaryGreen)
                             .disabled(newIngredient.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
                 
                 Section(header: Text("Instructions")) {
-                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    ForEach(Array(steps.enumerated()), id: \.offset) { index, _ in
                         HStack(alignment: .top) {
-                            Text("\(index + 1).")
-                                .font(Typography.Body.semibold)
-                                .foregroundColor(Theme.Colors.accent)
-                                .frame(width: 20, alignment: .leading)
-                            
+                            TastoryNumberBadge(number: index + 1, size: 24)
+
                             TextField("Step", text: Binding(
                                 get: { steps[index] },
                                 set: { steps[index] = $0 }
                             ), axis: .vertical)
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.bodyRegular)
                             .lineLimit(3...6)
-                            
+
                             Button(action: { steps.remove(at: index) }) {
                                 Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(TastoryColors.errorRed)
                             }
                         }
                     }
-                    
+
                     HStack(alignment: .top) {
-                        Text("\(steps.count + 1).")
-                            .font(Typography.Body.semibold)
-                            .foregroundColor(Theme.Colors.accent)
-                            .frame(width: 20, alignment: .leading)
-                        
+                        ZStack {
+                            RoundedRectangle(cornerRadius: TastoryRadius.small)
+                                .fill(TastoryColors.tertiaryText)
+                                .frame(width: 24, height: 24)
+                            Text("\(steps.count + 1)")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+
                         TextField("Add step", text: $newStep, axis: .vertical)
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.bodyRegular)
                             .lineLimit(3...6)
                             .focused($isAddingStep)
                             .onSubmit {
                                 addStep()
                             }
-                        
+
                         Button("Add", action: addStep)
+                            .foregroundColor(TastoryColors.primaryGreen)
                             .disabled(newStep.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
                 
                 Section(header: Text("Tips & Notes")) {
-                    ForEach(Array(tips.enumerated()), id: \.offset) { index, tip in
+                    ForEach(Array(tips.enumerated()), id: \.offset) { index, _ in
                         HStack(alignment: .top) {
-                            Image(systemName: "lightbulb")
-                                .font(.system(size: 16))
-                                .foregroundColor(Theme.Colors.accent)
+                            Image(systemName: "lightbulb.fill")
+                                .font(.system(size: TastoryIconSize.small))
+                                .foregroundColor(TastoryColors.primaryGreen)
                                 .frame(width: 20, alignment: .leading)
                                 .padding(.top, 2)
-                            
+
                             TextField("Tip", text: Binding(
                                 get: { tips[index] },
                                 set: { tips[index] = $0 }
                             ), axis: .vertical)
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.bodyRegular)
                             .lineLimit(2...6)
-                            
+
                             Button(action: { tips.remove(at: index) }) {
                                 Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(TastoryColors.errorRed)
                             }
                         }
                     }
-                    
+
                     HStack(alignment: .top) {
                         Image(systemName: "lightbulb")
-                            .font(.system(size: 16))
-                            .foregroundColor(Theme.Colors.accent)
+                            .font(.system(size: TastoryIconSize.small))
+                            .foregroundColor(TastoryColors.tertiaryText)
                             .frame(width: 20, alignment: .leading)
                             .padding(.top, 2)
-                        
+
                         TextField("Add tip or note", text: $newTip, axis: .vertical)
-                            .font(Typography.Body.regular)
+                            .font(TastoryTypography.bodyRegular)
                             .lineLimit(2...6)
                             .focused($isAddingTip)
                             .onSubmit {
                                 addTip()
                             }
-                        
+
                         Button("Add", action: addTip)
+                            .foregroundColor(TastoryColors.primaryGreen)
                             .disabled(newTip.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }

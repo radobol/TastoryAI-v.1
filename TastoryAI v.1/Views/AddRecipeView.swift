@@ -17,37 +17,37 @@ struct AddRecipeView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Theme.Colors.background
+                TastoryColors.background
                     .ignoresSafeArea()
-                
-                VStack(spacing: Theme.Spacing.xLarge) {
-                    VStack(spacing: Theme.Spacing.large) {
+
+                VStack(spacing: TastorySpacing.xxl) {
+                    VStack(spacing: TastorySpacing.lg) {
                         Text("Add a Recipe")
-                            .font(Typography.Title1.bold)
-                            .foregroundColor(Theme.Colors.text)
-                        
+                            .font(TastoryTypography.largeTitle)
+                            .foregroundColor(TastoryColors.primaryText)
+
                         Text("Choose how you'd like to add your recipe")
-                            .font(Typography.Body.regular)
-                            .foregroundColor(Theme.Colors.secondaryText)
+                            .font(TastoryTypography.body)
+                            .foregroundColor(TastoryColors.secondaryText)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.top, Theme.Spacing.xLarge)
-                    
-                    VStack(spacing: Theme.Spacing.medium) {
+                    .padding(.top, TastorySpacing.xxl)
+
+                    VStack(spacing: TastorySpacing.md) {
                         AddOptionButton(
                             icon: "link",
                             title: "From URL",
                             subtitle: "Paste a link from any website",
                             action: { showingURLEntry = true }
                         )
-                        
+
                         AddOptionButton(
                             icon: "camera.fill",
                             title: "From Photo",
                             subtitle: "Take or select a photo",
                             action: { showingPhotoEntry = true }
                         )
-                        
+
                         AddOptionButton(
                             icon: "square.and.pencil",
                             title: "Manual Entry",
@@ -55,8 +55,8 @@ struct AddRecipeView: View {
                             action: { showingManualEntry = true }
                         )
                     }
-                    .padding(.horizontal, Theme.Spacing.large)
-                    
+                    .padding(.horizontal, TastorySpacing.lg)
+
                     Spacer()
                 }
             }
@@ -66,7 +66,7 @@ struct AddRecipeView: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
         }
@@ -112,45 +112,41 @@ struct AddOptionButton: View {
     let title: String
     let subtitle: String
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: Theme.Spacing.medium) {
+            HStack(spacing: TastorySpacing.md) {
+                // Icon in light green circle
                 ZStack {
-                    RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                        .fill(Theme.Colors.accent.opacity(0.1))
+                    Circle()
+                        .fill(TastoryColors.lightGreenBg)
                         .frame(width: 50, height: 50)
-                    
+
                     Image(systemName: icon)
-                        .font(.system(size: 24))
-                        .foregroundColor(Theme.Colors.accent)
+                        .font(.system(size: TastoryIconSize.large))
+                        .foregroundColor(TastoryColors.primaryGreen)
                 }
-                
-                VStack(alignment: .leading, spacing: Theme.Spacing.xxSmall) {
+
+                VStack(alignment: .leading, spacing: TastorySpacing.xxs) {
                     Text(title)
-                        .font(Typography.Headline.regular)
-                        .foregroundColor(Theme.Colors.text)
-                    
+                        .font(TastoryTypography.headline)
+                        .foregroundColor(TastoryColors.primaryText)
+
                     Text(subtitle)
-                        .font(Typography.Subheadline.regular)
-                        .foregroundColor(Theme.Colors.secondaryText)
+                        .font(TastoryTypography.callout)
+                        .foregroundColor(TastoryColors.secondaryText)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Theme.Colors.tertiaryText)
+                    .foregroundColor(TastoryColors.tertiaryText)
             }
-            .padding(Theme.Spacing.medium)
-            .background(Theme.Colors.secondaryBackground)
-            .cornerRadius(Theme.CornerRadius.medium)
-            .shadow(
-                color: Theme.Shadow.small.color,
-                radius: Theme.Shadow.small.radius,
-                x: Theme.Shadow.small.x,
-                y: Theme.Shadow.small.y
-            )
+            .padding(TastorySpacing.md)
+            .background(TastoryColors.cardBackground)
+            .cornerRadius(TastoryRadius.large)
+            .tastoryShadow(TastoryShadow.small)
         }
     }
 }
@@ -164,89 +160,90 @@ struct URLRecipeEntryView: View {
     @State private var errorMessage: String?
     @State private var showingRecipeEditor = false
     @State private var extractedRecipe: Recipe?
-    
+
     var body: some View {
         NavigationView {
-            VStack(spacing: Theme.Spacing.large) {
-                VStack(spacing: Theme.Spacing.medium) {
-                    Text("Add Recipe from URL")
-                        .font(Typography.Title2.bold)
-                        .foregroundColor(Theme.Colors.text)
-                    
-                    Text("Paste a link from any recipe website, Instagram, TikTok, or other cooking source")
-                        .font(Typography.Body.regular)
-                        .foregroundColor(Theme.Colors.secondaryText)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top, Theme.Spacing.large)
-                
-                VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-                    Text("Recipe URL")
-                        .font(Typography.Subheadline.semibold)
-                        .foregroundColor(Theme.Colors.text)
-                    
-                    TextField("https://www.example.com/recipe", text: $urlText)
-                        .keyboardType(.URL)
-                        .autocapitalization(.none)
-                        .disableAutocorrection(true)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    
-                    if let errorMessage = errorMessage {
-                        Text(errorMessage)
-                            .font(Typography.Caption1.regular)
-                            .foregroundColor(.red)
-                    }
-                }
-                .padding(.horizontal, Theme.Spacing.large)
-                
-                Button(action: processURL) {
-                    HStack {
-                        if extractionService.isProcessing {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                                .foregroundColor(.white)
-                        } else {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .font(.system(size: 16))
-                        }
-                        
-                        Text(extractionService.isProcessing ? extractionService.processingStatus : "Import Recipe")
-                            .font(Typography.Subheadline.semibold)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(Theme.Spacing.medium)
-                    .background(
-                        RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                            .fill(isValidURL && !extractionService.isProcessing ? Theme.Colors.accent : Theme.Colors.tertiaryText)
-                    )
-                }
-                .disabled(!isValidURL || extractionService.isProcessing)
-                .padding(.horizontal, Theme.Spacing.large)
-                
-                // Progress indicator
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
+
                 if extractionService.isProcessing {
-                    VStack(spacing: Theme.Spacing.small) {
-                        ProgressView(value: extractionService.processingProgress)
-                            .progressViewStyle(LinearProgressViewStyle())
-                            .padding(.horizontal, Theme.Spacing.large)
-                        
-                        Text(extractionService.processingStatus)
-                            .font(Typography.Caption1.regular)
-                            .foregroundColor(Theme.Colors.secondaryText)
+                    // Full-screen loading view
+                    TastoryLoadingView(
+                        title: "Importing Recipe",
+                        message: extractionService.processingStatus,
+                        showProgress: true,
+                        progress: extractionService.processingProgress
+                    )
+                } else {
+                    VStack(spacing: TastorySpacing.lg) {
+                        VStack(spacing: TastorySpacing.md) {
+                            Text("Add Recipe from URL")
+                                .font(TastoryTypography.title)
+                                .foregroundColor(TastoryColors.primaryText)
+
+                            Text("Paste a link from any recipe website, Instagram, TikTok, or other cooking source")
+                                .font(TastoryTypography.body)
+                                .foregroundColor(TastoryColors.secondaryText)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.top, TastorySpacing.lg)
+
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            Text("Recipe URL")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.primaryText)
+
+                            TextField("https://www.example.com/recipe", text: $urlText)
+                                .keyboardType(.URL)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                                .padding(TastorySpacing.md)
+                                .background(TastoryColors.cardBackground)
+                                .cornerRadius(TastoryRadius.medium)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: TastoryRadius.medium)
+                                        .stroke(TastoryColors.border, lineWidth: 1)
+                                )
+
+                            // Paste from clipboard button
+                            Button(action: pasteFromClipboard) {
+                                HStack(spacing: TastorySpacing.xs) {
+                                    Image(systemName: "doc.on.clipboard")
+                                    Text("Paste from Clipboard")
+                                }
+                                .font(TastoryTypography.callout)
+                                .foregroundColor(TastoryColors.primaryGreen)
+                            }
+
+                            if let errorMessage = errorMessage {
+                                Text(errorMessage)
+                                    .font(TastoryTypography.caption)
+                                    .foregroundColor(TastoryColors.errorRed)
+                            }
+                        }
+                        .padding(.horizontal, TastorySpacing.lg)
+
+                        TastoryButton(
+                            title: "Import Recipe",
+                            style: .primary,
+                            icon: "arrow.down.circle.fill",
+                            isDisabled: !isValidURL,
+                            action: processURL
+                        )
+                        .padding(.horizontal, TastorySpacing.lg)
+
+                        Spacer()
                     }
                 }
-                
-                Spacer()
             }
-            .background(Theme.Colors.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
             .onAppear {
@@ -280,7 +277,7 @@ struct URLRecipeEntryView: View {
     private var isValidURL: Bool {
         isValidURLString(urlText)
     }
-    
+
     private func isValidURLString(_ string: String) -> Bool {
         guard let url = URL(string: string.trimmingCharacters(in: .whitespacesAndNewlines)),
               let scheme = url.scheme?.lowercased() else {
@@ -288,7 +285,13 @@ struct URLRecipeEntryView: View {
         }
         return scheme == "http" || scheme == "https"
     }
-    
+
+    private func pasteFromClipboard() {
+        if let clipboardText = UIPasteboard.general.string {
+            urlText = clipboardText
+        }
+    }
+
     private func processURL() {
         guard isValidURL else { return }
         
@@ -325,152 +328,119 @@ struct PhotoRecipeEntryView: View {
     @State private var errorMessage: String?
     @State private var showingRecipeEditor = false
     @State private var extractedRecipe: Recipe?
-    
+
     var body: some View {
         NavigationView {
-            VStack(spacing: Theme.Spacing.large) {
-                VStack(spacing: Theme.Spacing.medium) {
-                    Text("Add Recipe from Photo")
-                        .font(Typography.Title2.bold)
-                        .foregroundColor(Theme.Colors.text)
-                    
-                    Text("Take a photo or select from your library to extract recipe details")
-                        .font(Typography.Body.regular)
-                        .foregroundColor(Theme.Colors.secondaryText)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.top, Theme.Spacing.large)
-                
-                // Image Selection Area
-                VStack(spacing: Theme.Spacing.medium) {
-                    if let selectedImage = selectedImage {
-                        Image(uiImage: selectedImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(maxHeight: 200)
-                            .cornerRadius(Theme.CornerRadius.medium)
-                            .shadow(
-                                color: Theme.Shadow.small.color,
-                                radius: Theme.Shadow.small.radius,
-                                x: Theme.Shadow.small.x,
-                                y: Theme.Shadow.small.y
-                            )
-                    } else {
-                        RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                            .fill(Theme.Colors.tertiaryBackground)
-                            .frame(height: 200)
-                            .overlay(
-                                VStack(spacing: Theme.Spacing.small) {
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(Theme.Colors.tertiaryText)
-                                    
-                                    Text("No image selected")
-                                        .font(Typography.Subheadline.regular)
-                                        .foregroundColor(Theme.Colors.tertiaryText)
-                                }
-                            )
-                    }
-                    
-                    Button(action: { isShowingActionSheet = true }) {
-                        HStack {
-                            Image(systemName: "camera.fill")
-                                .font(.system(size: 16))
-                            Text(selectedImage == nil ? "Select Photo" : "Change Photo")
-                                .font(Typography.Subheadline.semibold)
-                        }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(Theme.Spacing.medium)
-                        .background(
-                            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                                .fill(Theme.Colors.accent)
-                        )
-                    }
-                }
-                .padding(.horizontal, Theme.Spacing.large)
-                
-                // Process Button
-                if selectedImage != nil {
-                    VStack(spacing: Theme.Spacing.medium) {
-                        Button(action: processImage) {
-                            HStack {
-                                if isProcessingOCR || extractionService.isProcessing {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                        .foregroundColor(.white)
-                                } else {
-                                    Image(systemName: "text.viewfinder")
-                                        .font(.system(size: 16))
-                                }
-                                
-                                Text(getProcessingText())
-                                    .font(Typography.Subheadline.semibold)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
+
+                if isProcessingOCR || extractionService.isProcessing {
+                    // Full-screen loading view
+                    TastoryLoadingView(
+                        title: "Extracting Recipe",
+                        message: getProcessingText(),
+                        icon: "doc.text.magnifyingglass",
+                        showProgress: extractionService.isProcessing,
+                        progress: extractionService.processingProgress
+                    )
+                } else {
+                    ScrollView {
+                        VStack(spacing: TastorySpacing.lg) {
+                            VStack(spacing: TastorySpacing.md) {
+                                Text("Add Recipe from Photo")
+                                    .font(TastoryTypography.title)
+                                    .foregroundColor(TastoryColors.primaryText)
+
+                                Text("Take a photo or select from your library to extract recipe details")
+                                    .font(TastoryTypography.body)
+                                    .foregroundColor(TastoryColors.secondaryText)
+                                    .multilineTextAlignment(.center)
                             }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(Theme.Spacing.medium)
-                            .background(
-                                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium)
-                                    .fill((isProcessingOCR || extractionService.isProcessing) ? Theme.Colors.tertiaryText : Theme.Colors.accent)
-                            )
-                        }
-                        .disabled(isProcessingOCR || extractionService.isProcessing)
-                        .padding(.horizontal, Theme.Spacing.large)
-                        
-                        // AI Processing Progress
-                        if extractionService.isProcessing {
-                            VStack(spacing: Theme.Spacing.small) {
-                                ProgressView(value: extractionService.processingProgress)
-                                    .progressViewStyle(LinearProgressViewStyle())
-                                    .padding(.horizontal, Theme.Spacing.large)
-                                
-                                Text(extractionService.processingStatus)
-                                    .font(Typography.Caption1.regular)
-                                    .foregroundColor(Theme.Colors.secondaryText)
+                            .padding(.top, TastorySpacing.lg)
+
+                            // Image Selection Area
+                            TastoryCard {
+                                VStack(spacing: TastorySpacing.md) {
+                                    if let selectedImage = selectedImage {
+                                        Image(uiImage: selectedImage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(maxHeight: 200)
+                                            .cornerRadius(TastoryRadius.medium)
+                                    } else {
+                                        RoundedRectangle(cornerRadius: TastoryRadius.medium)
+                                            .fill(TastoryColors.border)
+                                            .frame(height: 200)
+                                            .overlay(
+                                                VStack(spacing: TastorySpacing.sm) {
+                                                    Image(systemName: "photo")
+                                                        .font(.system(size: TastoryIconSize.xLarge))
+                                                        .foregroundColor(TastoryColors.tertiaryText)
+
+                                                    Text("No image selected")
+                                                        .font(TastoryTypography.callout)
+                                                        .foregroundColor(TastoryColors.tertiaryText)
+                                                }
+                                            )
+                                    }
+
+                                    TastoryButton(
+                                        title: selectedImage == nil ? "Select Photo" : "Change Photo",
+                                        style: .secondary,
+                                        icon: "camera.fill",
+                                        action: { isShowingActionSheet = true }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, TastorySpacing.lg)
+
+                            // Process Button
+                            if selectedImage != nil {
+                                TastoryButton(
+                                    title: extractedText.isEmpty ? "Extract Recipe" : "Generate Recipe",
+                                    style: .primary,
+                                    icon: "text.viewfinder",
+                                    action: processImage
+                                )
+                                .padding(.horizontal, TastorySpacing.lg)
+                            }
+
+                            // Extracted Text Display
+                            if !extractedText.isEmpty {
+                                TastoryCard {
+                                    VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                                        Text("Extracted Text:")
+                                            .font(TastoryTypography.headline)
+                                            .foregroundColor(TastoryColors.primaryText)
+
+                                        Text(extractedText)
+                                            .font(TastoryTypography.bodyRegular)
+                                            .foregroundColor(TastoryColors.primaryText)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                }
+                                .padding(.horizontal, TastorySpacing.lg)
+                            }
+
+                            if let errorMessage = errorMessage {
+                                Text(errorMessage)
+                                    .font(TastoryTypography.caption)
+                                    .foregroundColor(TastoryColors.errorRed)
+                                    .padding(.horizontal, TastorySpacing.lg)
                             }
                         }
+                        .padding(.bottom, TastorySpacing.xl)
                     }
                 }
-                
-                // Extracted Text Display
-                if !extractedText.isEmpty {
-                    VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-                        Text("Extracted Text:")
-                            .font(Typography.Subheadline.semibold)
-                            .foregroundColor(Theme.Colors.text)
-                        
-                        ScrollView {
-                            Text(extractedText)
-                                .font(Typography.Body.regular)
-                                .foregroundColor(Theme.Colors.text)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(Theme.Spacing.medium)
-                                .background(Theme.Colors.secondaryBackground)
-                                .cornerRadius(Theme.CornerRadius.medium)
-                        }
-                        .frame(maxHeight: 150)
-                    }
-                    .padding(.horizontal, Theme.Spacing.large)
-                }
-                
-                if let errorMessage = errorMessage {
-                    Text(errorMessage)
-                        .font(Typography.Caption1.regular)
-                        .foregroundColor(.red)
-                        .padding(.horizontal, Theme.Spacing.large)
-                }
-                
-                Spacer()
             }
-            .background(Theme.Colors.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(Theme.Colors.accent)
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
             .confirmationDialog("Select Image Source", isPresented: $isShowingActionSheet) {

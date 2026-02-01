@@ -64,54 +64,92 @@ struct HomeView: View {
 
     var body: some View {
         NavigationView {
-            ZStack {
-                Theme.Colors.background
-                    .ignoresSafeArea()
-                
-                if storageManager.recipes.isEmpty {
-                    EmptyStateView()
-                } else if filteredRecipes.isEmpty && !debouncedSearchText.isEmpty {
-                    SearchEmptyStateView(searchText: debouncedSearchText)
-                } else {
-                    RecipeGridView(
-                        recipes: filteredRecipes,
-                        isSelectionMode: isSelectionMode,
-                        selectedRecipeIds: $selectedRecipeIds
-                    )
-                }
+            VStack(spacing: 0) {
+                // Custom header
+                HStack {
+                    Text("My Recipes")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(TastoryColors.primaryText)
 
-                VStack {
                     Spacer()
 
-                    // Bulk actions toolbar (shown in selection mode)
-                    if isSelectionMode && !selectedRecipeIds.isEmpty {
-                        bulkActionsToolbar
-                            .padding(.horizontal, Theme.Spacing.medium)
-                            .padding(.bottom, Theme.Spacing.small)
-                    }
-
-                    HStack {
-                        Spacer()
-                        if !isSelectionMode {
-                            AddRecipeButton(showingAddRecipe: $showingAddRecipe)
-                                .padding(.trailing, Theme.Spacing.medium)
-                                .padding(.bottom, Theme.Spacing.medium)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("My Recipes")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
                     if !storageManager.recipes.isEmpty {
                         Button(isSelectionMode ? "Cancel" : "Select") {
                             toggleSelectionMode()
                         }
-                        .foregroundColor(Theme.Colors.accent)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(TastoryColors.primaryGreen)
+                        .buttonStyle(.bordered)
+                        .buttonBorderShape(.capsule)
+                        .tint(.gray)
+                    }
+                }
+                .padding(.horizontal, TastorySpacing.md)
+                .padding(.top, TastorySpacing.sm)
+                .padding(.bottom, TastorySpacing.md)
+
+                // Custom search bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(TastoryColors.secondaryText)
+
+                    TextField("Search recipes, ingredients, or categories", text: $searchText)
+                        .font(TastoryTypography.body)
+                }
+                .padding(TastorySpacing.sm)
+                .background(Color(.systemGray6))
+                .cornerRadius(TastoryRadius.medium)
+                .padding(.horizontal, TastorySpacing.md)
+                .padding(.bottom, TastorySpacing.sm)
+
+                // Main content
+                ZStack {
+                    TastoryColors.background
+                        .ignoresSafeArea()
+
+                    if storageManager.recipes.isEmpty {
+                        TastoryEmptyState(
+                            icon: "book.closed",
+                            title: "No recipes yet",
+                            message: "Add your first recipe by tapping the + button below."
+                        )
+                    } else if filteredRecipes.isEmpty && !debouncedSearchText.isEmpty {
+                        TastoryEmptyState(
+                            icon: "magnifyingglass",
+                            title: "No results found",
+                            message: "Try searching for different keywords or check your spelling."
+                        )
+                    } else {
+                        RecipeGridView(
+                            recipes: filteredRecipes,
+                            isSelectionMode: isSelectionMode,
+                            selectedRecipeIds: $selectedRecipeIds
+                        )
+                    }
+
+                    VStack {
+                        Spacer()
+
+                        // Bulk actions toolbar (shown in selection mode)
+                        if isSelectionMode && !selectedRecipeIds.isEmpty {
+                            bulkActionsToolbar
+                                .padding(.horizontal, TastorySpacing.md)
+                                .padding(.bottom, TastorySpacing.sm)
+                        }
+
+                        HStack {
+                            Spacer()
+                            if !isSelectionMode {
+                                AddRecipeButton(showingAddRecipe: $showingAddRecipe)
+                                    .padding(.trailing, TastorySpacing.md)
+                                    .padding(.bottom, TastorySpacing.md)
+                            }
+                        }
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Search recipes, ingredients, or categories")
+            .background(TastoryColors.background)
+            .navigationBarHidden(true)
             .onChange(of: searchText) { _, newValue in
                 // Debounce search with 250ms delay
                 Task {
@@ -159,59 +197,52 @@ struct HomeView: View {
     // MARK: - Bulk Actions Toolbar
 
     private var bulkActionsToolbar: some View {
-        HStack(spacing: Theme.Spacing.medium) {
-            // Delete button
-            Button(action: {
-                showingBulkDeleteAlert = true
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 20))
-                    Text("Delete")
-                        .font(Typography.Caption1.regular)
+        TastoryCard(padding: TastorySpacing.md) {
+            HStack(spacing: TastorySpacing.md) {
+                // Delete button
+                Button(action: {
+                    showingBulkDeleteAlert = true
+                }) {
+                    VStack(spacing: TastorySpacing.xxs) {
+                        Image(systemName: "trash")
+                            .font(.system(size: TastoryIconSize.medium))
+                        Text("Delete")
+                            .font(TastoryTypography.caption)
+                    }
+                    .foregroundColor(TastoryColors.errorRed)
                 }
-                .foregroundColor(.red)
-            }
 
-            Spacer()
+                Spacer()
 
-            // Add Category button
-            Button(action: {
-                showingAddCategorySheet = true
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "folder.badge.plus")
-                        .font(.system(size: 20))
-                    Text("Add")
-                        .font(Typography.Caption1.regular)
+                // Add Category button
+                Button(action: {
+                    showingAddCategorySheet = true
+                }) {
+                    VStack(spacing: TastorySpacing.xxs) {
+                        Image(systemName: "folder.badge.plus")
+                            .font(.system(size: TastoryIconSize.medium))
+                        Text("Add")
+                            .font(TastoryTypography.caption)
+                    }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
-                .foregroundColor(Theme.Colors.accent)
-            }
 
-            Spacer()
+                Spacer()
 
-            // Set Primary button
-            Button(action: {
-                showingSetPrimarySheet = true
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "star")
-                        .font(.system(size: 20))
-                    Text("Primary")
-                        .font(Typography.Caption1.regular)
+                // Set Primary button
+                Button(action: {
+                    showingSetPrimarySheet = true
+                }) {
+                    VStack(spacing: TastorySpacing.xxs) {
+                        Image(systemName: "star")
+                            .font(.system(size: TastoryIconSize.medium))
+                        Text("Primary")
+                            .font(TastoryTypography.caption)
+                    }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
-                .foregroundColor(Theme.Colors.accent)
             }
         }
-        .padding(Theme.Spacing.medium)
-        .background(Theme.Colors.background)
-        .cornerRadius(12)
-        .shadow(
-            color: Theme.Shadow.medium.color,
-            radius: Theme.Shadow.medium.radius,
-            x: Theme.Shadow.medium.x,
-            y: Theme.Shadow.medium.y
-        )
     }
 
     // MARK: - Helper Methods
@@ -233,28 +264,6 @@ struct HomeView: View {
     }
 }
 
-struct EmptyStateView: View {
-    var body: some View {
-        VStack(spacing: Theme.Spacing.large) {
-            Image(systemName: "book.closed")
-                .font(.system(size: 80))
-                .foregroundColor(Theme.Colors.tertiaryText)
-            
-            VStack(spacing: Theme.Spacing.small) {
-                Text("No recipes yet")
-                    .font(Typography.Title2.semibold)
-                    .foregroundColor(Theme.Colors.text)
-                
-                Text("Start by adding your first recipe")
-                    .font(Typography.Body.regular)
-                    .foregroundColor(Theme.Colors.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(Theme.Spacing.xLarge)
-    }
-}
-
 struct AddRecipeButton: View {
     @Binding var showingAddRecipe: Bool
 
@@ -262,44 +271,15 @@ struct AddRecipeButton: View {
         Button(action: { showingAddRecipe = true }) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accent)
-                    .frame(width: 56, height: 56)
-                    .shadow(
-                        color: Theme.Shadow.medium.color,
-                        radius: Theme.Shadow.medium.radius,
-                        x: Theme.Shadow.medium.x,
-                        y: Theme.Shadow.medium.y
-                    )
+                    .fill(TastoryColors.primaryGreen)
+                    .frame(width: TastoryButtonHeight.primary, height: TastoryButtonHeight.primary)
+                    .tastoryShadow(TastoryShadow.medium)
 
                 Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.system(size: TastoryIconSize.large, weight: .semibold))
                     .foregroundColor(.white)
             }
         }
-    }
-}
-
-struct SearchEmptyStateView: View {
-    let searchText: String
-
-    var body: some View {
-        VStack(spacing: Theme.Spacing.large) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.secondaryText)
-
-            VStack(spacing: Theme.Spacing.small) {
-                Text("No results found")
-                    .font(Typography.Title2.semibold)
-                    .foregroundColor(Theme.Colors.text)
-
-                Text("Try searching for different keywords")
-                    .font(Typography.Body.regular)
-                    .foregroundColor(Theme.Colors.secondaryText)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(Theme.Spacing.xLarge)
     }
 }
 

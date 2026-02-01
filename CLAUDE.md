@@ -67,9 +67,9 @@ Tastory AI is a native iOS cookbook app that captures recipes from any source (T
 
 ## UI/UX Requirements & Design System
 
-> **IMPORTANT**: All new UI elements, screens, and components MUST follow the Tastory-inspired design system defined in [newUX.md](newUX.md). This includes colors, typography, spacing, and reusable components.
+> **IMPORTANT**: All new UI elements, screens, and components MUST follow the Tastory design system defined in [newUX.md](newUX.md). This includes colors, typography, spacing, and reusable components.
 >
-> **Progress Tracking**: See [newUXtodo.md](newUXtodo.md) for implementation status.
+> **Status**: ✅ UX Redesign COMPLETED (All 7 phases)
 
 ### Design Principles
 - Modern, clean aesthetic inspired by Tastory Suite
@@ -90,9 +90,17 @@ Use the following reusable components defined in `Views/Components/`:
 - `TastoryLoadingView` - Loading indicators with animation
 - `TastoryBadge` - Tags and badges
 
-### Legacy Requirements (Being Updated)
-- Visual hierarchy: ingredients and steps over metadata
-- Prioritize clarity, whitespace, and typography
+### Header/Navigation Pattern
+All main screens use a consistent custom header approach:
+- **Custom Header**: VStack with HStack containing title (28pt bold) and action button
+- **Action Buttons**: Use `.buttonStyle(.bordered)` with `.tint(.gray)` for gray glass effect
+- **Button Shapes**: `.buttonBorderShape(.capsule)` for text buttons, `.buttonBorderShape(.circle)` for icon buttons
+- **Navigation Bar Hidden**: Main tabs use `.navigationBarHidden(true)` for full control
+- **Sub-screens**: Keep navigation bar for back button, apply glass button style to toolbar items
+
+### Visual Hierarchy
+- Ingredients and steps prioritized over metadata
+- Clarity, whitespace, and typography emphasized
 
 ---
 
@@ -156,10 +164,19 @@ Use the following reusable components defined in `Views/Components/`:
 
 > **Implementation Details**: For technical implementation patterns, code examples, and specific component details, see [implementation-details.md](implementation-details.md)
 
-### 5. Search & Organization **COMPLETED**
+### 5. Search & Organization ✅ **COMPLETED**
 - ✅ Search bar in HomeView - search title, ingredients, categories, steps
 - ✅ Multi-select recipes with bulk operations
 - ✅ Category browsing and filtering
+
+### 6. UX Redesign ✅ **COMPLETED** (All 7 Phases)
+- ✅ **Phase 1**: Design System Foundation - TastoryDesign.swift with colors, spacing, radius, shadows; reusable components in Views/Components/
+- ✅ **Phase 2**: Core Views - HomeView, RecipeCardView, RecipeDetailView, CategoriesView updated
+- ✅ **Phase 3**: Recipe Creation/Editing - AddRecipeView, URLRecipeEntryView, PhotoRecipeEntryView, RecipeEditingView, EditRecipeView
+- ✅ **Phase 4**: Category Management - FilteredRecipesView, CategorySheets, BulkCategorySheets
+- ✅ **Phase 5**: Settings & Profile - ProfileView, DebugMenuView
+- ✅ **Phase 6**: Share Extension - ShareViewController UIKit styling with Tastory design constants
+- ✅ **Phase 7**: Polish & Testing - All screens tested, consistent styling verified, custom header pattern implemented
 
 ---
 

@@ -26,24 +26,41 @@ struct CategoriesView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if categoryManager.categories.isEmpty {
-                    emptyState
-                } else {
-                    categoryList
-                }
-            }
-            .navigationTitle("Categories")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+            VStack(spacing: 0) {
+                // Custom header
+                HStack {
+                    Text("Categories")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(TastoryColors.primaryText)
+
+                    Spacer()
+
                     Button(action: {
                         showingNewCategorySheet = true
                     }) {
-                        Image(systemName: "plus")
-                            .foregroundColor(Theme.Colors.accent)
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: TastoryIconSize.large))
+                            .foregroundColor(TastoryColors.primaryGreen)
+                    }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.circle)
+                    .tint(.gray)
+                }
+                .padding(.horizontal, TastorySpacing.md)
+                .padding(.top, TastorySpacing.sm)
+                .padding(.bottom, TastorySpacing.md)
+
+                // Content
+                Group {
+                    if categoryManager.categories.isEmpty {
+                        emptyState
+                    } else {
+                        categoryList
                     }
                 }
             }
+            .background(TastoryColors.background)
+            .navigationBarHidden(true)
             .sheet(isPresented: $showingNewCategorySheet) {
                 NewCategorySheet(
                     categoryName: $newCategoryName,
@@ -116,7 +133,7 @@ struct CategoriesView: View {
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
-                        .tint(Theme.Colors.accent)
+                        .tint(TastoryColors.primaryGreen)
                     }
                 }
             }
@@ -127,20 +144,16 @@ struct CategoriesView: View {
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: Theme.Spacing.medium) {
-            Image(systemName: "folder")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.secondaryText)
-
-            Text("No categories yet")
-                .font(Typography.Body.regular)
-                .foregroundColor(Theme.Colors.secondaryText)
-
-            Text("Tap + to create your first category")
-                .font(Typography.Caption1.regular)
-                .foregroundColor(Theme.Colors.secondaryText)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        TastoryEmptyState(
+            icon: "folder",
+            title: "No categories yet",
+            message: "Create categories to organize your recipes.",
+            buttonTitle: "Create Category",
+            buttonIcon: "plus",
+            buttonAction: {
+                showingNewCategorySheet = true
+            }
+        )
     }
 
     // MARK: - Helper Methods
@@ -238,23 +251,28 @@ private struct CategoryRow: View {
     let recipeCount: Int
 
     var body: some View {
-        HStack(spacing: Theme.Spacing.small) {
-            Image(systemName: "folder.fill")
-                .font(.system(size: 20))
-                .foregroundColor(Theme.Colors.accent)
+        HStack(spacing: TastorySpacing.sm) {
+            // Folder icon in light green circle
+            ZStack {
+                Circle()
+                    .fill(TastoryColors.lightGreenBg)
+                    .frame(width: 40, height: 40)
+
+                Image(systemName: "folder.fill")
+                    .font(.system(size: TastoryIconSize.medium))
+                    .foregroundColor(TastoryColors.primaryGreen)
+            }
 
             Text(category.name)
-                .font(Typography.Body.regular)
-                .foregroundColor(Theme.Colors.text)
+                .font(TastoryTypography.body)
+                .foregroundColor(TastoryColors.primaryText)
 
             Spacer()
 
-            Text("\(recipeCount)")
-                .font(Typography.Caption1.regular)
-                .foregroundColor(Theme.Colors.secondaryText)
-                .padding(.trailing, Theme.Spacing.small)
+            // Recipe count badge
+            TastoryBadge(text: "\(recipeCount)", style: .count)
         }
-        .padding(.vertical, Theme.Spacing.xSmall)
+        .padding(.vertical, TastorySpacing.xs)
     }
 }
 

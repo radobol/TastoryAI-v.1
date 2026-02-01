@@ -69,6 +69,46 @@ Create/update `TastoryDesign.swift` with these colors:
 | `small` | 0 1px 2px rgba(0,0,0,0.05) | Subtle elevation |
 | `medium` | 0 2px 4px rgba(0,0,0,0.08) | Cards, floating elements |
 
+### Header/Navigation Pattern
+
+Main screens (HomeView, CategoriesView) use a **custom header approach** for consistent styling:
+
+```swift
+// Custom header structure
+VStack(spacing: 0) {
+    // Header
+    HStack {
+        Text("Screen Title")
+            .font(.system(size: 28, weight: .bold))
+            .foregroundColor(TastoryColors.primaryText)
+
+        Spacer()
+
+        // Action button with gray glass style
+        Button("Action") { }
+            .font(.system(size: 17, weight: .medium))
+            .foregroundColor(TastoryColors.primaryGreen)
+            .buttonStyle(.bordered)
+            .buttonBorderShape(.capsule)  // or .circle for icon buttons
+            .tint(.gray)
+    }
+    .padding(.horizontal, TastorySpacing.md)
+    .padding(.top, TastorySpacing.sm)
+    .padding(.bottom, TastorySpacing.md)
+
+    // Custom search bar (if needed)
+    // Content
+}
+.navigationBarHidden(true)
+```
+
+**Key principles:**
+- **Title**: 28pt bold, left-aligned
+- **Action buttons**: Gray glass background (`.buttonStyle(.bordered)` + `.tint(.gray)`)
+- **Button shapes**: `.capsule` for text, `.circle` for icons
+- **Text color**: Green for action buttons
+- **Sub-screens**: Keep navigation bar for back button, apply same button styling to toolbar items
+
 ---
 
 ## Reusable Components

@@ -16,12 +16,12 @@ struct RecipeGridView: View {
 
     var columns: [GridItem] {
         let count = sizeClass == .compact ? 2 : 4
-        return Array(repeating: GridItem(.flexible(), spacing: Theme.Spacing.medium), count: count)
+        return Array(repeating: GridItem(.flexible(), spacing: TastorySpacing.md), count: count)
     }
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: Theme.Spacing.medium) {
+            LazyVGrid(columns: columns, spacing: TastorySpacing.md) {
                 ForEach(recipes) { recipe in
                     RecipeCardView(
                         recipe: recipe,
@@ -35,9 +35,9 @@ struct RecipeGridView: View {
                     }
                 }
             }
-            .padding(Theme.Spacing.medium)
+            .padding(TastorySpacing.md)
         }
-        .background(Theme.Colors.background)
+        .background(TastoryColors.background)
     }
 
     private func toggleSelection(for recipeId: UUID) {

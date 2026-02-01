@@ -23,31 +23,31 @@ struct RecipeDetailView: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Hero Image Section
                 heroImageSection
-                
+
                 // Content
-                VStack(alignment: .leading, spacing: Theme.Spacing.large) {
+                VStack(alignment: .leading, spacing: TastorySpacing.lg) {
                     // Title and Category
                     titleSection
-                    
+
                     // Servings Control
                     servingsSection
-                    
+
                     // Ingredients
                     ingredientsSection
-                    
+
                     // Instructions
                     instructionsSection
-                    
+
                     // Tips & Notes
                     tipsSection
-                    
+
                     // Source URL
                     sourceURLSection
                 }
-                .padding(Theme.Spacing.medium)
+                .padding(TastorySpacing.md)
             }
         }
-        .background(Theme.Colors.background)
+        .background(TastoryColors.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -71,7 +71,7 @@ struct RecipeDetailView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
-                        .foregroundColor(Theme.Colors.accent)
+                        .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
         }
@@ -101,10 +101,10 @@ struct RecipeDetailView: View {
                     switch phase {
                     case .empty:
                         ZStack {
-                            RoundedRectangle(cornerRadius: 0)
-                                .fill(Theme.Colors.tertiaryBackground)
+                            Rectangle()
+                                .fill(TastoryColors.border)
                                 .frame(height: 250)
-                            
+
                             ProgressView()
                                 .scaleEffect(1.2)
                         }
@@ -115,175 +115,166 @@ struct RecipeDetailView: View {
                             .frame(height: 250)
                             .clipped()
                     case .failure(_):
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 0)
-                                .fill(Theme.Colors.tertiaryBackground)
-                                .frame(height: 250)
-                            
-                            Image(systemName: "photo")
-                                .font(.system(size: 60))
-                                .foregroundColor(Theme.Colors.tertiaryText)
-                        }
+                        heroPlaceholder
                     @unknown default:
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 0)
-                                .fill(Theme.Colors.tertiaryBackground)
-                                .frame(height: 250)
-                            
-                            Image(systemName: "photo")
-                                .font(.system(size: 60))
-                                .foregroundColor(Theme.Colors.tertiaryText)
-                        }
+                        heroPlaceholder
                     }
                 }
             } else {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 0)
-                        .fill(Theme.Colors.tertiaryBackground)
-                        .frame(height: 250)
-                    
-                    Image(systemName: "photo")
-                        .font(.system(size: 60))
-                        .foregroundColor(Theme.Colors.tertiaryText)
-                }
+                heroPlaceholder
             }
+        }
+    }
+
+    private var heroPlaceholder: some View {
+        ZStack {
+            Rectangle()
+                .fill(TastoryColors.border)
+                .frame(height: 250)
+
+            Image(systemName: "photo")
+                .font(.system(size: TastoryIconSize.xxLarge))
+                .foregroundColor(TastoryColors.tertiaryText)
         }
     }
     
     private var titleSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-            Text(viewModel.recipe.title)
-                .font(Typography.Title1.bold)
-                .foregroundColor(Theme.Colors.text)
-            
-            // Display primary category from new category system
-            let categoryName = getCategoryDisplayName(for: viewModel.recipe)
-            HStack(spacing: Theme.Spacing.xSmall) {
-                Image(systemName: "tag.fill")
-                    .font(.system(size: 12))
-                Text(categoryName)
-                    .font(Typography.Subheadline.semibold)
+        TastoryCard {
+            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                Text(viewModel.recipe.title)
+                    .font(TastoryTypography.title)
+                    .foregroundColor(TastoryColors.primaryText)
+
+                // Display primary category from new category system
+                let categoryName = getCategoryDisplayName(for: viewModel.recipe)
+                TastoryBadge(text: categoryName, style: .tag, icon: "tag.fill")
             }
-            .foregroundColor(Theme.Colors.accent)
-            
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
     private var servingsSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-            Text("Servings")
-                .font(Typography.Headline.regular)
-                .foregroundColor(Theme.Colors.text)
-            
-            HStack(spacing: Theme.Spacing.medium) {
-                Button(action: viewModel.decreaseServings) {
-                    Image(systemName: "minus.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(viewModel.currentServings > 1 ? Theme.Colors.accent : Theme.Colors.tertiaryText)
+        TastoryCard {
+            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                Text("Servings")
+                    .font(TastoryTypography.headline)
+                    .foregroundColor(TastoryColors.primaryText)
+
+                HStack(spacing: TastorySpacing.md) {
+                    Button(action: viewModel.decreaseServings) {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.system(size: TastoryIconSize.large))
+                            .foregroundColor(viewModel.currentServings > 1 ? TastoryColors.primaryGreen : TastoryColors.tertiaryText)
+                    }
+                    .disabled(viewModel.currentServings <= 1)
+
+                    Text("\(viewModel.currentServings)")
+                        .font(TastoryTypography.title)
+                        .foregroundColor(TastoryColors.primaryText)
+                        .frame(minWidth: 40)
+
+                    Button(action: viewModel.increaseServings) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: TastoryIconSize.large))
+                            .foregroundColor(viewModel.currentServings < 20 ? TastoryColors.primaryGreen : TastoryColors.tertiaryText)
+                    }
+                    .disabled(viewModel.currentServings >= 20)
+
+                    Spacer()
                 }
-                .disabled(viewModel.currentServings <= 1)
-                
-                Text("\(viewModel.currentServings)")
-                    .font(Typography.Title2.bold)
-                    .foregroundColor(Theme.Colors.text)
-                    .frame(minWidth: 40)
-                
-                Button(action: viewModel.increaseServings) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(viewModel.currentServings < 20 ? Theme.Colors.accent : Theme.Colors.tertiaryText)
-                }
-                .disabled(viewModel.currentServings >= 20)
-                
-                Spacer()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(Theme.Spacing.medium)
-        .background(Theme.Colors.secondaryBackground)
-        .cornerRadius(Theme.CornerRadius.medium)
     }
     
     private var ingredientsSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-            Text("Ingredients")
-                .font(Typography.Headline.regular)
-                .foregroundColor(Theme.Colors.text)
-            
-            VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-                ForEach(viewModel.scaledIngredients, id: \.self) { ingredient in
-                    IngredientRow(
-                        ingredient: ingredient,
-                        isChecked: viewModel.isIngredientChecked(ingredient)
-                    ) {
-                        viewModel.toggleIngredientCheck(ingredient)
+        TastoryCard {
+            VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                Text("Ingredients")
+                    .font(TastoryTypography.headline)
+                    .foregroundColor(TastoryColors.primaryText)
+
+                VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                    ForEach(viewModel.scaledIngredients, id: \.self) { ingredient in
+                        IngredientRow(
+                            ingredient: ingredient,
+                            isChecked: viewModel.isIngredientChecked(ingredient)
+                        ) {
+                            viewModel.toggleIngredientCheck(ingredient)
+                        }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
     private var instructionsSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-            Text("Instructions")
-                .font(Typography.Headline.regular)
-                .foregroundColor(Theme.Colors.text)
-            
-            VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                ForEach(Array(viewModel.recipe.steps.enumerated()), id: \.offset) { index, step in
-                    InstructionStep(number: index + 1, instruction: step)
+        TastoryCard {
+            VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                Text("Instructions")
+                    .font(TastoryTypography.headline)
+                    .foregroundColor(TastoryColors.primaryText)
+
+                VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                    ForEach(Array(viewModel.recipe.steps.enumerated()), id: \.offset) { index, step in
+                        InstructionStep(number: index + 1, instruction: step)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     
     private var tipsSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
+        Group {
             if !viewModel.recipe.tips.isEmpty {
-                Text("Tips & Notes")
-                    .font(Typography.Headline.regular)
-                    .foregroundColor(Theme.Colors.text)
-                
-                VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-                    ForEach(viewModel.recipe.tips, id: \.self) { tip in
-                        HStack(alignment: .top, spacing: Theme.Spacing.small) {
-                            Image(systemName: "lightbulb")
-                                .font(.system(size: 16))
-                                .foregroundColor(Theme.Colors.accent)
-                                .padding(.top, 2)
-                            
-                            Text(tip)
-                                .font(Typography.Body.regular)
-                                .foregroundColor(Theme.Colors.text)
-                                .multilineTextAlignment(.leading)
+                TastoryCard(backgroundColor: TastoryColors.lightGreenBg) {
+                    VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                        Text("Tips & Notes")
+                            .font(TastoryTypography.headline)
+                            .foregroundColor(TastoryColors.primaryText)
+
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            ForEach(viewModel.recipe.tips, id: \.self) { tip in
+                                HStack(alignment: .top, spacing: TastorySpacing.sm) {
+                                    Image(systemName: "lightbulb.fill")
+                                        .font(.system(size: TastoryIconSize.small))
+                                        .foregroundColor(TastoryColors.primaryGreen)
+                                        .padding(.top, 2)
+
+                                    Text(tip)
+                                        .font(TastoryTypography.bodyRegular)
+                                        .foregroundColor(TastoryColors.primaryText)
+                                        .multilineTextAlignment(.leading)
+                                }
+                            }
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-            } else {
-                EmptyView()
             }
         }
     }
     
     private var sourceURLSection: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
+        Group {
             if let sourceURL = viewModel.recipe.sourceURL, !sourceURL.isEmpty {
-                HStack(spacing: Theme.Spacing.small) {
-                    Image(systemName: "link")
-                        .font(.system(size: 16))
-                        .foregroundColor(Theme.Colors.accent)
-                    
-                    if let url = URL(string: sourceURL) {
-                        Link("Original recipe", destination: url)
-                            .font(Typography.Body.semibold)
-                            .foregroundColor(Theme.Colors.accent)
-                    } else {
-                        Text("Original recipe")
-                            .font(Typography.Body.semibold)
-                            .foregroundColor(Theme.Colors.secondaryText)
+                if let url = URL(string: sourceURL) {
+                    Link(destination: url) {
+                        TastoryListItem(
+                            title: "Original recipe",
+                            leadingIcon: "link",
+                            showChevron: true
+                        )
                     }
+                } else {
+                    TastoryListItem(
+                        title: "Original recipe",
+                        leadingIcon: "link",
+                        showChevron: false
+                    )
                 }
-            } else {
-                EmptyView()
             }
         }
     }
@@ -306,20 +297,25 @@ struct IngredientRow: View {
     let ingredient: String
     let isChecked: Bool
     let onToggle: () -> Void
-    
+
     var body: some View {
         Button(action: onToggle) {
-            HStack(spacing: Theme.Spacing.small) {
-                Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20))
-                    .foregroundColor(isChecked ? Theme.Colors.success : Theme.Colors.tertiaryText)
-                
+            HStack(spacing: TastorySpacing.sm) {
+                // Green bullet or checkmark
+                if isChecked {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: TastoryIconSize.medium))
+                        .foregroundColor(TastoryColors.successGreen)
+                } else {
+                    TastoryBullet()
+                }
+
                 Text(ingredient)
-                    .font(Typography.Body.regular)
-                    .foregroundColor(isChecked ? Theme.Colors.secondaryText : Theme.Colors.text)
+                    .font(TastoryTypography.bodyRegular)
+                    .foregroundColor(isChecked ? TastoryColors.secondaryText : TastoryColors.primaryText)
                     .strikethrough(isChecked)
                     .multilineTextAlignment(.leading)
-                
+
                 Spacer()
             }
         }
@@ -330,22 +326,14 @@ struct IngredientRow: View {
 struct InstructionStep: View {
     let number: Int
     let instruction: String
-    
+
     var body: some View {
-        HStack(alignment: .top, spacing: Theme.Spacing.small) {
-            ZStack {
-                Circle()
-                    .fill(Theme.Colors.accent)
-                    .frame(width: 24, height: 24)
-                
-                Text("\(number)")
-                    .font(Typography.Caption1.medium)
-                    .foregroundColor(.white)
-            }
-            
+        HStack(alignment: .top, spacing: TastorySpacing.sm) {
+            TastoryNumberBadge(number: number)
+
             Text(instruction)
-                .font(Typography.Body.regular)
-                .foregroundColor(Theme.Colors.text)
+                .font(TastoryTypography.bodyRegular)
+                .foregroundColor(TastoryColors.primaryText)
                 .multilineTextAlignment(.leading)
         }
     }

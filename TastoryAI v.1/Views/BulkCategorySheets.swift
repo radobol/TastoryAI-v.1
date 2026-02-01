@@ -23,41 +23,67 @@ struct AddCategoryToBulkSheet: View {
 
     var body: some View {
         NavigationView {
-            List {
-                Section(header: Text("Select Secondary Category to Add")) {
-                    ForEach(categoryManager.categories) { category in
-                        Button(action: {
-                            addCategoryToRecipes(category.id)
-                        }) {
-                            HStack {
-                                Image(systemName: "folder.fill")
-                                    .foregroundColor(Theme.Colors.accent)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
 
-                                Text(category.name)
-                                    .font(Typography.Body.regular)
-                                    .foregroundColor(.primary)
+                ScrollView {
+                    VStack(spacing: TastorySpacing.md) {
+                        // Categories list
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            Text("Select Category to Add")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.secondaryText)
+                                .padding(.horizontal, TastorySpacing.md)
 
-                                Spacer()
+                            VStack(spacing: 0) {
+                                ForEach(categoryManager.categories) { category in
+                                    Button(action: {
+                                        addCategoryToRecipes(category.id)
+                                    }) {
+                                        HStack(spacing: TastorySpacing.sm) {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(TastoryColors.lightGreenBg)
+                                                    .frame(width: 40, height: 40)
+                                                Image(systemName: "folder.fill")
+                                                    .font(.system(size: TastoryIconSize.medium))
+                                                    .foregroundColor(TastoryColors.primaryGreen)
+                                            }
 
-                                Image(systemName: "plus.circle")
-                                    .foregroundColor(Theme.Colors.accent)
+                                            Text(category.name)
+                                                .font(TastoryTypography.body)
+                                                .foregroundColor(TastoryColors.primaryText)
+
+                                            Spacer()
+
+                                            Image(systemName: "plus.circle")
+                                                .foregroundColor(TastoryColors.primaryGreen)
+                                        }
+                                        .padding(.horizontal, TastorySpacing.md)
+                                        .padding(.vertical, TastorySpacing.sm)
+                                    }
+
+                                    if category.id != categoryManager.categories.last?.id {
+                                        Divider().padding(.leading, 56)
+                                    }
+                                }
                             }
+                            .background(TastoryColors.cardBackground)
+                            .cornerRadius(TastoryRadius.large)
+                            .padding(.horizontal, TastorySpacing.md)
                         }
-                    }
-                }
 
-                Section {
-                    Button(action: {
-                        showingNewCategorySheet = true
-                    }) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(Theme.Colors.accent)
-                            Text("Create New Category")
-                                .foregroundColor(Theme.Colors.accent)
-                                .font(Typography.Body.semibold)
+                        TastoryButton(
+                            title: "Create New Category",
+                            style: .text,
+                            icon: "plus.circle.fill"
+                        ) {
+                            showingNewCategorySheet = true
                         }
+                        .padding(.horizontal, TastorySpacing.md)
                     }
+                    .padding(.top, TastorySpacing.md)
                 }
             }
             .navigationTitle("Add Category")
@@ -67,6 +93,7 @@ struct AddCategoryToBulkSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
             .sheet(isPresented: $showingNewCategorySheet) {
@@ -145,35 +172,66 @@ struct RemoveCategoryFromBulkSheet: View {
 
     var body: some View {
         NavigationView {
-            List {
-                if commonCategories.isEmpty {
-                    Section {
-                        Text("No common categories found")
-                            .font(Typography.Body.regular)
-                            .foregroundColor(Theme.Colors.secondaryText)
-                    }
-                } else {
-                    Section(header: Text("Common Categories")) {
-                        ForEach(commonCategories) { category in
-                            Button(action: {
-                                removeCategoryFromRecipes(category.id)
-                            }) {
-                                HStack {
-                                    Image(systemName: "folder.fill")
-                                        .foregroundColor(Theme.Colors.accent)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
 
-                                    Text(category.name)
-                                        .font(Typography.Body.regular)
-                                        .foregroundColor(.primary)
+                ScrollView {
+                    VStack(spacing: TastorySpacing.md) {
+                        if commonCategories.isEmpty {
+                            TastoryEmptyState(
+                                icon: "folder.badge.questionmark",
+                                title: "No common categories",
+                                message: "Selected recipes don't share any common categories."
+                            )
+                            .padding(.top, TastorySpacing.xl)
+                        } else {
+                            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                                Text("Common Categories")
+                                    .font(TastoryTypography.headline)
+                                    .foregroundColor(TastoryColors.secondaryText)
+                                    .padding(.horizontal, TastorySpacing.md)
 
-                                    Spacer()
+                                VStack(spacing: 0) {
+                                    ForEach(commonCategories) { category in
+                                        Button(action: {
+                                            removeCategoryFromRecipes(category.id)
+                                        }) {
+                                            HStack(spacing: TastorySpacing.sm) {
+                                                ZStack {
+                                                    Circle()
+                                                        .fill(TastoryColors.lightGreenBg)
+                                                        .frame(width: 40, height: 40)
+                                                    Image(systemName: "folder.fill")
+                                                        .font(.system(size: TastoryIconSize.medium))
+                                                        .foregroundColor(TastoryColors.primaryGreen)
+                                                }
 
-                                    Image(systemName: "minus.circle")
-                                        .foregroundColor(.red)
+                                                Text(category.name)
+                                                    .font(TastoryTypography.body)
+                                                    .foregroundColor(TastoryColors.primaryText)
+
+                                                Spacer()
+
+                                                Image(systemName: "minus.circle")
+                                                    .foregroundColor(TastoryColors.errorRed)
+                                            }
+                                            .padding(.horizontal, TastorySpacing.md)
+                                            .padding(.vertical, TastorySpacing.sm)
+                                        }
+
+                                        if category.id != commonCategories.last?.id {
+                                            Divider().padding(.leading, 56)
+                                        }
+                                    }
                                 }
+                                .background(TastoryColors.cardBackground)
+                                .cornerRadius(TastoryRadius.large)
+                                .padding(.horizontal, TastorySpacing.md)
                             }
                         }
                     }
+                    .padding(.top, TastorySpacing.md)
                 }
             }
             .navigationTitle("Remove Category")
@@ -183,6 +241,7 @@ struct RemoveCategoryFromBulkSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
         }
@@ -225,40 +284,70 @@ struct SetPrimaryCategorySheet: View {
 
     var body: some View {
         NavigationView {
-            List {
-                Section(header: Text("Select Primary Category")) {
-                    ForEach(categoryManager.categories) { category in
-                        Button(action: {
-                            selectedCategoryId = category.id
-                            selectedCategoryName = category.name
-                            showingConfirmAlert = true
-                        }) {
-                            HStack {
-                                Image(systemName: "star.fill")
-                                    .foregroundColor(Theme.Colors.accent)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
 
-                                Text(category.name)
-                                    .font(Typography.Body.regular)
-                                    .foregroundColor(.primary)
+                ScrollView {
+                    VStack(spacing: TastorySpacing.md) {
+                        // Categories list
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            Text("Select Primary Category")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.secondaryText)
+                                .padding(.horizontal, TastorySpacing.md)
 
-                                Spacer()
+                            VStack(spacing: 0) {
+                                ForEach(categoryManager.categories) { category in
+                                    Button(action: {
+                                        selectedCategoryId = category.id
+                                        selectedCategoryName = category.name
+                                        showingConfirmAlert = true
+                                    }) {
+                                        HStack(spacing: TastorySpacing.sm) {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(TastoryColors.lightGreenBg)
+                                                    .frame(width: 40, height: 40)
+                                                Image(systemName: "star.fill")
+                                                    .font(.system(size: TastoryIconSize.medium))
+                                                    .foregroundColor(TastoryColors.primaryGreen)
+                                            }
+
+                                            Text(category.name)
+                                                .font(TastoryTypography.body)
+                                                .foregroundColor(TastoryColors.primaryText)
+
+                                            Spacer()
+
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(TastoryColors.secondaryText)
+                                                .font(.system(size: 14, weight: .semibold))
+                                        }
+                                        .padding(.horizontal, TastorySpacing.md)
+                                        .padding(.vertical, TastorySpacing.sm)
+                                    }
+
+                                    if category.id != categoryManager.categories.last?.id {
+                                        Divider().padding(.leading, 56)
+                                    }
+                                }
                             }
+                            .background(TastoryColors.cardBackground)
+                            .cornerRadius(TastoryRadius.large)
+                            .padding(.horizontal, TastorySpacing.md)
                         }
-                    }
-                }
 
-                Section {
-                    Button(action: {
-                        showingNewCategorySheet = true
-                    }) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(Theme.Colors.accent)
-                            Text("Create New Category")
-                                .foregroundColor(Theme.Colors.accent)
-                                .font(Typography.Body.semibold)
+                        TastoryButton(
+                            title: "Create New Category",
+                            style: .text,
+                            icon: "plus.circle.fill"
+                        ) {
+                            showingNewCategorySheet = true
                         }
+                        .padding(.horizontal, TastorySpacing.md)
                     }
+                    .padding(.top, TastorySpacing.md)
                 }
             }
             .navigationTitle("Set Primary")
@@ -268,6 +357,7 @@ struct SetPrimaryCategorySheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
             .alert("Set Primary Category", isPresented: $showingConfirmAlert) {
@@ -363,62 +453,59 @@ struct RemoveFromCategorySheet: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: Theme.Spacing.large) {
-                Image(systemName: "exclamationmark.triangle")
-                    .font(.system(size: 60))
-                    .foregroundColor(.orange)
-                    .padding(.top, Theme.Spacing.xLarge)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
 
-                VStack(spacing: Theme.Spacing.small) {
-                    Text("Remove from \"\(category.name)\"?")
-                        .font(Typography.Title2.semibold)
-                        .foregroundColor(Theme.Colors.text)
-                        .multilineTextAlignment(.center)
+                VStack(spacing: TastorySpacing.lg) {
+                    // Warning icon
+                    ZStack {
+                        Circle()
+                            .fill(Color.orange.opacity(0.15))
+                            .frame(width: 100, height: 100)
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 40))
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.top, TastorySpacing.xl)
 
-                    Text("Remove \(selectedRecipeIds.count) recipe\(selectedRecipeIds.count == 1 ? "" : "s") from this category? Recipes will remain in other categories.")
-                        .font(Typography.Body.regular)
-                        .foregroundColor(Theme.Colors.secondaryText)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, Theme.Spacing.large)
-                }
+                    // Message
+                    VStack(spacing: TastorySpacing.sm) {
+                        Text("Remove from \"\(category.name)\"?")
+                            .font(TastoryTypography.title)
+                            .foregroundColor(TastoryColors.primaryText)
+                            .multilineTextAlignment(.center)
 
-                Spacer()
-
-                VStack(spacing: Theme.Spacing.medium) {
-                    Button(action: {
-                        removeFromCategory()
-                    }) {
-                        Text("Remove from Category")
-                            .font(Typography.Body.semibold)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(Theme.CornerRadius.medium)
+                        Text("Remove \(selectedRecipeIds.count) recipe\(selectedRecipeIds.count == 1 ? "" : "s") from this category? Recipes will remain in other categories.")
+                            .font(TastoryTypography.body)
+                            .foregroundColor(TastoryColors.secondaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, TastorySpacing.lg)
                     }
 
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        Text("Cancel")
-                            .font(Typography.Body.regular)
-                            .foregroundColor(Theme.Colors.accent)
-                            .frame(maxWidth: .infinity)
-                            .padding()
+                    Spacer()
+
+                    // Buttons
+                    VStack(spacing: TastorySpacing.sm) {
+                        TastoryButton(
+                            title: "Remove from Category",
+                            style: .destructive
+                        ) {
+                            removeFromCategory()
+                        }
+
+                        TastoryButton(
+                            title: "Cancel",
+                            style: .secondary
+                        ) {
+                            dismiss()
+                        }
                     }
-                }
-                .padding(.horizontal, Theme.Spacing.medium)
-                .padding(.bottom, Theme.Spacing.medium)
-            }
-            .navigationTitle("Remove from Category")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    .padding(.horizontal, TastorySpacing.md)
+                    .padding(.bottom, TastorySpacing.lg)
                 }
             }
+            .navigationBarHidden(true)
         }
     }
 
@@ -462,41 +549,67 @@ struct MoveToCategorySheet: View {
 
     var body: some View {
         NavigationView {
-            List {
-                Section(header: Text("Select Destination Category")) {
-                    ForEach(availableCategories) { category in
-                        Button(action: {
-                            moveToCategory(category.id)
-                        }) {
-                            HStack {
-                                Image(systemName: "folder.fill")
-                                    .foregroundColor(Theme.Colors.accent)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
 
-                                Text(category.name)
-                                    .font(Typography.Body.regular)
-                                    .foregroundColor(.primary)
+                ScrollView {
+                    VStack(spacing: TastorySpacing.md) {
+                        // Categories list
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            Text("Select Destination Category")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.secondaryText)
+                                .padding(.horizontal, TastorySpacing.md)
 
-                                Spacer()
+                            VStack(spacing: 0) {
+                                ForEach(availableCategories) { category in
+                                    Button(action: {
+                                        moveToCategory(category.id)
+                                    }) {
+                                        HStack(spacing: TastorySpacing.sm) {
+                                            ZStack {
+                                                Circle()
+                                                    .fill(TastoryColors.lightGreenBg)
+                                                    .frame(width: 40, height: 40)
+                                                Image(systemName: "folder.fill")
+                                                    .font(.system(size: TastoryIconSize.medium))
+                                                    .foregroundColor(TastoryColors.primaryGreen)
+                                            }
 
-                                Image(systemName: "arrow.right")
-                                    .foregroundColor(Theme.Colors.accent)
+                                            Text(category.name)
+                                                .font(TastoryTypography.body)
+                                                .foregroundColor(TastoryColors.primaryText)
+
+                                            Spacer()
+
+                                            Image(systemName: "arrow.right")
+                                                .foregroundColor(TastoryColors.primaryGreen)
+                                        }
+                                        .padding(.horizontal, TastorySpacing.md)
+                                        .padding(.vertical, TastorySpacing.sm)
+                                    }
+
+                                    if category.id != availableCategories.last?.id {
+                                        Divider().padding(.leading, 56)
+                                    }
+                                }
                             }
+                            .background(TastoryColors.cardBackground)
+                            .cornerRadius(TastoryRadius.large)
+                            .padding(.horizontal, TastorySpacing.md)
                         }
-                    }
-                }
 
-                Section {
-                    Button(action: {
-                        showingNewCategorySheet = true
-                    }) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(Theme.Colors.accent)
-                            Text("Create New Category")
-                                .foregroundColor(Theme.Colors.accent)
-                                .font(Typography.Body.semibold)
+                        TastoryButton(
+                            title: "Create New Category",
+                            style: .text,
+                            icon: "plus.circle.fill"
+                        ) {
+                            showingNewCategorySheet = true
                         }
+                        .padding(.horizontal, TastorySpacing.md)
                     }
+                    .padding(.top, TastorySpacing.md)
                 }
             }
             .navigationTitle("Move to Category")
@@ -506,6 +619,7 @@ struct MoveToCategorySheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
             .sheet(isPresented: $showingNewCategorySheet) {

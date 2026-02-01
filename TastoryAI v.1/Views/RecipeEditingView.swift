@@ -47,320 +47,294 @@ struct RecipeEditingView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading, spacing: Theme.Spacing.large) {
-                    // Recipe Header
-                    HStack(alignment: .top, spacing: Theme.Spacing.medium) {
-                        // Recipe Image
-                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                            if let imageURL = recipe.imageURL, !imageURL.isEmpty {
-                                AsyncImage(url: URL(string: imageURL)) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Theme.Colors.secondaryBackground)
-                                            .frame(width: 100, height: 100)
-                                            .overlay(
-                                                ProgressView()
-                                                    .scaleEffect(0.8)
-                                            )
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 100, height: 100)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    case .failure(_):
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Theme.Colors.secondaryBackground)
-                                            .frame(width: 100, height: 100)
-                                            .overlay(
-                                                Image(systemName: "photo")
-                                                    .font(.system(size: 30))
-                                                    .foregroundColor(Theme.Colors.tertiaryText)
-                                            )
-                                    @unknown default:
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Theme.Colors.secondaryBackground)
-                                            .frame(width: 100, height: 100)
-                                            .overlay(
-                                                Image(systemName: "photo")
-                                                    .font(.system(size: 30))
-                                                    .foregroundColor(Theme.Colors.tertiaryText)
-                                            )
-                                    }
-                                }
-                            } else {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Theme.Colors.secondaryBackground)
-                                    .frame(width: 100, height: 100)
-                                    .overlay(
-                                        VStack(spacing: 4) {
-                                            Image(systemName: "photo")
-                                                .font(.system(size: 24))
-                                                .foregroundColor(Theme.Colors.tertiaryText)
-                                            
-                                            Text("Tap to add")
-                                                .font(.system(size: 10))
-                                                .foregroundColor(Theme.Colors.tertiaryText)
+                VStack(alignment: .leading, spacing: TastorySpacing.lg) {
+                    // Recipe Header Card
+                    TastoryCard {
+                        HStack(alignment: .top, spacing: TastorySpacing.md) {
+                            // Recipe Image
+                            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                                if let imageURL = recipe.imageURL, !imageURL.isEmpty {
+                                    AsyncImage(url: URL(string: imageURL)) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            RoundedRectangle(cornerRadius: TastoryRadius.medium)
+                                                .fill(TastoryColors.border)
+                                                .frame(width: 100, height: 100)
+                                                .overlay(ProgressView().scaleEffect(0.8))
+                                        case .success(let image):
+                                            image
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 100, height: 100)
+                                                .clipShape(RoundedRectangle(cornerRadius: TastoryRadius.medium))
+                                        case .failure(_):
+                                            photoPlaceholder
+                                        @unknown default:
+                                            photoPlaceholder
                                         }
-                                    )
+                                    }
+                                } else {
+                                    photoPlaceholder
+                                }
                             }
+                            .disabled(isProcessingPhoto)
+
+                            // Recipe Title
+                            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                                TextField("Recipe Title", text: $recipe.title)
+                                    .font(TastoryTypography.title)
+                                    .foregroundColor(TastoryColors.primaryText)
+                                    .textFieldStyle(.plain)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .disabled(isProcessingPhoto)
-                        
-                        // Recipe Title
-                        VStack(alignment: .leading, spacing: Theme.Spacing.small) {
-                            TextField("Recipe Title", text: $recipe.title)
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(Theme.Colors.text)
-                                .textFieldStyle(.plain)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .padding(.horizontal, Theme.Spacing.medium)
+                    .padding(.horizontal, TastorySpacing.md)
                     
                     // Categories Section
-                    VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                        Text("CATEGORIES")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color(.secondaryLabel))
-                            .padding(.horizontal, Theme.Spacing.medium)
-                        
-                        VStack(spacing: Theme.Spacing.small) {
-                            // Primary Category
-                            HStack {
-                                Text("Primary:")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(Theme.Colors.secondaryText)
-                                    .frame(width: 80, alignment: .leading)
-                                
-                                Menu {
-                                    ForEach(categoryManager.categories, id: \.id) { category in
-                                        Button(category.name) {
-                                            primaryCategoryId = category.id
-                                            additionalCategoryIds.removeAll { $0 == category.id }
-                                        }
-                                    }
-                                    Divider()
-                                    Button(action: {
-                                        newCategoryForPrimary = true
-                                        showingNewCategorySheet = true
-                                    }) {
-                                        Label("New Category", systemImage: "plus.circle")
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(categoryManager.getCategoryName(for: primaryCategoryId) ?? "Select")
-                                            .font(.system(size: 16))
-                                            .foregroundColor(.primary)
-                                        Spacer()
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Theme.Colors.secondaryBackground)
-                                    .cornerRadius(8)
-                                }
-                            }
-                            
-                            // Additional Categories
-                            if !additionalCategoryIds.isEmpty {
-                                HStack(alignment: .top) {
-                                    Text("Also in:")
-                                        .font(.system(size: 16))
-                                        .foregroundColor(Theme.Colors.secondaryText)
+                    TastoryCard {
+                        VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                            Text("Categories")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.primaryText)
+
+                            VStack(spacing: TastorySpacing.sm) {
+                                // Primary Category
+                                HStack {
+                                    Text("Primary:")
+                                        .font(TastoryTypography.body)
+                                        .foregroundColor(TastoryColors.secondaryText)
                                         .frame(width: 80, alignment: .leading)
-                                    
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        ForEach(additionalCategoryIds, id: \.self) { categoryId in
-                                            HStack {
-                                                Text(categoryManager.getCategoryName(for: categoryId) ?? "Unknown")
-                                                    .font(.system(size: 16))
-                                                    .foregroundColor(.primary)
-                                                
-                                                Button(action: {
+
+                                    Menu {
+                                        ForEach(categoryManager.categories, id: \.id) { category in
+                                            Button(category.name) {
+                                                primaryCategoryId = category.id
+                                                additionalCategoryIds.removeAll { $0 == category.id }
+                                            }
+                                        }
+                                        Divider()
+                                        Button(action: {
+                                            newCategoryForPrimary = true
+                                            showingNewCategorySheet = true
+                                        }) {
+                                            Label("New Category", systemImage: "plus.circle")
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(categoryManager.getCategoryName(for: primaryCategoryId) ?? "Select")
+                                                .font(TastoryTypography.body)
+                                                .foregroundColor(TastoryColors.primaryText)
+                                            Spacer()
+                                            Image(systemName: "chevron.up.chevron.down")
+                                                .font(.caption)
+                                                .foregroundColor(TastoryColors.secondaryText)
+                                        }
+                                        .padding(.horizontal, TastorySpacing.sm)
+                                        .padding(.vertical, TastorySpacing.xs)
+                                        .background(TastoryColors.border)
+                                        .cornerRadius(TastoryRadius.small)
+                                    }
+                                }
+
+                                // Additional Categories as badges
+                                if !additionalCategoryIds.isEmpty {
+                                    HStack(alignment: .top) {
+                                        Text("Also in:")
+                                            .font(TastoryTypography.body)
+                                            .foregroundColor(TastoryColors.secondaryText)
+                                            .frame(width: 80, alignment: .leading)
+
+                                        FlowLayout(spacing: TastorySpacing.xs) {
+                                            ForEach(additionalCategoryIds, id: \.self) { categoryId in
+                                                TastoryRemovableBadge(
+                                                    text: categoryManager.getCategoryName(for: categoryId) ?? "Unknown",
+                                                    icon: "tag.fill"
+                                                ) {
                                                     additionalCategoryIds.removeAll { $0 == categoryId }
-                                                }) {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .foregroundColor(.secondary)
-                                                        .font(.system(size: 16))
                                                 }
                                             }
                                         }
+
+                                        Spacer()
                                     }
-                                    
-                                    Spacer()
                                 }
-                            }
-                            
-                            // Add Category Menu (same style as primary)
-                            HStack {
-                                Text("Secondary:")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(Theme.Colors.secondaryText)
-                                    .frame(width: 80, alignment: .leading)
-                                
-                                Menu {
-                                    // Show all categories except primary and already added
-                                    ForEach(categoryManager.categories.filter { category in
-                                        category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
-                                    }, id: \.id) { category in
-                                        Button(category.name) {
-                                            additionalCategoryIds.append(category.id)
+
+                                // Add Category Menu
+                                HStack {
+                                    Text("Add:")
+                                        .font(TastoryTypography.body)
+                                        .foregroundColor(TastoryColors.secondaryText)
+                                        .frame(width: 80, alignment: .leading)
+
+                                    Menu {
+                                        ForEach(categoryManager.categories.filter { category in
+                                            category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                                        }, id: \.id) { category in
+                                            Button(category.name) {
+                                                additionalCategoryIds.append(category.id)
+                                            }
+                                        }
+
+                                        if categoryManager.categories.filter({ category in
+                                            category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
+                                        }).isEmpty {
+                                            Text("All categories already added")
+                                                .foregroundColor(TastoryColors.secondaryText)
+                                        }
+
+                                        Divider()
+                                        Button(action: {
+                                            newCategoryForPrimary = false
+                                            showingNewCategorySheet = true
+                                        }) {
+                                            Label("New Category", systemImage: "plus.circle")
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text("Select category")
+                                                .font(TastoryTypography.body)
+                                                .foregroundColor(TastoryColors.primaryGreen)
+                                            Image(systemName: "plus.circle.fill")
+                                                .foregroundColor(TastoryColors.primaryGreen)
                                         }
                                     }
-                                    
-                                    if categoryManager.categories.filter({ category in
+                                    .disabled(categoryManager.categories.filter { category in
                                         category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
-                                    }).isEmpty {
-                                        Text("All categories already added")
-                                            .foregroundColor(.secondary)
-                                    }
-                                    
-                                    Divider()
-                                    Button(action: {
-                                        newCategoryForPrimary = false
-                                        showingNewCategorySheet = true
-                                    }) {
-                                        Label("New Category", systemImage: "plus.circle")
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text("Select")
-                                            .font(.system(size: 16))
-                                            .foregroundColor(.primary)
-                                        Spacer()
-                                        Image(systemName: "chevron.up.chevron.down")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Theme.Colors.secondaryBackground)
-                                    .cornerRadius(8)
+                                    }.isEmpty)
                                 }
-                                .disabled(categoryManager.categories.filter { category in
-                                    category.id != primaryCategoryId && !additionalCategoryIds.contains(category.id)
-                                }.isEmpty)
                             }
                         }
-                        .padding(.horizontal, Theme.Spacing.medium)
                     }
+                    .padding(.horizontal, TastorySpacing.md)
                     
                     // Ingredients Section
-                    VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                        HStack {
-                            Text("INGREDIENTS")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color(.secondaryLabel))
-                                .padding(.horizontal, Theme.Spacing.medium)
-                            
-                            Spacer()
-                            
-                            Button(action: addIngredient) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(Theme.Colors.accent)
-                                    .font(.system(size: 20))
+                    TastoryCard {
+                        VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                            HStack {
+                                Text("Ingredients")
+                                    .font(TastoryTypography.headline)
+                                    .foregroundColor(TastoryColors.primaryText)
+
+                                Spacer()
+
+                                Button(action: addIngredient) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(TastoryColors.primaryGreen)
+                                        .font(.system(size: TastoryIconSize.medium))
+                                }
                             }
-                            .padding(.trailing, Theme.Spacing.medium)
-                        }
-                        
-                        VStack(spacing: 8) {
-                            ForEach(Array(ingredients.enumerated()), id: \.offset) { index, ingredient in
-                                RecipeIngredientRow(
-                                    text: $ingredients[index],
-                                    onDelete: ingredients.count > 1 ? { deleteIngredient(at: index) } : nil
-                                )
+
+                            VStack(spacing: TastorySpacing.xs) {
+                                ForEach(Array(ingredients.enumerated()), id: \.offset) { index, _ in
+                                    RecipeIngredientRow(
+                                        text: $ingredients[index],
+                                        onDelete: ingredients.count > 1 ? { deleteIngredient(at: index) } : nil
+                                    )
+                                }
                             }
                         }
-                        .padding(.horizontal, Theme.Spacing.medium)
                     }
+                    .padding(.horizontal, TastorySpacing.md)
                     
                     // Steps Section
-                    VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                        HStack {
-                            Text("INSTRUCTIONS")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color(.secondaryLabel))
-                                .padding(.horizontal, Theme.Spacing.medium)
-                            
-                            Spacer()
-                            
-                            Button(action: addStep) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(Theme.Colors.accent)
-                                    .font(.system(size: 20))
+                    TastoryCard {
+                        VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                            HStack {
+                                Text("Instructions")
+                                    .font(TastoryTypography.headline)
+                                    .foregroundColor(TastoryColors.primaryText)
+
+                                Spacer()
+
+                                Button(action: addStep) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(TastoryColors.primaryGreen)
+                                        .font(.system(size: TastoryIconSize.medium))
+                                }
                             }
-                            .padding(.trailing, Theme.Spacing.medium)
-                        }
-                        
-                        VStack(spacing: 12) {
-                            ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                                RecipeStepRow(
-                                    number: index + 1,
-                                    text: $steps[index],
-                                    onDelete: steps.count > 1 ? { deleteStep(at: index) } : nil
-                                )
+
+                            VStack(spacing: TastorySpacing.sm) {
+                                ForEach(Array(steps.enumerated()), id: \.offset) { index, _ in
+                                    RecipeStepRow(
+                                        number: index + 1,
+                                        text: $steps[index],
+                                        onDelete: steps.count > 1 ? { deleteStep(at: index) } : nil
+                                    )
+                                }
                             }
                         }
-                        .padding(.horizontal, Theme.Spacing.medium)
                     }
+                    .padding(.horizontal, TastorySpacing.md)
                     
-                    // Tips Section
-                    VStack(alignment: .leading, spacing: Theme.Spacing.medium) {
-                        HStack {
-                            Text("TIPS & NOTES")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(Color(.secondaryLabel))
-                                .padding(.horizontal, Theme.Spacing.medium)
-                            
-                            Spacer()
-                            
-                            Button(action: addTip) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(Theme.Colors.accent)
-                                    .font(.system(size: 20))
+                    // Tips Section with light green background
+                    TastoryCard(backgroundColor: TastoryColors.lightGreenBg) {
+                        VStack(alignment: .leading, spacing: TastorySpacing.md) {
+                            HStack {
+                                Text("Tips & Notes")
+                                    .font(TastoryTypography.headline)
+                                    .foregroundColor(TastoryColors.primaryText)
+
+                                Spacer()
+
+                                Button(action: addTip) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundColor(TastoryColors.primaryGreen)
+                                        .font(.system(size: TastoryIconSize.medium))
+                                }
                             }
-                            .padding(.trailing, Theme.Spacing.medium)
-                        }
-                        
-                        VStack(spacing: 12) {
-                            ForEach(Array(tips.enumerated()), id: \.offset) { index, tip in
-                                RecipeTipRow(
-                                    text: $tips[index],
-                                    onDelete: tips.count > 1 ? { deleteTip(at: index) } : nil
-                                )
+
+                            VStack(spacing: TastorySpacing.sm) {
+                                ForEach(Array(tips.enumerated()), id: \.offset) { index, _ in
+                                    RecipeTipRow(
+                                        text: $tips[index],
+                                        onDelete: tips.count > 1 ? { deleteTip(at: index) } : nil
+                                    )
+                                }
                             }
                         }
-                        .padding(.horizontal, Theme.Spacing.medium)
                     }
-                    
-                    // Add some bottom padding for the save button
-                    Spacer(minLength: 80)
+                    .padding(.horizontal, TastorySpacing.md)
+
+                    // Save/Cancel Buttons
+                    VStack(spacing: TastorySpacing.sm) {
+                        TastoryButton(
+                            title: "Save Recipe",
+                            style: .primary,
+                            icon: "checkmark",
+                            action: saveRecipe
+                        )
+
+                        TastoryButton(
+                            title: "Cancel",
+                            style: .secondary,
+                            action: onCancel
+                        )
+                    }
+                    .padding(.horizontal, TastorySpacing.md)
+                    .padding(.bottom, TastorySpacing.lg)
                 }
-                .padding(.vertical, Theme.Spacing.medium)
+                .padding(.vertical, TastorySpacing.md)
             }
-            .background(Theme.Colors.background)
+            .background(TastoryColors.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         onCancel()
                     }
-                    .foregroundColor(Theme.Colors.secondaryText)
+                    .foregroundColor(TastoryColors.secondaryText)
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         saveRecipe()
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, Theme.Spacing.medium)
-                    .padding(.vertical, Theme.Spacing.small)
-                    .background(Theme.Colors.accent)
-                    .cornerRadius(8)
+                    .padding(.horizontal, TastorySpacing.md)
+                    .padding(.vertical, TastorySpacing.sm)
+                    .background(TastoryColors.primaryGreen)
+                    .cornerRadius(TastoryRadius.small)
                     .fontWeight(.semibold)
                 }
             }
@@ -463,12 +437,12 @@ struct RecipeEditingView: View {
         await MainActor.run {
             isProcessingPhoto = true
         }
-        
+
         do {
             if let data = try await item.loadTransferable(type: Data.self),
                let image = UIImage(data: data),
                let dataURL = ImageDataURL.create(from: image) {
-                
+
                 await MainActor.run {
                     recipe.imageURL = dataURL
                     isProcessingPhoto = false
@@ -480,6 +454,73 @@ struct RecipeEditingView: View {
             }
         }
     }
+
+    // MARK: - Private Views
+
+    private var photoPlaceholder: some View {
+        RoundedRectangle(cornerRadius: TastoryRadius.medium)
+            .fill(TastoryColors.border)
+            .frame(width: 100, height: 100)
+            .overlay(
+                VStack(spacing: TastorySpacing.xxs) {
+                    Image(systemName: "photo")
+                        .font(.system(size: TastoryIconSize.large))
+                        .foregroundColor(TastoryColors.tertiaryText)
+
+                    Text("Tap to add")
+                        .font(TastoryTypography.caption)
+                        .foregroundColor(TastoryColors.tertiaryText)
+                }
+            )
+    }
+}
+
+// MARK: - FlowLayout for category badges
+
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(in: proposal.width ?? 0, subviews: subviews, spacing: spacing)
+        return result.size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = FlowResult(in: bounds.width, subviews: subviews, spacing: spacing)
+        for (index, subview) in subviews.enumerated() {
+            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
+                                      y: bounds.minY + result.positions[index].y),
+                         proposal: .unspecified)
+        }
+    }
+
+    struct FlowResult {
+        var size: CGSize = .zero
+        var positions: [CGPoint] = []
+
+        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
+            var x: CGFloat = 0
+            var y: CGFloat = 0
+            var rowHeight: CGFloat = 0
+
+            for subview in subviews {
+                let size = subview.sizeThatFits(.unspecified)
+
+                if x + size.width > maxWidth && x > 0 {
+                    x = 0
+                    y += rowHeight + spacing
+                    rowHeight = 0
+                }
+
+                positions.append(CGPoint(x: x, y: y))
+                rowHeight = max(rowHeight, size.height)
+                x += size.width + spacing
+                self.size.width = max(self.size.width, x)
+            }
+
+            self.size.height = y + rowHeight
+        }
+    }
 }
 
 // MARK: - Supporting Views
@@ -487,24 +528,22 @@ struct RecipeEditingView: View {
 struct RecipeIngredientRow: View {
     @Binding var text: String
     let onDelete: (() -> Void)?
-    
+
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "circle")
-                .foregroundColor(Color(.systemGray3))
-                .font(.system(size: 16))
-                .frame(width: 20, height: 20)
-            
+        HStack(spacing: TastorySpacing.sm) {
+            // Green bullet
+            TastoryBullet()
+
             TextField("Ingredient", text: $text)
-                .font(.system(size: 16))
-                .foregroundColor(Color(.label))
+                .font(TastoryTypography.bodyRegular)
+                .foregroundColor(TastoryColors.primaryText)
                 .textFieldStyle(.plain)
-            
+
             if let onDelete = onDelete {
                 Button(action: onDelete) {
                     Image(systemName: "minus.circle.fill")
-                        .foregroundColor(.red)
-                        .font(.system(size: 16))
+                        .foregroundColor(TastoryColors.errorRed)
+                        .font(.system(size: TastoryIconSize.small))
                 }
             }
         }
@@ -516,74 +555,67 @@ struct RecipeStepRow: View {
     let number: Int
     @Binding var text: String
     let onDelete: (() -> Void)?
-    
+
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            // Step number
-            Circle()
-                .fill(Color(.systemOrange))
-                .frame(width: 30, height: 30)
-                .overlay(
-                    Text("\(number)")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.white)
-                )
-            
-            VStack(alignment: .leading, spacing: Theme.Spacing.small) {
+        HStack(alignment: .top, spacing: TastorySpacing.md) {
+            // Green number badge
+            TastoryNumberBadge(number: number, size: 30)
+
+            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
                 TextField("Step description", text: $text, axis: .vertical)
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(.label))
+                    .font(TastoryTypography.bodyRegular)
+                    .foregroundColor(TastoryColors.primaryText)
                     .textFieldStyle(.plain)
                     .lineLimit(3...10)
-                
+
                 if let onDelete = onDelete {
                     HStack {
                         Spacer()
                         Button(action: onDelete) {
                             Text("Remove Step")
-                                .font(Typography.Caption1.regular)
-                                .foregroundColor(.red)
+                                .font(TastoryTypography.caption)
+                                .foregroundColor(TastoryColors.errorRed)
                         }
                     }
                 }
             }
         }
-        .padding(.vertical, Theme.Spacing.small)
+        .padding(.vertical, TastorySpacing.sm)
     }
 }
 
 struct RecipeTipRow: View {
     @Binding var text: String
     let onDelete: (() -> Void)?
-    
+
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "lightbulb")
-                .foregroundColor(Theme.Colors.accent)
-                .font(.system(size: 16))
+        HStack(alignment: .top, spacing: TastorySpacing.sm) {
+            Image(systemName: "lightbulb.fill")
+                .foregroundColor(TastoryColors.primaryGreen)
+                .font(.system(size: TastoryIconSize.small))
                 .frame(width: 20, height: 20)
                 .padding(.top, 2)
-            
-            VStack(alignment: .leading, spacing: Theme.Spacing.small) {
+
+            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
                 TextField("Tip or note", text: $text, axis: .vertical)
-                    .font(.system(size: 16))
-                    .foregroundColor(Color(.label))
+                    .font(TastoryTypography.bodyRegular)
+                    .foregroundColor(TastoryColors.primaryText)
                     .textFieldStyle(.plain)
                     .lineLimit(2...8)
-                
+
                 if let onDelete = onDelete {
                     HStack {
                         Spacer()
                         Button(action: onDelete) {
                             Text("Remove Tip")
-                                .font(Typography.Caption1.regular)
-                                .foregroundColor(.red)
+                                .font(TastoryTypography.caption)
+                                .foregroundColor(TastoryColors.errorRed)
                         }
                     }
                 }
             }
         }
-        .padding(.vertical, Theme.Spacing.small)
+        .padding(.vertical, TastorySpacing.sm)
     }
 }
 

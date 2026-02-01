@@ -28,9 +28,16 @@ struct FilteredRecipesView: View {
 
     var body: some View {
         ZStack {
+            TastoryColors.background
+                .ignoresSafeArea()
+
             Group {
                 if filteredRecipes.isEmpty {
-                    emptyState
+                    TastoryEmptyState(
+                        icon: "tray",
+                        title: "No recipes yet",
+                        message: "No recipes in this category yet. Add recipes from the main screen."
+                    )
                 } else {
                     RecipeGridView(
                         recipes: filteredRecipes,
@@ -46,8 +53,8 @@ struct FilteredRecipesView: View {
                 // Bulk actions toolbar (shown in selection mode)
                 if isSelectionMode && !selectedRecipeIds.isEmpty {
                     bulkActionsToolbar
-                        .padding(.horizontal, Theme.Spacing.medium)
-                        .padding(.bottom, Theme.Spacing.small)
+                        .padding(.horizontal, TastorySpacing.md)
+                        .padding(.bottom, TastorySpacing.sm)
                 }
             }
         }
@@ -59,7 +66,11 @@ struct FilteredRecipesView: View {
                     Button(isSelectionMode ? "Cancel" : "Select") {
                         toggleSelectionMode()
                     }
-                    .foregroundColor(Theme.Colors.accent)
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(TastoryColors.primaryGreen)
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .tint(.gray)
                 }
             }
         }
@@ -92,59 +103,52 @@ struct FilteredRecipesView: View {
     // MARK: - Bulk Actions Toolbar
 
     private var bulkActionsToolbar: some View {
-        HStack(spacing: Theme.Spacing.medium) {
-            // Remove from current category
-            Button(action: {
-                showingRemoveFromCategorySheet = true
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "folder.badge.minus")
-                        .font(.system(size: 20))
-                    Text("Remove")
-                        .font(Typography.Caption1.regular)
+        TastoryCard(padding: TastorySpacing.md) {
+            HStack(spacing: TastorySpacing.md) {
+                // Remove from current category
+                Button(action: {
+                    showingRemoveFromCategorySheet = true
+                }) {
+                    VStack(spacing: TastorySpacing.xxs) {
+                        Image(systemName: "folder.badge.minus")
+                            .font(.system(size: TastoryIconSize.medium))
+                        Text("Remove")
+                            .font(TastoryTypography.caption)
+                    }
+                    .foregroundColor(TastoryColors.errorRed)
                 }
-                .foregroundColor(.red)
-            }
 
-            Spacer()
+                Spacer()
 
-            // Add to another category
-            Button(action: {
-                showingAddCategorySheet = true
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "folder.badge.plus")
-                        .font(.system(size: 20))
-                    Text("Add")
-                        .font(Typography.Caption1.regular)
+                // Add to another category
+                Button(action: {
+                    showingAddCategorySheet = true
+                }) {
+                    VStack(spacing: TastorySpacing.xxs) {
+                        Image(systemName: "folder.badge.plus")
+                            .font(.system(size: TastoryIconSize.medium))
+                        Text("Add")
+                            .font(TastoryTypography.caption)
+                    }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
-                .foregroundColor(Theme.Colors.accent)
-            }
 
-            Spacer()
+                Spacer()
 
-            // Move to another category
-            Button(action: {
-                showingMoveToCategorySheet = true
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "folder.fill.badge.gearshape")
-                        .font(.system(size: 20))
-                    Text("Move")
-                        .font(Typography.Caption1.regular)
+                // Move to another category
+                Button(action: {
+                    showingMoveToCategorySheet = true
+                }) {
+                    VStack(spacing: TastorySpacing.xxs) {
+                        Image(systemName: "folder.fill.badge.gearshape")
+                            .font(.system(size: TastoryIconSize.medium))
+                        Text("Move")
+                            .font(TastoryTypography.caption)
+                    }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
-                .foregroundColor(Theme.Colors.accent)
             }
         }
-        .padding(Theme.Spacing.medium)
-        .background(Theme.Colors.background)
-        .cornerRadius(12)
-        .shadow(
-            color: Theme.Shadow.medium.color,
-            radius: Theme.Shadow.medium.radius,
-            x: Theme.Shadow.medium.x,
-            y: Theme.Shadow.medium.y
-        )
     }
 
     // MARK: - Helper Methods
@@ -156,22 +160,6 @@ struct FilteredRecipesView: View {
         }
     }
 
-    // MARK: - Empty State
-
-    private var emptyState: some View {
-        VStack(spacing: Theme.Spacing.medium) {
-            Image(systemName: "tray")
-                .font(.system(size: 60))
-                .foregroundColor(Theme.Colors.secondaryText)
-
-            Text("No recipes in this category yet")
-                .font(Typography.Body.regular)
-                .foregroundColor(Theme.Colors.secondaryText)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.Colors.background)
-    }
 }
 
 // MARK: - Preview

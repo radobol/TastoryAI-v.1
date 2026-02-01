@@ -11,134 +11,150 @@ struct DebugMenuView: View {
     @State private var showingAPITest = false
     @State private var apiTestResult = ""
     @State private var showingImageExtractorView = false
-    
+
     var body: some View {
-        List {
-            // API Testing Section
-            Section("API Testing") {
-                Button(action: testAPI) {
-                    HStack {
-                        Image(systemName: "network")
-                            .foregroundColor(Theme.Colors.accent)
-                            .font(.title3)
-                            .frame(width: 24, height: 24)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Test OpenAI API")
-                                .font(.body)
-                                .foregroundColor(.primary)
-                            
-                            Text("Verify API connection and response")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+        ZStack {
+            TastoryColors.background
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: TastorySpacing.md) {
+                    // API Testing Section
+                    VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                        TastorySectionHeader(title: "API Testing")
+                            .padding(.horizontal, TastorySpacing.md)
+
+                        TastoryListItem(
+                            title: "Test OpenAI API",
+                            subtitle: "Verify API connection and response",
+                            leadingIcon: "network",
+                            showChevron: false,
+                            action: testAPI
+                        )
+                        .padding(.horizontal, TastorySpacing.md)
+                    }
+
+                    // Image Extraction Testing Section
+                    VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                        TastorySectionHeader(title: "Image Extraction")
+                            .padding(.horizontal, TastorySpacing.md)
+
+                        TastoryListItem(
+                            title: "Test Image URL Extraction",
+                            subtitle: "Extract images from recipe URLs",
+                            leadingIcon: "photo.badge.arrow.down",
+                            showChevron: false
+                        ) {
+                            showingImageExtractorView = true
                         }
-                        
-                        Spacer()
+                        .padding(.horizontal, TastorySpacing.md)
                     }
-                    .padding(.vertical, 2)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            
-            // Image Extraction Testing Section
-            Section("Image Extraction") {
-                Button(action: { showingImageExtractorView = true }) {
-                    HStack {
-                        Image(systemName: "photo.badge.arrow.down")
-                            .foregroundColor(Theme.Colors.accent)
-                            .font(.title3)
-                            .frame(width: 24, height: 24)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Test Image URL Extraction")
-                                .font(.body)
-                                .foregroundColor(.primary)
-                            
-                            Text("Extract images from recipe URLs")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+
+                    // Scaling System Testing Section
+                    VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                        TastorySectionHeader(title: "Scaling System")
+                            .padding(.horizontal, TastorySpacing.md)
+
+                        VStack(spacing: 0) {
+                            Button(action: testScaling) {
+                                HStack(spacing: TastorySpacing.sm) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(TastoryColors.lightGreenBg)
+                                            .frame(width: 40, height: 40)
+                                        Image(systemName: "scalemass.fill")
+                                            .foregroundColor(TastoryColors.primaryGreen)
+                                            .font(.system(size: TastoryIconSize.medium))
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Quick Scaling Test")
+                                            .font(TastoryTypography.body)
+                                            .foregroundColor(TastoryColors.primaryText)
+                                        Text("Test ingredient scaling system")
+                                            .font(TastoryTypography.caption)
+                                            .foregroundColor(TastoryColors.secondaryText)
+                                    }
+
+                                    Spacer()
+                                }
+                                .padding(.horizontal, TastorySpacing.md)
+                                .padding(.vertical, TastorySpacing.sm)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+
+                            Divider().padding(.leading, 56)
+
+                            NavigationLink(destination: ScalingDebugView()) {
+                                HStack(spacing: TastorySpacing.sm) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(TastoryColors.lightGreenBg)
+                                            .frame(width: 40, height: 40)
+                                        Image(systemName: "wrench.and.screwdriver.fill")
+                                            .foregroundColor(TastoryColors.primaryGreen)
+                                            .font(.system(size: TastoryIconSize.medium))
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Advanced Scaling Tests")
+                                            .font(TastoryTypography.body)
+                                            .foregroundColor(TastoryColors.primaryText)
+                                        Text("Detailed testing interface")
+                                            .font(TastoryTypography.caption)
+                                            .foregroundColor(TastoryColors.secondaryText)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(TastoryColors.secondaryText)
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .padding(.horizontal, TastorySpacing.md)
+                                .padding(.vertical, TastorySpacing.sm)
+                            }
                         }
-                        
-                        Spacer()
+                        .background(TastoryColors.cardBackground)
+                        .cornerRadius(TastoryRadius.large)
+                        .padding(.horizontal, TastorySpacing.md)
                     }
-                    .padding(.vertical, 2)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            
-            // Scaling System Testing Section
-            Section("Scaling System") {
-                Button(action: testScaling) {
-                    HStack {
-                        Image(systemName: "scalemass.fill")
-                            .foregroundColor(Theme.Colors.accent)
-                            .font(.title3)
-                            .frame(width: 24, height: 24)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Quick Scaling Test")
-                                .font(.body)
-                                .foregroundColor(.primary)
-                            
-                            Text("Test ingredient scaling system")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+
+                    // System Information Section
+                    VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                        TastorySectionHeader(title: "System Information")
+                            .padding(.horizontal, TastorySpacing.md)
+
+                        HStack(spacing: TastorySpacing.sm) {
+                            ZStack {
+                                Circle()
+                                    .fill(TastoryColors.lightGreenBg)
+                                    .frame(width: 40, height: 40)
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundColor(TastoryColors.primaryGreen)
+                                    .font(.system(size: TastoryIconSize.medium))
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("App Version")
+                                    .font(TastoryTypography.body)
+                                    .foregroundColor(TastoryColors.primaryText)
+                                Text("1.0 (Debug Build)")
+                                    .font(TastoryTypography.caption)
+                                    .foregroundColor(TastoryColors.secondaryText)
+                            }
+
+                            Spacer()
                         }
-                        
-                        Spacer()
+                        .padding(.horizontal, TastorySpacing.md)
+                        .padding(.vertical, TastorySpacing.sm)
+                        .background(TastoryColors.cardBackground)
+                        .cornerRadius(TastoryRadius.large)
+                        .padding(.horizontal, TastorySpacing.md)
                     }
-                    .padding(.vertical, 2)
                 }
-                .buttonStyle(PlainButtonStyle())
-                
-                NavigationLink(destination: ScalingDebugView()) {
-                    HStack {
-                        Image(systemName: "wrench.and.screwdriver.fill")
-                            .foregroundColor(Theme.Colors.accent)
-                            .font(.title3)
-                            .frame(width: 24, height: 24)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Advanced Scaling Tests")
-                                .font(.body)
-                                .foregroundColor(.primary)
-                            
-                            Text("Detailed testing interface")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.secondary)
-                            .font(.caption)
-                    }
-                    .padding(.vertical, 2)
-                }
-            }
-            
-            // System Information Section
-            Section("System Information") {
-                HStack {
-                    Image(systemName: "info.circle.fill")
-                        .foregroundColor(Theme.Colors.accent)
-                        .font(.title3)
-                        .frame(width: 24, height: 24)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("App Version")
-                            .font(.body)
-                            .foregroundColor(.primary)
-                        
-                        Text("1.0 (Debug Build)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.vertical, 2)
+                .padding(.top, TastorySpacing.md)
+                .padding(.bottom, TastorySpacing.lg)
             }
         }
         .navigationTitle("Debug & Testing")

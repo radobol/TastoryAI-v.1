@@ -13,50 +13,79 @@ struct NewCategorySheet: View {
     @Binding var errorMessage: String?
     let onSave: (String) -> Void
     let onCancel: () -> Void
-    
+
     @FocusState private var isNameFieldFocused: Bool
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
-            Form {
-                Section {
-                    TextField("Category Name", text: $categoryName)
-                        .font(Typography.Body.regular)
-                        .focused($isNameFieldFocused)
-                        .onChange(of: categoryName) { _, _ in
-                            errorMessage = nil // Clear error when typing
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
+
+                VStack(spacing: TastorySpacing.lg) {
+                    // Title
+                    Text("New Category")
+                        .font(TastoryTypography.title)
+                        .foregroundColor(TastoryColors.primaryText)
+                        .padding(.top, TastorySpacing.lg)
+
+                    // Input Card
+                    TastoryCard {
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            Text("Category Name")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.primaryText)
+
+                            TextField("Enter category name", text: $categoryName)
+                                .font(TastoryTypography.body)
+                                .padding(TastorySpacing.md)
+                                .background(TastoryColors.background)
+                                .cornerRadius(TastoryRadius.medium)
+                                .focused($isNameFieldFocused)
+                                .onChange(of: categoryName) { _, _ in
+                                    errorMessage = nil
+                                }
+
+                            if let error = errorMessage {
+                                Text(error)
+                                    .font(TastoryTypography.caption)
+                                    .foregroundColor(TastoryColors.errorRed)
+                            }
+
+                            Text("Category names must be 1-32 characters")
+                                .font(TastoryTypography.caption)
+                                .foregroundColor(TastoryColors.secondaryText)
                         }
-                    
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.red)
                     }
-                } header: {
-                    Text("Enter a name for the new category")
-                } footer: {
-                    Text("Category names must be 1-32 characters")
-                        .font(.caption)
+                    .padding(.horizontal, TastorySpacing.md)
+
+                    Spacer()
+
+                    // Buttons
+                    VStack(spacing: TastorySpacing.sm) {
+                        TastoryButton(
+                            title: "Create Category",
+                            style: .primary,
+                            icon: "plus",
+                            isDisabled: categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        ) {
+                            onSave(categoryName)
+                        }
+
+                        TastoryButton(
+                            title: "Cancel",
+                            style: .secondary
+                        ) {
+                            onCancel()
+                            dismiss()
+                        }
+                    }
+                    .padding(.horizontal, TastorySpacing.md)
+                    .padding(.bottom, TastorySpacing.lg)
                 }
             }
-            .navigationTitle("New Category")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        onCancel()
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        onSave(categoryName)
-                    }
-                    .disabled(categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
+            .navigationBarHidden(true)
             .onAppear {
                 isNameFieldFocused = true
             }
@@ -77,44 +106,73 @@ struct EditCategorySheet: View {
 
     var body: some View {
         NavigationView {
-            Form {
-                Section {
-                    TextField("Category Name", text: $categoryName)
-                        .font(Typography.Body.regular)
-                        .focused($isNameFieldFocused)
-                        .onChange(of: categoryName) { _, _ in
-                            errorMessage = nil
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
+
+                VStack(spacing: TastorySpacing.lg) {
+                    // Title
+                    Text("Edit Category")
+                        .font(TastoryTypography.title)
+                        .foregroundColor(TastoryColors.primaryText)
+                        .padding(.top, TastorySpacing.lg)
+
+                    // Input Card
+                    TastoryCard {
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            Text("Category Name")
+                                .font(TastoryTypography.headline)
+                                .foregroundColor(TastoryColors.primaryText)
+
+                            TextField("Enter category name", text: $categoryName)
+                                .font(TastoryTypography.body)
+                                .padding(TastorySpacing.md)
+                                .background(TastoryColors.background)
+                                .cornerRadius(TastoryRadius.medium)
+                                .focused($isNameFieldFocused)
+                                .onChange(of: categoryName) { _, _ in
+                                    errorMessage = nil
+                                }
+
+                            if let error = errorMessage {
+                                Text(error)
+                                    .font(TastoryTypography.caption)
+                                    .foregroundColor(TastoryColors.errorRed)
+                            }
+
+                            Text("Category names must be 1-32 characters and unique")
+                                .font(TastoryTypography.caption)
+                                .foregroundColor(TastoryColors.secondaryText)
+                        }
+                    }
+                    .padding(.horizontal, TastorySpacing.md)
+
+                    Spacer()
+
+                    // Buttons
+                    VStack(spacing: TastorySpacing.sm) {
+                        TastoryButton(
+                            title: "Save Changes",
+                            style: .primary,
+                            icon: "checkmark",
+                            isDisabled: categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        ) {
+                            onSave(categoryName)
                         }
 
-                    if let error = errorMessage {
-                        Text(error)
-                            .font(.caption)
-                            .foregroundColor(.red)
+                        TastoryButton(
+                            title: "Cancel",
+                            style: .secondary
+                        ) {
+                            onCancel()
+                            dismiss()
+                        }
                     }
-                } header: {
-                    Text("Rename category")
-                } footer: {
-                    Text("Category names must be 1-32 characters and unique")
-                        .font(.caption)
+                    .padding(.horizontal, TastorySpacing.md)
+                    .padding(.bottom, TastorySpacing.lg)
                 }
             }
-            .navigationTitle("Edit Category")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        onCancel()
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        onSave(categoryName)
-                    }
-                    .disabled(categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
+            .navigationBarHidden(true)
             .onAppear {
                 isNameFieldFocused = true
             }
@@ -127,45 +185,78 @@ struct AddCategorySheet: View {
     let categories: [Category]
     let onSelectCategory: (UUID) -> Void
     let onCreateNew: () -> Void
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationView {
-            List {
-                if !categories.isEmpty {
-                    Section(header: Text("Available Categories")) {
-                        ForEach(categories, id: \.id) { category in
-                            Button(action: {
-                                onSelectCategory(category.id)
-                                dismiss()
-                            }) {
-                                HStack {
-                                    Text(category.name)
-                                        .font(Typography.Body.regular)
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    Image(systemName: "plus.circle")
-                                        .foregroundColor(Theme.Colors.accent)
+            ZStack {
+                TastoryColors.background
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: TastorySpacing.md) {
+                        // Categories list
+                        if !categories.isEmpty {
+                            VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                                Text("Available Categories")
+                                    .font(TastoryTypography.headline)
+                                    .foregroundColor(TastoryColors.secondaryText)
+                                    .padding(.horizontal, TastorySpacing.md)
+
+                                VStack(spacing: 0) {
+                                    ForEach(categories, id: \.id) { category in
+                                        Button(action: {
+                                            onSelectCategory(category.id)
+                                            dismiss()
+                                        }) {
+                                            HStack(spacing: TastorySpacing.sm) {
+                                                ZStack {
+                                                    Circle()
+                                                        .fill(TastoryColors.lightGreenBg)
+                                                        .frame(width: 40, height: 40)
+                                                    Image(systemName: "folder.fill")
+                                                        .font(.system(size: TastoryIconSize.medium))
+                                                        .foregroundColor(TastoryColors.primaryGreen)
+                                                }
+
+                                                Text(category.name)
+                                                    .font(TastoryTypography.body)
+                                                    .foregroundColor(TastoryColors.primaryText)
+
+                                                Spacer()
+
+                                                Image(systemName: "plus.circle")
+                                                    .foregroundColor(TastoryColors.primaryGreen)
+                                            }
+                                            .padding(.horizontal, TastorySpacing.md)
+                                            .padding(.vertical, TastorySpacing.sm)
+                                        }
+
+                                        if category.id != categories.last?.id {
+                                            Divider()
+                                                .padding(.leading, 56)
+                                        }
+                                    }
                                 }
+                                .background(TastoryColors.cardBackground)
+                                .cornerRadius(TastoryRadius.large)
+                                .padding(.horizontal, TastorySpacing.md)
                             }
                         }
-                    }
-                }
-                
-                Section {
-                    Button(action: {
-                        dismiss()
-                        onCreateNew()
-                    }) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(Theme.Colors.accent)
-                            Text("Create New Category")
-                                .foregroundColor(Theme.Colors.accent)
-                                .font(Typography.Body.semibold)
+
+                        // Create new button
+                        TastoryButton(
+                            title: "Create New Category",
+                            style: .text,
+                            icon: "plus.circle.fill"
+                        ) {
+                            dismiss()
+                            onCreateNew()
                         }
+                        .padding(.horizontal, TastorySpacing.md)
                     }
+                    .padding(.top, TastorySpacing.md)
                 }
             }
             .navigationTitle("Add Category")
@@ -175,6 +266,7 @@ struct AddCategorySheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundColor(TastoryColors.primaryGreen)
                 }
             }
         }

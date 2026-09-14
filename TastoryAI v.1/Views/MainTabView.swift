@@ -36,6 +36,7 @@ struct MainTabView: View {
 
 struct ProfileView: View {
     @StateObject private var storageManager = RecipeStorageManager.shared
+    @State private var hasAPIKey = false
 
     var body: some View {
         NavigationView {
@@ -75,6 +76,45 @@ struct ProfileView: View {
                             }
                         }
                         .padding(.horizontal, TastorySpacing.md)
+
+                        // AI Configuration Section
+                        VStack(alignment: .leading, spacing: TastorySpacing.sm) {
+                            TastorySectionHeader(title: "AI Configuration")
+                                .padding(.horizontal, TastorySpacing.md)
+
+                            NavigationLink(destination: APIKeySettingsView()) {
+                                HStack(spacing: TastorySpacing.sm) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(hasAPIKey ? TastoryColors.lightGreenBg : TastoryColors.warningOrange.opacity(0.12))
+                                            .frame(width: 40, height: 40)
+                                        Image(systemName: hasAPIKey ? "checkmark.shield.fill" : "key.fill")
+                                            .foregroundColor(hasAPIKey ? TastoryColors.primaryGreen : TastoryColors.warningOrange)
+                                            .font(.system(size: TastoryIconSize.medium))
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("OpenAI API Key")
+                                            .font(TastoryTypography.body)
+                                            .foregroundColor(TastoryColors.primaryText)
+                                        Text(hasAPIKey ? "Saved securely on this device" : "Required for AI recipe extraction")
+                                            .font(TastoryTypography.caption)
+                                            .foregroundColor(TastoryColors.secondaryText)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(TastoryColors.secondaryText)
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                                .padding(.horizontal, TastorySpacing.md)
+                                .padding(.vertical, TastorySpacing.sm)
+                            }
+                            .background(TastoryColors.cardBackground)
+                            .cornerRadius(TastoryRadius.large)
+                            .padding(.horizontal, TastorySpacing.md)
+                        }
 
                         // Preferences Section
                         VStack(alignment: .leading, spacing: TastorySpacing.sm) {
@@ -178,6 +218,9 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
+            .onAppear {
+                hasAPIKey = OpenAIKeyStore.shared.hasKey
+            }
         }
     }
 }

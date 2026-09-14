@@ -80,15 +80,7 @@ class OpenAIService: ObservableObject {
     // MARK: - API Key Management
     
     private var apiKey: String? {
-        // Try to get from build configuration (xcconfig)
-        if let configKey = Bundle.main.object(forInfoDictionaryKey: "OPENAI_API_KEY") as? String,
-           !configKey.isEmpty && configKey != "YOUR_API_KEY_HERE" {
-            print("✅ OpenAI API Key loaded from configuration: \(String(configKey.prefix(10)))...")
-            return configKey
-        }
-        
-        print("❌ OpenAI API Key not found or invalid")
-        return nil
+        try? OpenAIKeyStore.shared.load()
     }
     
     private func validateAPIKey() throws {
@@ -117,6 +109,22 @@ class OpenAIService: ObservableObject {
     }
     
     // MARK: - API Communication
+
+    func testConnection() async throws {
+        try validateAPIKey()
+        try checkRateLimit()
+
+        let request = OpenAIRequest(
+            model: model,
+            messages: [
+                OpenAIMessage(role: "user", content: "Reply with exactly: OK")
+            ],
+            temperature: 0,
+            maxTokens: 8
+        )
+
+        _ = try await performRequest(request)
+    }
     
     func generateRecipeFromText(_ text: String) async throws -> String {
         try validateAPIKey()
@@ -325,7 +333,7 @@ enum OpenAIServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingAPIKey:
-            return "OpenAI API key is missing. Please configure your API key."
+            return "OpenAI API key is missing. Add it in Profile → OpenAI API Key."
         case .invalidURL:
             return "Invalid API URL."
         case .invalidResponse:
